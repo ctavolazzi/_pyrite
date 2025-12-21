@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Lint Markdown files
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check Markdown links
         uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check required files exist
         run: |
           echo "Checking required files..."
@@ -47,7 +47,7 @@ jobs:
           test -d _work_efforts || (echo "Missing _work_efforts/" && exit 1)
           test -f _work_efforts/devlog.md || (echo "Missing devlog.md" && exit 1)
           echo "✅ All required files present"
-      
+
       - name: Check work efforts structure
         run: |
           echo "Validating work efforts structure..."
