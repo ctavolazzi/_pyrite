@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Lint Markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v18
+        with:
+          globs: |
+            **/*.md
+            !node_modules/**
+
+  link-check:
+    name: Link Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check Markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/mlc_config.json'
+
+  validate-structure:
+    name: Validate Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check required files exist
+        run: |
+          echo "Checking required files..."
+          test -f README.md || (echo "Missing README.md" && exit 1)
+          test -f LICENSE || (echo "Missing LICENSE" && exit 1)
+          test -f CHANGELOG.md || (echo "Missing CHANGELOG.md" && exit 1)
+          test -d _work_efforts || (echo "Missing _work_efforts/" && exit 1)
+          test -f _work_efforts/devlog.md || (echo "Missing devlog.md" && exit 1)
+          echo "✅ All required files present"
+      
+      - name: Check work efforts structure
+        run: |
+          echo "Validating work efforts structure..."
+          if ls _work_efforts/*-*_*/ 1> /dev/null 2>&1; then
+            echo "✅ Work efforts categories found"
+          else
+            echo "⚠️ No work effort categories yet (okay for new repo)"
+          fi
