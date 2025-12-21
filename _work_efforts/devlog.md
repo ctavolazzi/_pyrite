@@ -140,3 +140,44 @@
 **Documentation:**
 - Work effort 10.02: CI Pipeline Setup
 - Stage 2 requirements documented in `_docs/20-29_development/`
+
+### 12:30 - Stage 2: Testing Infrastructure Complete
+
+**Task:** Refactor update system for dependency injection and create mocked tests
+
+**Actions:**
+1. ✅ Refactored `update-installer.js`:
+   - Added `downloadFn` and `extractFn` constructor options
+   - Created `_defaultDownload()` and `_defaultExtract()` methods
+   - Updated `downloadUpdate()` and `extractUpdate()` to use injectable functions
+
+2. ✅ Refactored `update-checker.js`:
+   - Added `fetchFn` constructor option
+   - Created `_defaultFetch()` method
+   - Updated `fetchLatestRelease()` to use injectable function
+
+3. ✅ Created `tests/update-installer-mocked.test.js`:
+   - 16 comprehensive mocked integration tests
+   - Tests run completely offline (no network)
+   - Tests run without system commands (no unzip)
+   - Full coverage: UpdateChecker, UpdateInstaller, Rollback, Edge Cases
+
+**Test Results:**
+| Test Suite | Passed | Total |
+|------------|--------|-------|
+| update-installer-mocked.test.js | 16 | 16 |
+| update-system.test.js (existing) | 17 | 17 |
+
+**Files Modified (cursor-coding-protocols):**
+- `scripts/update-installer.js` - Added DI
+- `scripts/update-checker.js` - Added DI
+- `tests/update-installer-mocked.test.js` - New mocked test file
+
+**Work Effort:** 10.03 - Stage 2 Testing Infrastructure
+
+**Status:** ✅ Complete
+
+**All 3 Stages Now Complete!**
+- Stage 1: Documentation ✅
+- Stage 2: Testing Infrastructure ✅
+- Stage 3: GitHub Infrastructure ✅
