@@ -5,6 +5,9 @@
     },
     {
       "pattern": "^https://github.com/ctavolazzi/_pyrite/releases"
+    },
+    {
+      "pattern": "^https://github.com/ctavolazzi/.*/pull/"
     }
   ],
   "timeout": "20s",
