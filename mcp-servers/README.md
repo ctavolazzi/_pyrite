@@ -50,7 +50,7 @@ Add to `~/.cursor/mcp.json`:
       "args": ["~/.mcp-servers/work-efforts/server.js"]
     },
     "simple-tools": {
-      "command": "node", 
+      "command": "node",
       "args": ["~/.mcp-servers/simple-tools/server.js"]
     },
     "docs-maintainer": {
