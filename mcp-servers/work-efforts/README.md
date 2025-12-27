@@ -1,69 +1,197 @@
-# Work Efforts MCP Server
+# Work Efforts MCP Server v0.3.0
 
-Simple MCP server for managing Johnny Decimal work efforts across repositories.
+MCP server for managing work efforts and tickets with date-based IDs.
+
+## ID Format
+
+### Work Effort: `WE-YYMMDD-xxxx`
+- `YYMMDD` = date (251227 = Dec 27, 2025)
+- `xxxx` = 4-char random alphanumeric (a-z, 0-9)
+- Example: `WE-251227-a1b2`
+
+### Ticket: `TKT-xxxx-NNN`
+- `xxxx` = parent WE's unique suffix
+- `NNN` = sequential (001, 002, 003...)
+- Example: `TKT-a1b2-001`
+
+## Folder Structure
+
+```
+_work_efforts_/
+├── WE-251227-a1b2_api_architecture/
+│   ├── WE-251227-a1b2_index.md
+│   └── tickets/
+│       ├── TKT-a1b2-001_define_endpoints.md
+│       ├── TKT-a1b2-002_implement_api.md
+│       └── TKT-a1b2-003_add_caching.md
+```
 
 ## Tools
 
 ### `create_work_effort`
-Create a new work effort with automatic numbering.
+Create a new work effort with folder, index.md, and tickets/ subfolder.
 
 **Parameters:**
-- `repo_path` - Full path to repository
-- `title` - Work effort title
-- `category` - Category like "00-09", "10-19"
-- `subcategory` - Subcategory like "00", "01"
-- `objective` - What needs to be done
-- `tasks` - Array of task strings (optional)
+- `repo_path` (required) - Full path to repository
+- `title` (required) - Work effort title
+- `objective` (required) - What needs to be done and why
+- `branch` - Git branch name (auto-generated if not provided)
+- `repository` - Repository name for reference
+- `tickets` - Array of initial tickets to create
+  - Each ticket: `{ title, description?, acceptance_criteria? }`
 
 **Example:**
 ```
-Create a work effort for "User Authentication" in category 10-19, subcategory 00
+Create a work effort titled "API Architecture" with objective "Build REST API endpoints"
+in repo /path/to/repo with initial tickets for "Define endpoints" and "Implement handlers"
+```
+
+### `create_ticket`
+Create a new ticket in an existing work effort.
+
+**Parameters:**
+- `work_effort_path` (required) - Full path to work effort directory
+- `title` (required) - Ticket title
+- `description` - What needs to be done
+- `acceptance_criteria` - Array of acceptance criteria strings
+
+**Example:**
+```
+Create a ticket "Add caching layer" in work effort at /path/to/repo/_work_efforts_/WE-251227-a1b2_api
 ```
 
 ### `list_work_efforts`
 List all work efforts in a repository.
 
 **Parameters:**
-- `repo_path` - Full path to repository
-- `status` - Filter by status: "active", "paused", "completed", "all" (default: "all")
+- `repo_path` (required) - Full path to repository
+- `status` - Filter: "active", "paused", "completed", "all" (default: "all")
 
-**Example:**
-```
-List all active work efforts
-```
-
-### `update_work_effort`
-Update status or add progress to a work effort.
+### `list_tickets`
+List all tickets in a work effort.
 
 **Parameters:**
-- `file_path` - Full path to work effort markdown file
-- `status` - New status: "active", "paused", or "completed" (optional)
-- `progress` - Progress note to add (optional)
+- `work_effort_path` (required) - Full path to work effort directory
+- `status` - Filter: "pending", "in_progress", "completed", "blocked", "all" (default: "all")
 
-**Example:**
+### `update_work_effort`
+Update a work effort status or add progress notes.
+
+**Parameters:**
+- `work_effort_path` (required) - Full path to work effort directory
+- `status` - New status: "active", "paused", "completed"
+- `progress` - Progress note to add
+- `commit` - Commit hash to add to commits list
+
+### `update_ticket`
+Update a ticket status, files changed, or notes.
+
+**Parameters:**
+- `ticket_path` (required) - Full path to ticket file
+- `status` - New status: "pending", "in_progress", "completed", "blocked"
+- `files_changed` - Array of file paths that were modified
+- `notes` - Implementation notes to add
+- `commit` - Commit hash to add
+
+### `search_work_efforts`
+Search work efforts and tickets by keyword.
+
+**Parameters:**
+- `repo_path` (required) - Full path to repository
+- `query` (required) - Search keyword
+- `include_tickets` - Also search within tickets (default: true)
+
+## Usage Examples
+
+**Create a work effort with tickets:**
 ```
-Update work effort 00.01 to completed
-Add progress note "Finished implementing login flow"
+Create a work effort "User Authentication" with objective "Implement secure login"
+and tickets for "Design auth flow", "Implement JWT", "Add password reset"
 ```
 
-## Usage
-
-AI agents can use these tools automatically. Just ask naturally:
-- "Create a work effort for implementing the payment flow"
-- "List all my active work efforts"
-- "Mark work effort 00.01 as completed"
-- "Add progress to work effort: finished the API integration"
-
-## Structure Created
-
+**Update ticket status:**
 ```
-repo/_work_efforts/
-├── 00-09_category/
-│   └── 00_subcategory/
-│       └── 00.01_20250930_descriptive_title.md
+Mark ticket TKT-a1b2-001 as completed with files changed: src/auth.js, src/jwt.js
 ```
 
-## Internal Tool
+**Search for work:**
+```
+Search for "authentication" in work efforts
+```
 
-This is an internal development tool. Modify as needed.
+## Templates
 
+### Work Effort Index
+```markdown
+---
+id: WE-251227-a1b2
+title: "Title"
+status: active
+created: 2025-12-27T09:13:45.000Z
+created_by: username
+last_updated: 2025-12-27T09:13:45.000Z
+branch: feature/WE-251227-a1b2-title
+repository: repo-name
+---
+
+# WE-251227-a1b2: Title
+
+## Objective
+...
+
+## Tickets
+| ID | Title | Status |
+|----|-------|--------|
+
+## Commits
+...
+
+## Related
+...
+```
+
+### Ticket
+```markdown
+---
+id: TKT-a1b2-001
+parent: WE-251227-a1b2
+title: "Title"
+status: pending
+created: 2025-12-27T09:15:22.000Z
+created_by: username
+assigned_to: null
+---
+
+# TKT-a1b2-001: Title
+
+## Description
+...
+
+## Acceptance Criteria
+- [ ] ...
+
+## Files Changed
+...
+
+## Implementation Notes
+...
+
+## Commits
+...
+```
+
+## Changelog
+
+### v0.3.0 (2025-12-27)
+- New ID format: `WE-YYMMDD-xxxx` for work efforts
+- New ID format: `TKT-xxxx-NNN` for tickets
+- New folder structure with `tickets/` subfolder
+- Added `create_ticket` tool
+- Added `list_tickets` tool
+- Added `update_ticket` tool
+- Enhanced metadata in templates
+- Search now includes tickets
+
+### v0.2.0
+- Initial release with Johnny Decimal numbering
+- Basic CRUD operations for work efforts
