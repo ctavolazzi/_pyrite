@@ -39,11 +39,35 @@ _pyrite/
 
 ## AI Agent Instructions
 
+### The Workflow (for non-trivial tasks)
+
+```
+STEP 0: ECHO      → Repeat understanding, WAIT for confirmation
+STEP 1: THINK     → Use sequential-thinking MCP for complex problems
+STEP 2: SEARCH    → Check work efforts for related work
+STEP 3: PLAN      → Create Work Effort, WAIT for approval
+STEP 4: EXECUTE   → Work through tickets, update status
+STEP 5: VERIFY    → Test changes
+STEP 6: COMPLETE  → Update all statuses
+STEP 7: DOCUMENT  → Update docs if needed
+STEP 8: PERSIST   → Store learnings in memory MCP
+```
+
+### Quick Guidelines
+
 1. **Check devlog first** — understand recent context
 2. **Use work efforts** — track non-trivial tasks
 3. **Cross-repo work** — this is the integration point
 4. **Experiment freely** — `experiments/` is for trying things
 5. **Document decisions** — especially architectural ones
+
+### MCP Servers
+
+See `docs/mcp/MCP-SERVERS.md` for full reference. Key servers:
+- `sequential-thinking` - Problem breakdown
+- `work-efforts` - Task tracking (v0.3.0: WE-YYMMDD-xxxx format)
+- `memory` - Knowledge persistence
+- `docs-maintainer` - Documentation management
 
 ## Safety Rules
 

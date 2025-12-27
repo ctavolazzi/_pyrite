@@ -1,0 +1,98 @@
+# FogSift AI Development Rules
+
+## Session Startup
+1. Run `date` to verify current date/time
+2. Check `_work_efforts_/` for active work
+3. Read recent devlog entries if available
+
+## The Workflow (MANDATORY for non-trivial tasks)
+
+```
+STEP 0: ECHO      → Repeat understanding, WAIT for confirmation
+STEP 1: THINK     → Use sequential-thinking MCP for complex problems
+STEP 2: SEARCH    → Check _work_efforts_ for related work (search_work_efforts)
+STEP 3: PLAN      → Create Work Effort with tickets (create_work_effort)
+                   → STOP and wait for user approval
+STEP 4: EXECUTE   → Work through tickets, update status (update_ticket)
+STEP 5: VERIFY    → Test changes (Playwright browser tools if UI)
+STEP 6: COMPLETE  → Update all statuses to completed
+STEP 7: DOCUMENT  → Update _docs if needed (docs-maintainer)
+STEP 8: PERSIST   → Store learnings in memory MCP
+```
+
+## ID Formats (v0.3.0)
+- Work Effort: `WE-YYMMDD-xxxx` (e.g., WE-251227-a1b2)
+- Ticket: `TKT-xxxx-NNN` (e.g., TKT-a1b2-001)
+- Suffix is 4-char alphanumeric (a-z, 0-9), NOT numeric
+
+## MCP Tools Available
+
+### Planning & Thinking
+| Tool | When to Use |
+|------|-------------|
+| `mcp_sequential-thinking_sequentialthinking` | Complex problems, multi-step planning |
+| `mcp_memory_*` | Persist knowledge across sessions |
+
+### Work Tracking
+| Tool | When to Use |
+|------|-------------|
+| `mcp_work-efforts_create_work_effort` | New initiative (2+ tasks) |
+| `mcp_work-efforts_create_ticket` | Add task to existing WE |
+| `mcp_work-efforts_list_work_efforts` | See all WEs |
+| `mcp_work-efforts_update_work_effort` | Change WE status |
+| `mcp_work-efforts_update_ticket` | Change ticket status |
+| `mcp_work-efforts_search_work_efforts` | Find related work |
+
+### Documentation
+| Tool | When to Use |
+|------|-------------|
+| `mcp_docs-maintainer_create_doc` | New documentation |
+| `mcp_docs-maintainer_update_doc` | Modify existing doc |
+| `mcp_docs-maintainer_search_docs` | Find docs |
+
+### Browser Testing
+| Tool | When to Use |
+|------|-------------|
+| `mcp_cursor-ide-browser_browser_navigate` | Go to URL |
+| `mcp_cursor-ide-browser_browser_snapshot` | Get page state |
+| `mcp_cursor-ide-browser_browser_click` | Click element |
+| `mcp_cursor-ide-browser_browser_type` | Enter text |
+| `mcp_cursor-ide-browser_browser_take_screenshot` | Visual verification |
+
+### File Operations
+| Tool | When to Use |
+|------|-------------|
+| `mcp_filesystem_*` | File read/write/search |
+
+### Image Generation
+| Tool | When to Use |
+|------|-------------|
+| `mcp_nano-banana_generate_image` | Create new image |
+| `mcp_nano-banana_edit_image` | Modify existing image |
+
+## Stopping Points (MUST WAIT)
+1. After echoing understanding → wait for confirmation
+2. After creating work effort → wait for approval
+3. Before destructive operations → wait for explicit "yes"
+
+## Code Style
+- Direct and minimal - no unnecessary abstractions
+- Inline logic until 3+ uses
+- Single file until 500+ lines
+- Let exceptions bubble up
+
+## Git Conventions
+- Branch: `feature/WE-YYMMDD-xxxx-slug`
+- Commit: `WE-YYMMDD-xxxx/TKT-xxxx-NNN: Description`
+- Comment: `// TKT-xxxx-NNN: reason`
+
+## File Locations
+- Work efforts: `_work_efforts_/`
+- Documentation: `_docs/`
+- MCP servers: `/Users/ctavolazzi/Code/.mcp-servers/`
+
+## Full Documentation
+- Workflow guide: `_docs/20-29_development/workflow_category/workflow.01_mcp_work_efforts_system_v0_3_0.md`
+- This file: `.cursorrules`
+- AI reference: `AGENTS.md`
+
