@@ -8,6 +8,9 @@
     },
     {
       "pattern": "^https://github.com/ctavolazzi/.*/pull/"
+    },
+    {
+      "pattern": "^http://localhost"
     }
   ],
   "timeout": "20s",
