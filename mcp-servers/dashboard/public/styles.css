@@ -973,6 +973,13 @@ body {
   display: block;
 }
 
+/* Detail view needs flex display for its layout */
+.detail-view.active {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
 /* ============================================================================
    Stats Section
    ============================================================================ */
@@ -2054,6 +2061,89 @@ body {
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 0.8em;
+}
+
+/* Empty State for Detail View */
+.detail-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-xl);
+  text-align: center;
+  grid-column: 1 / -1; /* Span all columns */
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: var(--accent);
+  margin-bottom: var(--space-lg);
+  animation: floatGem 3s ease-in-out infinite;
+}
+
+@keyframes floatGem {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.empty-message {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+  line-height: 1.5;
+  margin-bottom: var(--space-xl);
+}
+
+.empty-hints {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.hint-icon {
+  font-size: 1.2rem;
+}
+
+.hint-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.empty-action-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.empty-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Legacy support for old detail styles */

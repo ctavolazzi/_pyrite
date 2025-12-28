@@ -1015,7 +1015,10 @@ class MissionControl {
   }
 
   renderDetail() {
-    if (!this.selectedItem) return;
+    if (!this.selectedItem || !this.selectedItem.we) {
+      this.showEmptyDetailState();
+      return;
+    }
 
     const { repo, we, ticketId } = this.selectedItem;
     const tickets = we.tickets || [];
@@ -1027,8 +1030,9 @@ class MissionControl {
     this.elements.detailTitle = document.getElementById('detailTitle');
     this.elements.detailMeta = document.getElementById('detailMeta');
 
+    const title = we.title || we.id || 'Untitled Work Effort';
     if (this.elements.detailTitle) {
-      this.elements.detailTitle.textContent = we.title;
+      this.elements.detailTitle.textContent = title;
     }
 
     if (this.elements.detailMeta) {
@@ -1434,6 +1438,36 @@ class MissionControl {
       return this.formatDate(dateString);
     } catch (e) {
       return dateString;
+    }
+  }
+
+  showEmptyDetailState() {
+    const container = document.querySelector('.detail-body');
+    if (container) {
+      container.innerHTML = `
+        <div class="detail-empty-state">
+          <div class="empty-icon">◈</div>
+          <h2 class="empty-title">Select a Work Effort</h2>
+          <p class="empty-message">Choose a work effort from the sidebar to view details, manage tickets, and track progress.</p>
+          <div class="empty-hints">
+            <div class="hint">
+              <span class="hint-icon">🌲</span>
+              <span class="hint-text">Browse the tree on the left</span>
+            </div>
+            <div class="hint">
+              <span class="hint-icon">🔍</span>
+              <span class="hint-text">Use search to find specific items</span>
+            </div>
+            <div class="hint">
+              <span class="hint-icon">▶</span>
+              <span class="hint-text">Try the Live Demo to see it in action</span>
+            </div>
+          </div>
+          <button class="empty-action-btn" onclick="window.missionControl.showDashboard()">
+            ← Back to Dashboard
+          </button>
+        </div>
+      `;
     }
   }
 
@@ -2007,9 +2041,14 @@ class MissionControl {
     const stepEl = this.elements.demoPanelSteps.querySelector(`[data-step="${stepId}"]`);
     if (!stepEl) return;
 
+    const STEP_PAUSE = 2670; // 2.67 seconds per step for user to absorb
+
     // Set to running
     stepEl.className = 'demo-step running';
     stepEl.querySelector('.demo-step-icon').textContent = '◌';
+
+    // Scroll step into view
+    stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     try {
       const result = await action();
@@ -2019,11 +2058,15 @@ class MissionControl {
       stepEl.querySelector('.demo-step-icon').textContent = '✓';
       stepEl.querySelector('.demo-step-detail').textContent = result;
 
+      // Pause so user can see the result
+      await this.delay(STEP_PAUSE);
+
       return result;
     } catch (error) {
       stepEl.className = 'demo-step error';
       stepEl.querySelector('.demo-step-icon').textContent = '✗';
       stepEl.querySelector('.demo-step-detail').textContent = error.message;
+      await this.delay(STEP_PAUSE); // Still pause on error so user can see
       throw error;
     }
   }
