@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Amber gradient for inner gem -->
+    <linearGradient id="gem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9d3d"/>
+      <stop offset="40%" style="stop-color:#ffb86c"/>
+      <stop offset="60%" style="stop-color:#ffb86c"/>
+      <stop offset="100%" style="stop-color:#ff9d3d"/>
+    </linearGradient>
+    
+    <!-- Highlight gradient -->
+    <linearGradient id="highlight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd699"/>
+      <stop offset="100%" style="stop-color:#ff9d3d"/>
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="30" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Radial glow background -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff9d3d;stop-opacity:0.4"/>
+      <stop offset="50%" style="stop-color:#ff9d3d;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#ff9d3d;stop-opacity:0"/>
+    </radialGradient>
+    
+    <!-- Dark background gradient -->
+    <radialGradient id="darkBg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#12100e"/>
+      <stop offset="100%" style="stop-color:#0a0806"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Dark background -->
+  <rect width="1024" height="1024" fill="url(#darkBg)"/>
+  
+  <!-- Outer glow circle -->
+  <circle cx="512" cy="512" r="400" fill="url(#bgGlow)"/>
+  
+  <!-- Outer diamond frame - dark -->
+  <path d="M512 80 L944 512 L512 944 L80 512 Z" 
+        fill="#0a0806" 
+        stroke="#3d352d" 
+        stroke-width="3"/>
+  
+  <!-- Main inner diamond - amber with glow -->
+  <path d="M512 140 L884 512 L512 884 L140 512 Z" 
+        fill="url(#gem)" 
+        filter="url(#glow)"/>
+  
+  <!-- Center dark facet for depth -->
+  <path d="M512 260 L764 512 L512 764 L260 512 Z" 
+        fill="#0a0806" 
+        opacity="0.5"/>
+  
+  <!-- Inner gem facet -->
+  <path d="M512 320 L704 512 L512 704 L320 512 Z" 
+        fill="url(#gem)" 
+        opacity="0.7"/>
+  
+  <!-- Core highlight -->
+  <path d="M512 400 L624 512 L512 624 L400 512 Z" 
+        fill="url(#highlight)" 
+        opacity="0.4"/>
+  
+  <!-- Top-left sparkle cluster -->
+  <circle cx="300" cy="300" r="24" fill="#fff" opacity="0.9" filter="url(#glow)"/>
+  <circle cx="300" cy="300" r="10" fill="#fff"/>
+  <circle cx="340" cy="260" r="8" fill="#fff" opacity="0.6"/>
+  <circle cx="260" cy="340" r="6" fill="#fff" opacity="0.4"/>
+  
+  <!-- Small accent sparkles -->
+  <circle cx="724" cy="300" r="6" fill="#fff" opacity="0.3"/>
+  <circle cx="300" cy="724" r="4" fill="#fff" opacity="0.2"/>
+</svg>
+
