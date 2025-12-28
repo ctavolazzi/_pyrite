@@ -1,0 +1,155 @@
+/* ============================================================================
+   🔶 PYRITE DIAMOND ANIMATIONS - SACRED BACKUP 🔶
+   ============================================================================
+   DO NOT DELETE THIS FILE - Contains the signature _pyrite diamond animations
+   that give the brand its identity.
+   
+   Backed up: 2024-12-28
+   ============================================================================ */
+
+/* ----------------------------------------------------------------------------
+   GEM ROTATE - Main diamond rotation/pulse animation
+   Used on: .brand-gem, .about-gem, sidebar logo
+   Duration: 8s infinite loop
+   ---------------------------------------------------------------------------- */
+@keyframes gemRotate {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    text-shadow: 0 0 10px var(--accent-glow);
+  }
+  25% { 
+    transform: rotate(5deg) scale(1.05); 
+  }
+  50% {
+    transform: rotate(0deg) scale(1.1);
+    text-shadow: 0 0 25px var(--accent-glow), 0 0 40px var(--accent-dim);
+  }
+  75% { 
+    transform: rotate(-5deg) scale(1.05); 
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   GLOW PULSE - Radial glow that pulses behind the diamond
+   Used on: .brand-glow, .about-gem-glow
+   Duration: 3s infinite loop
+   ---------------------------------------------------------------------------- */
+@keyframes glowPulse {
+  0%, 100% { 
+    opacity: 0.3; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(1.2); 
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   LOGO GLOW - Text shadow glow for logo text
+   Used on: .logo-symbol
+   Duration: 3s infinite loop
+   ---------------------------------------------------------------------------- */
+@keyframes logoGlow {
+  0%, 100% { 
+    text-shadow: 0 0 10px var(--accent-glow); 
+  }
+  50% { 
+    text-shadow: 0 0 20px var(--accent-glow), 0 0 30px var(--accent-dim); 
+  }
+}
+
+/* ============================================================================
+   BRAND GEM COMPONENT - The main diamond in the sidebar
+   ============================================================================ */
+.brand-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.brand-gem {
+  font-size: 2rem;
+  color: var(--accent);           /* #ff9d3d amber */
+  z-index: 1;
+  animation: gemRotate 8s ease-in-out infinite;
+}
+
+.brand-glow {
+  position: absolute;
+  inset: -5px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: glowPulse 3s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* ============================================================================
+   ABOUT MODAL GEM - Larger version for about overlay
+   ============================================================================ */
+.about-logo {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.about-gem {
+  font-size: 4rem;
+  color: var(--accent);
+  display: block;
+  animation: gemRotate 8s ease-in-out infinite;
+}
+
+.about-gem-glow {
+  position: absolute;
+  inset: -10px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: glowPulse 3s ease-in-out infinite;
+  z-index: -1;
+}
+
+/* ============================================================================
+   SITE NAV GEM - Smaller version in top navigation
+   ============================================================================ */
+.site-nav-gem {
+  font-size: 1.5rem;
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* ============================================================================
+   CSS VARIABLES USED (from :root)
+   ============================================================================ */
+/*
+  --accent: #ff9d3d;              Main amber/orange
+  --accent-bright: #ffb86c;       Lighter amber
+  --accent-dim: rgba(255, 157, 61, 0.15);   Transparent amber
+  --accent-glow: rgba(255, 157, 61, 0.4);   Glow color
+*/
+
+/* ============================================================================
+   HTML STRUCTURE REFERENCE
+   ============================================================================ */
+/*
+  <!-- Sidebar Brand -->
+  <div class="brand-logo">
+    <span class="brand-gem">◈</span>
+    <div class="brand-glow"></div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="about-logo">
+    <span class="about-gem">◈</span>
+    <div class="about-gem-glow"></div>
+  </div>
+
+  <!-- Site Nav -->
+  <span class="site-nav-gem">◈</span>
+*/
+

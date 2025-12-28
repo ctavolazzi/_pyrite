@@ -1,18 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <defs>
+    <!-- Amber gradient for inner gem -->
     <linearGradient id="gem" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#ff9d3d"/>
       <stop offset="50%" style="stop-color:#ffb86c"/>
       <stop offset="100%" style="stop-color:#ff9d3d"/>
     </linearGradient>
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Outer glow -->
+    <radialGradient id="outerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff9d3d;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#ff9d3d;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <!-- Outer diamond - dark -->
-  <path d="M16 2 L30 16 L16 30 L2 16 Z" fill="#0a0806" stroke="#3d352d" stroke-width="1"/>
-  <!-- Inner diamond - amber gradient -->
-  <path d="M16 6 L26 16 L16 26 L6 16 Z" fill="url(#gem)"/>
-  <!-- Center highlight -->
-  <path d="M16 10 L22 16 L16 22 L10 16 Z" fill="#0a0806" opacity="0.3"/>
-  <!-- Sparkle -->
-  <circle cx="12" cy="12" r="1.5" fill="#fff" opacity="0.6"/>
+  
+  <!-- Background glow -->
+  <circle cx="16" cy="16" r="14" fill="url(#outerGlow)"/>
+  
+  <!-- Outer diamond - dark with subtle border -->
+  <path d="M16 2 L30 16 L16 30 L2 16 Z" fill="#0a0806" stroke="#3d352d" stroke-width="0.5"/>
+  
+  <!-- Inner diamond - amber gradient with glow -->
+  <path d="M16 5 L27 16 L16 27 L5 16 Z" fill="url(#gem)" filter="url(#glow)"/>
+  
+  <!-- Center facet - dark for depth -->
+  <path d="M16 9 L23 16 L16 23 L9 16 Z" fill="#0a0806" opacity="0.4"/>
+  
+  <!-- Inner highlight facet -->
+  <path d="M16 11 L21 16 L16 21 L11 16 Z" fill="url(#gem)" opacity="0.5"/>
+  
+  <!-- Top sparkle -->
+  <circle cx="11" cy="11" r="1.5" fill="#fff" opacity="0.8"/>
+  <circle cx="11" cy="11" r="0.5" fill="#fff"/>
 </svg>
-
