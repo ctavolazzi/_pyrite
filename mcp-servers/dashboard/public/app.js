@@ -248,10 +248,11 @@ class MissionControl {
     this.elements.queueList = document.getElementById('queueList');
     this.elements.queueEmpty = document.getElementById('queueEmpty');
 
-    // Action buttons
-    this.elements.startBtn = document.getElementById('startBtn');
-    this.elements.pauseBtn = document.getElementById('pauseBtn');
-    this.elements.completeBtn = document.getElementById('completeBtn');
+    // Detail view elements (new design)
+    this.elements.detailTitle = document.getElementById('detailTitle');
+    this.elements.detailMeta = document.getElementById('detailMeta');
+    this.elements.metadataGrid = document.getElementById('metadataGrid');
+    this.elements.ticketsList = document.getElementById('ticketsList');
 
     // Toast & Modal
     this.elements.toastContainer = document.getElementById('toastContainer');
@@ -332,11 +333,6 @@ class MissionControl {
 
     // Back button
     this.elements.backBtn?.addEventListener('click', () => this.showDashboard());
-
-    // Action buttons
-    this.elements.startBtn?.addEventListener('click', () => this.changeStatus('active'));
-    this.elements.pauseBtn?.addEventListener('click', () => this.changeStatus('paused'));
-    this.elements.completeBtn?.addEventListener('click', () => this.changeStatus('completed'));
 
     // Modal
     this.elements.modalClose?.addEventListener('click', () => this.closeModal());
@@ -1002,10 +998,14 @@ class MissionControl {
 
   showDetail(repo, we, ticketId = null) {
     this.selectedItem = { repo, we, ticketId };
-    this.renderDetail();
+    this.ticketFilter = 'all';
+    this.activeTab = 'tickets';
 
     this.elements.dashboardView?.classList.remove('active');
     this.elements.detailView?.classList.add('active');
+
+    this.renderDetail();
+    this.bindDetailEvents();
 
     this.updateBreadcrumb([
       { label: 'Command Center', action: () => this.showDashboard() },
@@ -1018,57 +1018,422 @@ class MissionControl {
     if (!this.selectedItem) return;
 
     const { repo, we, ticketId } = this.selectedItem;
+    const tickets = we.tickets || [];
+    const completedCount = tickets.filter(t => t.status === 'completed').length;
+    const totalCount = tickets.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-    this.elements.detailContent.innerHTML = `
-      <h1 class="detail-title">${this.escapeHtml(we.title)}</h1>
-      <div class="detail-id">
+    // Update header
+    this.elements.detailTitle = document.getElementById('detailTitle');
+    this.elements.detailMeta = document.getElementById('detailMeta');
+
+    if (this.elements.detailTitle) {
+      this.elements.detailTitle.textContent = we.title;
+    }
+
+    if (this.elements.detailMeta) {
+      this.elements.detailMeta.innerHTML = `
         <span class="queue-badge ${this.escapeHtml(we.status)}">${this.escapeHtml(we.status)}</span>
-        ${this.escapeHtml(we.id)} • ${this.escapeHtml(repo)} • ${we.format.toUpperCase()}
-      </div>
+        <span>${this.escapeHtml(we.id)}</span>
+        <span>•</span>
+        <span>${this.escapeHtml(repo)}</span>
+        <span>•</span>
+        <span class="badge">${(we.format || 'unknown').toUpperCase()}</span>
+      `;
+    }
 
-      ${we.objective ? `
-        <div class="detail-section">
-          <h3 class="detail-section-title">Objective</h3>
-          <p class="detail-objective">${this.escapeHtml(we.objective)}</p>
-        </div>
-      ` : ''}
+    // Update mini progress
+    const progressMini = document.getElementById('detailProgressMini');
+    if (progressMini) {
+      progressMini.innerHTML = `
+        <span class="progress-text">${completedCount}/${totalCount}</span>
+        <div class="progress-bar-mini"><div class="progress-fill-mini" style="width: ${progressPercent}%"></div></div>
+      `;
+    }
 
-      ${we.tickets && we.tickets.length > 0 ? `
-        <div class="detail-section">
-          <h3 class="detail-section-title">Tickets (${we.tickets.length})</h3>
-          <div class="detail-tickets">
-            ${we.tickets.map(ticket => `
-              <div class="detail-ticket ${ticketId === ticket.id ? 'highlighted' : ''}">
-                <div class="queue-indicator ${this.escapeHtml(ticket.status)}"></div>
-                <div class="detail-ticket-info">
-                  <div class="detail-ticket-id">${this.escapeHtml(ticket.id)}</div>
-                  <div class="detail-ticket-title">${this.escapeHtml(ticket.title)}</div>
-                </div>
-                <span class="queue-badge ${this.escapeHtml(ticket.status)}">${this.escapeHtml(ticket.status)}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-    `;
+    // Update status controls
+    this.renderStatusControls(we.status);
 
-    // Update action button states
-    this.updateActionButtons(we.status);
+    // Render panels
+    this.renderMetadataPanel(we, repo);
+    this.renderProgressPanel(we);
+    this.renderTicketsTab(we, ticketId);
+    this.renderDescriptionTab(we);
+    this.renderActivityTab(we);
+    this.renderFilesTab(we);
+    this.renderTimeTracking(we);
+    this.renderTags(we);
   }
 
-  updateActionButtons(status) {
-    // Show/hide buttons based on current status
-    const isActive = status === 'active' || status === 'in_progress';
-    const isCompleted = status === 'completed';
+  renderStatusControls(currentStatus) {
+    const controls = document.getElementById('detailStatusControls');
+    if (!controls) return;
 
-    if (this.elements.startBtn) {
-      this.elements.startBtn.style.display = isActive || isCompleted ? 'none' : 'inline-flex';
+    controls.querySelectorAll('.status-btn').forEach(btn => {
+      btn.classList.remove('current');
+      if (btn.dataset.status === currentStatus) {
+        btn.classList.add('current');
+      }
+    });
+  }
+
+  renderMetadataPanel(we, repo) {
+    const grid = document.getElementById('metadataGrid');
+    if (!grid) return;
+
+    const created = we.created ? this.formatDate(we.created) : '—';
+    const updated = we.updated || we.lastModified ? this.formatDate(we.updated || we.lastModified) : '—';
+
+    grid.innerHTML = `
+      <div class="metadata-item">
+        <span class="metadata-label">ID</span>
+        <span class="metadata-value">${this.escapeHtml(we.id)}</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Repository</span>
+        <span class="metadata-value">${this.escapeHtml(repo)}</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Format</span>
+        <span class="metadata-value badge">${(we.format || 'unknown').toUpperCase()}</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Status</span>
+        <span class="metadata-value queue-badge ${this.escapeHtml(we.status)}">${this.escapeHtml(we.status)}</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Priority</span>
+        <span class="metadata-value">${we.priority || 'Normal'}</span>
+      </div>
+      <div class="metadata-item">
+        <span class="metadata-label">Path</span>
+        <span class="metadata-value" style="font-size: 0.65rem; word-break: break-all;">${this.escapeHtml(we.path || '—')}</span>
+      </div>
+    `;
+  }
+
+  renderProgressPanel(we) {
+    const tickets = we.tickets || [];
+    const completedCount = tickets.filter(t => t.status === 'completed').length;
+    const totalCount = tickets.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+    // Update progress ring
+    const progressRing = document.getElementById('progressRing');
+    if (progressRing) {
+      const circumference = 2 * Math.PI * 45;
+      const offset = circumference - (progressPercent / 100) * circumference;
+      progressRing.style.strokeDashoffset = offset;
     }
-    if (this.elements.pauseBtn) {
-      this.elements.pauseBtn.style.display = isActive ? 'inline-flex' : 'none';
+
+    const progressPercentEl = document.getElementById('progressPercent');
+    if (progressPercentEl) {
+      progressPercentEl.textContent = `${progressPercent}%`;
     }
-    if (this.elements.completeBtn) {
-      this.elements.completeBtn.style.display = isCompleted ? 'none' : 'inline-flex';
+
+    const ticketsCompleted = document.getElementById('ticketsCompleted');
+    const ticketsTotal = document.getElementById('ticketsTotal');
+    if (ticketsCompleted) ticketsCompleted.textContent = completedCount;
+    if (ticketsTotal) ticketsTotal.textContent = totalCount;
+  }
+
+  renderTicketsTab(we, highlightTicketId) {
+    const list = document.getElementById('ticketsList');
+    if (!list) return;
+
+    const tickets = we.tickets || [];
+    const filtered = this.ticketFilter === 'all'
+      ? tickets
+      : tickets.filter(t => t.status === this.ticketFilter);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div class="panel-empty" style="text-align: center; padding: var(--space-lg);">
+          ${tickets.length === 0 ? 'No tickets yet. Click "+ Add Ticket" to create one.' : 'No tickets match the selected filter.'}
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = filtered.map(ticket => `
+      <div class="ticket-card ${highlightTicketId === ticket.id ? 'expanded' : ''}" data-ticket-id="${this.escapeHtml(ticket.id)}">
+        <div class="ticket-card-header">
+          <div class="ticket-indicator ${this.escapeHtml(ticket.status)}"></div>
+          <div class="ticket-info">
+            <div class="ticket-id">${this.escapeHtml(ticket.id)}</div>
+            <div class="ticket-title">${this.escapeHtml(ticket.title)}</div>
+          </div>
+          <span class="ticket-badge ${this.escapeHtml(ticket.status)}">${this.escapeHtml(ticket.status)}</span>
+          <span class="ticket-expand">▶</span>
+        </div>
+        <div class="ticket-card-body">
+          <p class="ticket-description">${this.escapeHtml(ticket.description || ticket.objective || 'No description provided.')}</p>
+          <div class="ticket-actions">
+            ${ticket.status !== 'in_progress' && ticket.status !== 'completed' ? `
+              <button class="ticket-action-btn primary" data-action="start" data-ticket="${this.escapeHtml(ticket.id)}">▶ Start</button>
+            ` : ''}
+            ${ticket.status === 'in_progress' ? `
+              <button class="ticket-action-btn" data-action="pause" data-ticket="${this.escapeHtml(ticket.id)}">⏸ Pause</button>
+            ` : ''}
+            ${ticket.status !== 'completed' ? `
+              <button class="ticket-action-btn primary" data-action="complete" data-ticket="${this.escapeHtml(ticket.id)}">✓ Complete</button>
+            ` : ''}
+            ${ticket.status !== 'blocked' && ticket.status !== 'completed' ? `
+              <button class="ticket-action-btn" data-action="block" data-ticket="${this.escapeHtml(ticket.id)}">⚠ Block</button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderDescriptionTab(we) {
+    const content = document.getElementById('descriptionContent');
+    if (!content) return;
+
+    content.innerHTML = `
+      <h2>Objective</h2>
+      <p>${this.escapeHtml(we.objective || 'No objective specified.')}</p>
+
+      ${we.description ? `
+        <h3>Description</h3>
+        <p>${this.escapeHtml(we.description)}</p>
+      ` : ''}
+
+      ${we.notes ? `
+        <h3>Notes</h3>
+        <p>${this.escapeHtml(we.notes)}</p>
+      ` : ''}
+
+      ${we.acceptance_criteria && we.acceptance_criteria.length > 0 ? `
+        <h3>Acceptance Criteria</h3>
+        <ul>
+          ${we.acceptance_criteria.map(c => `<li>${this.escapeHtml(c)}</li>`).join('')}
+        </ul>
+      ` : ''}
+    `;
+  }
+
+  renderActivityTab(we) {
+    const timeline = document.getElementById('activityTimeline');
+    if (!timeline) return;
+
+    // Generate activity from available data
+    const activities = [];
+
+    if (we.created) {
+      activities.push({
+        type: 'created',
+        time: we.created,
+        text: 'Work effort created'
+      });
+    }
+
+    // Add ticket activities
+    (we.tickets || []).forEach(ticket => {
+      if (ticket.created) {
+        activities.push({
+          type: 'ticket-added',
+          time: ticket.created,
+          text: `Ticket "${ticket.title}" added`
+        });
+      }
+    });
+
+    // Sort by time (most recent first)
+    activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    if (activities.length === 0) {
+      timeline.innerHTML = '<p class="panel-empty">No activity recorded yet.</p>';
+      return;
+    }
+
+    timeline.innerHTML = activities.slice(0, 20).map(activity => `
+      <div class="activity-item ${activity.type}">
+        <span class="activity-time">${this.formatRelativeTime(activity.time)}</span>
+        <p class="activity-text">${this.escapeHtml(activity.text)}</p>
+      </div>
+    `).join('');
+  }
+
+  renderFilesTab(we) {
+    const list = document.getElementById('filesList');
+    if (!list) return;
+
+    const files = we.files_changed || we.files || [];
+
+    if (files.length === 0) {
+      list.innerHTML = '<p class="panel-empty">No files tracked for this work effort.</p>';
+      return;
+    }
+
+    list.innerHTML = files.map(file => {
+      const fileName = typeof file === 'string' ? file : file.path;
+      const status = typeof file === 'object' ? file.status : 'modified';
+      return `
+        <div class="file-item">
+          <span class="file-icon">📄</span>
+          <span class="file-path">${this.escapeHtml(fileName)}</span>
+          <span class="file-status ${status}">${status}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderTimeTracking(we) {
+    const timeCreated = document.getElementById('timeCreated');
+    const timeUpdated = document.getElementById('timeUpdated');
+    const timeDuration = document.getElementById('timeDuration');
+
+    if (timeCreated) {
+      timeCreated.textContent = we.created ? this.formatRelativeTime(we.created) : '—';
+    }
+    if (timeUpdated) {
+      timeUpdated.textContent = (we.updated || we.lastModified) ? this.formatRelativeTime(we.updated || we.lastModified) : '—';
+    }
+    if (timeDuration) {
+      if (we.created) {
+        const created = new Date(we.created);
+        const now = new Date();
+        const diffMs = now - created;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        timeDuration.textContent = diffDays > 0 ? `${diffDays}d ${diffHours}h` : `${diffHours}h`;
+      } else {
+        timeDuration.textContent = '—';
+      }
+    }
+  }
+
+  renderTags(we) {
+    const tagsList = document.getElementById('tagsList');
+    if (!tagsList) return;
+
+    const tags = we.tags || we.labels || ['work-effort'];
+    tagsList.innerHTML = `
+      ${tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+      <button class="tag-add" title="Add Tag">+</button>
+    `;
+  }
+
+  bindDetailEvents() {
+    // Tab switching
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const pane = document.getElementById(`${tab.dataset.tab}Pane`);
+        if (pane) pane.classList.add('active');
+        this.activeTab = tab.dataset.tab;
+      });
+    });
+
+    // Ticket filter
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.ticketFilter = btn.dataset.filter;
+        if (this.selectedItem) {
+          this.renderTicketsTab(this.selectedItem.we, null);
+          this.bindTicketCardEvents();
+        }
+      });
+    });
+
+    // Status controls
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.changeStatus(btn.dataset.status);
+      });
+    });
+
+    // Quick action buttons
+    document.getElementById('quickStartBtn')?.addEventListener('click', () => this.changeStatus('active'));
+    document.getElementById('quickPauseBtn')?.addEventListener('click', () => this.changeStatus('paused'));
+    document.getElementById('quickCompleteBtn')?.addEventListener('click', () => this.changeStatus('completed'));
+
+    // Ticket card events
+    this.bindTicketCardEvents();
+  }
+
+  bindTicketCardEvents() {
+    document.querySelectorAll('.ticket-card-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const card = header.closest('.ticket-card');
+        card.classList.toggle('expanded');
+      });
+    });
+
+    document.querySelectorAll('.ticket-action-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        const ticketId = btn.dataset.ticket;
+        await this.handleTicketAction(action, ticketId);
+      });
+    });
+  }
+
+  async handleTicketAction(action, ticketId) {
+    if (!this.selectedItem) return;
+
+    const { repo, we } = this.selectedItem;
+    const ticket = we.tickets?.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    const statusMap = {
+      'start': 'in_progress',
+      'pause': 'pending',
+      'complete': 'completed',
+      'block': 'blocked'
+    };
+
+    const newStatus = statusMap[action];
+    if (!newStatus) return;
+
+    // For now, just update locally and show toast
+    // In a full implementation, this would call an API
+    this.showToast('info', 'Ticket Action', `${ticket.title} → ${newStatus}`);
+
+    // Update local state (temporary until WebSocket updates)
+    ticket.status = newStatus;
+    this.renderTicketsTab(we, ticketId);
+    this.renderProgressPanel(we);
+    this.bindTicketCardEvents();
+  }
+
+  formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  formatRelativeTime(dateString) {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+
+      if (diffSec < 60) return 'Just now';
+      if (diffMin < 60) return `${diffMin}m ago`;
+      if (diffHour < 24) return `${diffHour}h ago`;
+      if (diffDay < 7) return `${diffDay}d ago`;
+      return this.formatDate(dateString);
+    } catch (e) {
+      return dateString;
     }
   }
 

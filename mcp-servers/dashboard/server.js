@@ -415,9 +415,9 @@ app.post('/api/demo/ticket', async (req, res) => {
   // Extract WE ID from path
   const weFolderName = path.basename(workEffortPath);
   const weId = weFolderName.split('_')[0].split('-').slice(-1)[0]; // Get the 4-char ID
-  
+
   const ticketsDir = path.join(workEffortPath, 'tickets');
-  
+
   try {
     // Count existing tickets
     let ticketNum = 1;
@@ -490,7 +490,7 @@ app.patch('/api/demo/work-effort/:wePath', async (req, res) => {
     // Find the index file
     const files = await fs.readdir(wePath);
     const indexFile = files.find(f => f.endsWith('_index.md'));
-    
+
     if (!indexFile) {
       return res.status(404).json({ error: 'Index file not found' });
     }
@@ -510,13 +510,13 @@ app.patch('/api/demo/work-effort/:wePath', async (req, res) => {
 // Clean up demo work efforts
 app.delete('/api/demo/cleanup', async (req, res) => {
   const repoPath = config.repos[0]?.path;
-  
+
   if (!repoPath) {
     return res.status(400).json({ error: 'No repository configured' });
   }
 
   const weDir = path.join(repoPath, '_work_efforts');
-  
+
   try {
     const entries = await fs.readdir(weDir, { withFileTypes: true });
     let cleaned = 0;

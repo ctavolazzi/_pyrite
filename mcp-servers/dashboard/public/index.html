@@ -223,16 +223,176 @@
 
       <!-- Detail View (shown when clicking a work effort) -->
       <div class="view detail-view" id="detailView">
+        <!-- Detail Header -->
         <div class="detail-header">
-          <button class="back-btn" id="backBtn">← Back</button>
-          <div class="detail-actions">
-            <button class="action-btn" id="startBtn" title="Start Work Effort">▶ Start</button>
-            <button class="action-btn" id="pauseBtn" title="Pause Work Effort">⏸ Pause</button>
-            <button class="action-btn success" id="completeBtn" title="Complete Work Effort">✓ Complete</button>
+          <div class="detail-header-left">
+            <button class="back-btn" id="backBtn">← Back</button>
+            <div class="detail-title-area">
+              <h1 class="detail-title" id="detailTitle">Work Effort</h1>
+              <div class="detail-meta" id="detailMeta">
+                <!-- ID, repo, format badges -->
+              </div>
+            </div>
+          </div>
+          <div class="detail-header-right">
+            <div class="detail-progress-mini" id="detailProgressMini">
+              <span class="progress-text">0/0</span>
+              <div class="progress-bar-mini"><div class="progress-fill-mini"></div></div>
+            </div>
+            <div class="detail-status-controls" id="detailStatusControls">
+              <button class="status-btn pending" data-status="pending" title="Set Pending">○ Pending</button>
+              <button class="status-btn active" data-status="active" title="Set Active">▶ Active</button>
+              <button class="status-btn paused" data-status="paused" title="Set Paused">⏸ Paused</button>
+              <button class="status-btn completed" data-status="completed" title="Set Completed">✓ Done</button>
+            </div>
           </div>
         </div>
-        <div class="detail-content" id="detailContent">
-          <!-- Populated by JS -->
+
+        <!-- Detail Body - Three Column Layout -->
+        <div class="detail-body">
+          <!-- Left Panel: Metadata & Config -->
+          <aside class="detail-panel detail-panel-left" id="detailPanelLeft">
+            <div class="panel-section" id="metadataSection">
+              <h3 class="panel-title">◈ Metadata</h3>
+              <div class="metadata-grid" id="metadataGrid">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <div class="panel-section" id="progressSection">
+              <h3 class="panel-title">📊 Progress</h3>
+              <div class="progress-display" id="progressDisplay">
+                <div class="progress-ring">
+                  <svg viewBox="0 0 100 100">
+                    <circle class="progress-ring-bg" cx="50" cy="50" r="45"/>
+                    <circle class="progress-ring-fill" cx="50" cy="50" r="45" id="progressRing"/>
+                  </svg>
+                  <span class="progress-percent" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-stats">
+                  <div class="progress-stat">
+                    <span class="stat-num" id="ticketsCompleted">0</span>
+                    <span class="stat-label">Completed</span>
+                  </div>
+                  <div class="progress-stat">
+                    <span class="stat-num" id="ticketsTotal">0</span>
+                    <span class="stat-label">Total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-section" id="agentSection">
+              <h3 class="panel-title">🤖 Agent Control</h3>
+              <div class="agent-control" id="agentControl">
+                <div class="agent-status">
+                  <span class="agent-indicator idle"></span>
+                  <span class="agent-label">No agent assigned</span>
+                </div>
+                <div class="agent-actions">
+                  <button class="agent-btn" id="assignAgentBtn" title="Assign AI Agent">Assign Agent</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Center Panel: Main Content -->
+          <main class="detail-panel detail-panel-center" id="detailPanelCenter">
+            <!-- Tabs -->
+            <div class="detail-tabs">
+              <button class="detail-tab active" data-tab="tickets">▣ Tickets</button>
+              <button class="detail-tab" data-tab="description">📝 Description</button>
+              <button class="detail-tab" data-tab="activity">📋 Activity</button>
+              <button class="detail-tab" data-tab="files">📁 Files</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="detail-tab-content">
+              <!-- Tickets Tab -->
+              <div class="tab-pane active" id="ticketsPane">
+                <div class="tickets-header">
+                  <div class="tickets-filter">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="in_progress">In Progress</button>
+                    <button class="filter-btn" data-filter="completed">Done</button>
+                    <button class="filter-btn" data-filter="blocked">Blocked</button>
+                  </div>
+                  <button class="add-ticket-btn" id="addTicketBtn" title="Add New Ticket">+ Add Ticket</button>
+                </div>
+                <div class="tickets-list" id="ticketsList">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Description Tab -->
+              <div class="tab-pane" id="descriptionPane">
+                <div class="description-content" id="descriptionContent">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Activity Tab -->
+              <div class="tab-pane" id="activityPane">
+                <div class="activity-timeline" id="activityTimeline">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Files Tab -->
+              <div class="tab-pane" id="filesPane">
+                <div class="files-list" id="filesList">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <!-- Right Panel: Quick Actions & Related -->
+          <aside class="detail-panel detail-panel-right" id="detailPanelRight">
+            <div class="panel-section">
+              <h3 class="panel-title">⚡ Quick Actions</h3>
+              <div class="quick-actions" id="quickActions">
+                <button class="quick-action-btn" id="quickStartBtn">▶ Start Work</button>
+                <button class="quick-action-btn" id="quickPauseBtn">⏸ Pause</button>
+                <button class="quick-action-btn success" id="quickCompleteBtn">✓ Complete All</button>
+                <button class="quick-action-btn danger" id="quickArchiveBtn">🗄 Archive</button>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h3 class="panel-title">🔗 Related</h3>
+              <div class="related-list" id="relatedList">
+                <p class="panel-empty">No related work efforts</p>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h3 class="panel-title">⏱ Time Tracking</h3>
+              <div class="time-tracking" id="timeTracking">
+                <div class="time-stat">
+                  <span class="time-label">Created</span>
+                  <span class="time-value" id="timeCreated">—</span>
+                </div>
+                <div class="time-stat">
+                  <span class="time-label">Updated</span>
+                  <span class="time-value" id="timeUpdated">—</span>
+                </div>
+                <div class="time-stat">
+                  <span class="time-label">Duration</span>
+                  <span class="time-value" id="timeDuration">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-section">
+              <h3 class="panel-title">🏷 Tags</h3>
+              <div class="tags-list" id="tagsList">
+                <span class="tag">work-effort</span>
+                <button class="tag-add" title="Add Tag">+</button>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </main>
