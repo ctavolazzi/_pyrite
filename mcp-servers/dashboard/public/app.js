@@ -73,8 +73,8 @@ class MissionControl {
     const action = type.split(':')[1];
 
     const titles = {
-      created: '📋 New Work Effort',
-      updated: '📝 Updated',
+      created: '◈ New Work Effort',
+      updated: '◇ Updated',
       started: '▶️ Started',
       completed: '✅ Completed',
       paused: '⏸️ Paused',
@@ -110,7 +110,7 @@ class MissionControl {
 
     const titles = {
       created: '🎫 New Ticket',
-      updated: '📝 Ticket Updated',
+      updated: '▣ Ticket Updated',
       completed: '✅ Ticket Done',
       blocked: '🚫 Ticket Blocked',
     };
@@ -142,7 +142,7 @@ class MissionControl {
 
     this.smartNotify({
       type: action === 'removed' ? 'warning' : 'success',
-      title: action === 'added' ? '📁 Repo Added' : action === 'removed' ? '📁 Repo Removed' : '🔄 Synced',
+      title: action === 'added' ? '◫ Repo Added' : action === 'removed' ? '◫ Repo Removed' : '◰ Synced',
       message: messages[action] || data.name,
       data: { eventType: type, ...data },
     });
@@ -155,7 +155,7 @@ class MissionControl {
     if (action === 'connected') {
       this.toastManager.show({
         type: 'success',
-        title: '🔗 Connected',
+        title: '◈ Connected',
         message: 'Mission Control is online',
         duration: 3000,
       });
@@ -483,8 +483,8 @@ class MissionControl {
     switch (message.type) {
       case 'hot_reload':
         // Hot reload: refresh page when code changes
-        console.log(`🔥 Hot reload triggered: ${message.file}`);
-        this.showToast('info', '🔥 Reloading...', `${message.file} changed`);
+        console.log(`[Hot Reload] ${message.file}`);
+        this.showToast('info', '◰ Reloading...', `${message.file} changed`);
         setTimeout(() => window.location.reload(), 500);
         return;
 
@@ -1112,7 +1112,7 @@ class MissionControl {
     // Render progress ring using Charts
     const ringContainer = document.getElementById('progressRingContainer');
     if (ringContainer && window.Charts) {
-      const color = progressPercent === 100 ? '#10b981' : 
+      const color = progressPercent === 100 ? '#10b981' :
                     progressPercent > 50 ? '#ff9d3d' : '#e6a23c';
       Charts.progressRing(ringContainer, progressPercent, {
         size: 100,
@@ -1128,7 +1128,7 @@ class MissionControl {
     const ticketsCompleted = document.getElementById('ticketsCompleted');
     const ticketsInProgress = document.getElementById('ticketsInProgress');
     const ticketsPending = document.getElementById('ticketsPending');
-    
+
     if (ticketsCompleted) ticketsCompleted.textContent = completedCount;
     if (ticketsInProgress) ticketsInProgress.textContent = inProgressCount;
     if (ticketsPending) ticketsPending.textContent = pendingCount + blockedCount;
@@ -1206,7 +1206,7 @@ class MissionControl {
       // Generate cumulative completion data points
       const points = [];
       let cumulative = 0;
-      
+
       // Sort completed tickets by some date (fallback to current if no date)
       const sortedTickets = [...completed].sort((a, b) => {
         const dateA = a.completedAt ? new Date(a.completedAt) : new Date();
@@ -1253,7 +1253,7 @@ class MissionControl {
     // Create data points representing progress over "time"
     const points = [];
     const steps = Math.min(6, totalTickets + 1);
-    
+
     for (let i = 0; i <= steps; i++) {
       const progress = Math.min(completed, Math.round((completed / steps) * i));
       points.push({
@@ -1280,14 +1280,14 @@ class MissionControl {
     // Generate mock activity data for the last 8 weeks
     const data = [];
     const now = new Date();
-    
+
     for (let i = 55; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
-      
+
       // Random activity count (in real app, this would be actual activity)
       const count = Math.floor(Math.random() * 5);
-      
+
       data.push({
         date: date.toISOString().split('T')[0],
         count: count
@@ -2716,7 +2716,7 @@ class MissionControl {
                  ${this.selectedRepos.has(item.path) ? 'checked' : ''}
                  ${item.isAdded ? 'checked disabled' : ''}>
           <span class="browser-item-icon ${item.hasWorkEfforts ? 'repo' : 'folder'}">
-            ${item.hasWorkEfforts ? '◈' : '📁'}
+            ${item.hasWorkEfforts ? '◈' : '◫'}
           </span>
           <div class="browser-item-content">
             <div class="browser-item-name">${this.escapeHtml(item.name)}</div>

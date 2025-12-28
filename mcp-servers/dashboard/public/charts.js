@@ -3,7 +3,7 @@
  * ======================
  * Lightweight SVG chart generators.
  * No dependencies. Fast. Beautiful.
- * 
+ *
  * Charts:
  * - Donut (status distribution)
  * - Bar (comparisons)
@@ -54,11 +54,11 @@ const Charts = {
 
     Object.entries(data).forEach(([status, count]) => {
       if (count === 0) return;
-      
+
       const percent = count / total;
       const angle = percent * 360;
       const color = this.colors[status] || this.colors.default;
-      
+
       segments.push({
         status,
         count,
@@ -67,21 +67,21 @@ const Charts = {
         endAngle: currentAngle + angle,
         color
       });
-      
+
       currentAngle += angle;
     });
 
     const paths = segments.map((seg, i) => {
       const startRad = (seg.startAngle * Math.PI) / 180;
       const endRad = (seg.endAngle * Math.PI) / 180;
-      
+
       const x1 = cx + radius * Math.cos(startRad);
       const y1 = cy + radius * Math.sin(startRad);
       const x2 = cx + radius * Math.cos(endRad);
       const y2 = cy + radius * Math.sin(endRad);
-      
+
       const largeArc = seg.percent > 0.5 ? 1 : 0;
-      
+
       return `
         <path
           d="M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z"
@@ -127,7 +127,7 @@ const Charts = {
 
     const entries = Object.entries(data);
     const max = maxValue || Math.max(...entries.map(([, v]) => v), 1);
-    
+
     if (entries.length === 0) {
       container.innerHTML = this._emptyState('No data');
       return;
@@ -136,12 +136,12 @@ const Charts = {
     const bars = entries.map(([label, value], i) => {
       const percent = (value / max) * 100;
       const color = this.colors[label] || this.colors.default;
-      
+
       return `
         <div class="chart-bar-row" style="--delay: ${i * 0.05}s">
           <span class="chart-bar-label">${this._formatLabel(label)}</span>
           <div class="chart-bar-track">
-            <div class="chart-bar-fill ${animate ? 'animate' : ''}" 
+            <div class="chart-bar-fill ${animate ? 'animate' : ''}"
                  style="width: ${percent}%; background: ${color}"></div>
           </div>
           ${showValues ? `<span class="chart-bar-value">${value}</span>` : ''}
@@ -187,7 +187,7 @@ const Charts = {
     // Build path
     const pathPoints = values.map((v, i) => `${getX(i)},${getY(v)}`);
     const linePath = `M ${pathPoints.join(' L ')}`;
-    
+
     // Area path (for fill under line)
     const areaPath = `${linePath} L ${getX(points.length - 1)},${height - padding} L ${padding},${height - padding} Z`;
 
@@ -269,20 +269,20 @@ const Charts = {
 
     container.innerHTML = `
       <svg viewBox="0 0 ${size} ${size}" class="chart-progress-ring ${animate ? 'animate' : ''}">
-        <circle 
-          cx="${size / 2}" 
-          cy="${size / 2}" 
-          r="${radius}" 
-          fill="none" 
-          stroke="${bgColor}" 
+        <circle
+          cx="${size / 2}"
+          cy="${size / 2}"
+          r="${radius}"
+          fill="none"
+          stroke="${bgColor}"
           stroke-width="${thickness}"
         />
-        <circle 
-          cx="${size / 2}" 
-          cy="${size / 2}" 
-          r="${radius}" 
-          fill="none" 
-          stroke="${color}" 
+        <circle
+          cx="${size / 2}"
+          cy="${size / 2}"
+          r="${radius}"
+          fill="none"
+          stroke="${color}"
           stroke-width="${thickness}"
           stroke-linecap="round"
           stroke-dasharray="${circumference}"
@@ -352,13 +352,13 @@ const Charts = {
 
     // data is array of { date, count }
     const maxCount = Math.max(...data.map(d => d.count), 1);
-    
+
     // Group by week
     const cells = data.slice(-weeks * 7).map((d, i) => {
       const intensity = d.count / maxCount;
       const col = Math.floor(i / 7);
       const row = i % 7;
-      
+
       return `
         <rect
           x="${col * (cellSize + gap)}"
