@@ -3714,3 +3714,477 @@ body {
 .demo-status.error {
   color: var(--status-blocked);
 }
+
+/* ============================================================================
+   RESPONSIVE DESIGN - Mobile First
+   ============================================================================
+   Breakpoints:
+   - Mobile:  < 640px  (default styles)
+   - Tablet:  640px - 1024px
+   - Desktop: > 1024px
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   Mobile Navigation Toggle
+   -------------------------------------------------------------------------- */
+
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: 1001;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.mobile-nav-toggle:hover {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Overlay
+   -------------------------------------------------------------------------- */
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity var(--transition-medium);
+}
+
+.mobile-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Phone (< 640px)
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 639px) {
+  :root {
+    --sidebar-width: 100%;
+    --topbar-height: 50px;
+  }
+
+  /* Show mobile nav toggle */
+  .mobile-nav-toggle {
+    display: flex;
+  }
+
+  /* App layout - single column */
+  .app {
+    flex-direction: column;
+  }
+
+  /* Sidebar - Full screen overlay on mobile */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform var(--transition-medium);
+    z-index: 1000;
+    border-right: 1px solid var(--border);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Hide sidebar toggle on mobile since we use hamburger */
+  .sidebar-toggle {
+    display: none;
+  }
+
+  /* Main content - full width */
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  /* Header - compact on mobile */
+  .header {
+    padding: var(--space-sm);
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .header-left {
+    flex: 1 1 100%;
+    padding-left: 40px; /* Space for hamburger */
+  }
+
+  .breadcrumb {
+    font-size: 0.7rem;
+  }
+
+  .header-right {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  /* Stats section - horizontal scroll or grid */
+  .stats-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .stat-card {
+    padding: var(--space-sm);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+  }
+
+  /* Test/Demo cards - full width */
+  .test-card, .demo-card {
+    grid-column: span 2;
+  }
+
+  /* Detail view - single column */
+  .detail-body {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .detail-panel-left,
+  .detail-panel-right {
+    border: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-panel-center {
+    min-height: 400px;
+  }
+
+  /* Detail header - stacked */
+  .detail-header {
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+  }
+
+  .detail-header-left,
+  .detail-header-right {
+    width: 100%;
+  }
+
+  .detail-header-right {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .detail-status-controls {
+    flex-wrap: wrap;
+  }
+
+  /* Tabs - scrollable */
+  .detail-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .detail-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .detail-tab {
+    white-space: nowrap;
+    padding: var(--space-sm);
+    font-size: 0.7rem;
+  }
+
+  /* Ticket cards - touch friendly */
+  .ticket-card-header {
+    padding: var(--space-md);
+  }
+
+  .ticket-title {
+    font-size: 0.9rem;
+  }
+
+  .ticket-actions {
+    flex-wrap: wrap;
+  }
+
+  .ticket-action-btn {
+    padding: var(--space-sm) var(--space-md);
+    font-size: 0.75rem;
+    min-height: 44px; /* Touch target */
+  }
+
+  /* Quick actions - horizontal on mobile */
+  .quick-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .quick-action-btn {
+    flex: 1 1 calc(50% - var(--space-xs));
+    text-align: center;
+    min-height: 44px;
+  }
+
+  /* Progress ring - smaller */
+  .progress-ring {
+    width: 80px;
+    height: 80px;
+  }
+
+  .progress-percent {
+    font-size: 1rem;
+  }
+
+  /* Search - full width */
+  .search-container {
+    position: fixed;
+    top: var(--topbar-height);
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: var(--space-sm);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+
+  .search-container.mobile-open {
+    display: block;
+  }
+
+  /* Work queue - simplified */
+  .queue-filters {
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .queue-item {
+    padding: var(--space-md);
+  }
+
+  /* Modals - full screen on mobile */
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .modal-body {
+    max-height: calc(100vh - 120px);
+  }
+
+  /* Toast - bottom center, wider */
+  .toast-container {
+    left: var(--space-sm);
+    right: var(--space-sm);
+    bottom: var(--space-sm);
+    max-width: none;
+  }
+
+  .toast {
+    width: 100%;
+  }
+
+  /* Demo panel - near full screen */
+  .demo-panel {
+    width: 95%;
+    min-width: auto;
+    max-height: 80vh;
+  }
+
+  /* Test results - near full screen */
+  .test-results {
+    width: 95%;
+    min-width: auto;
+  }
+
+  /* Notification panel - full width */
+  .notification-panel {
+    width: calc(100vw - var(--space-md) * 2);
+    right: var(--space-sm);
+    max-height: 60vh;
+  }
+
+  /* Hide some elements on mobile */
+  .hero-ascii {
+    display: none;
+  }
+
+  .hero-subtitle {
+    font-size: 0.75rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Tablet (640px - 1024px)
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  :root {
+    --sidebar-width: 240px;
+  }
+
+  /* Two-column detail view */
+  .detail-body {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .detail-panel-right {
+    display: none; /* Hide right panel on tablet */
+  }
+
+  /* Move right panel content to bottom of center */
+  .detail-panel-center::after {
+    content: '';
+    display: block;
+  }
+
+  /* Stats - 4 columns */
+  .stats-section {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .test-card, .demo-card {
+    grid-column: span 2;
+  }
+
+  /* Sidebar can be toggled */
+  .sidebar.collapsed {
+    width: var(--sidebar-collapsed);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Desktop (> 1024px) - Default styles apply
+   -------------------------------------------------------------------------- */
+
+@media (min-width: 1025px) {
+  /* Ensure three columns on large screens */
+  .detail-body {
+    grid-template-columns: 240px 1fr 240px;
+  }
+
+  /* Full stats row */
+  .stats-section {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .test-card, .demo-card {
+    grid-column: span 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Touch Device Enhancements
+   -------------------------------------------------------------------------- */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .tree-node {
+    padding: var(--space-sm) var(--space-md);
+    min-height: 44px;
+  }
+
+  .filter-btn,
+  .status-btn,
+  .action-btn,
+  .modal-btn {
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  /* Remove hover effects that don't work on touch */
+  .tree-node:hover,
+  .ticket-card:hover,
+  .queue-item:hover {
+    background: inherit;
+    border-color: inherit;
+  }
+
+  /* Add active states instead */
+  .tree-node:active,
+  .ticket-card:active,
+  .queue-item:active {
+    background: var(--bg-highlight);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Landscape Phone
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 900px) and (orientation: landscape) {
+  .detail-body {
+    grid-template-columns: 200px 1fr;
+  }
+
+  .detail-panel-right {
+    display: none;
+  }
+
+  .progress-ring {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Print Styles
+   -------------------------------------------------------------------------- */
+
+@media print {
+  .sidebar,
+  .header,
+  .toast-container,
+  .notification-bell,
+  .detail-status-controls,
+  .quick-actions,
+  .agent-control,
+  .mobile-nav-toggle {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0;
+    width: 100%;
+  }
+
+  .detail-body {
+    grid-template-columns: 1fr;
+  }
+
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

@@ -412,6 +412,9 @@ class MissionControl {
     this.browserPath = '/Users/ctavolazzi/Code';
     this.selectedRepos = new Set();
 
+    // Mobile navigation
+    this.initMobileNav();
+
     // Check if hero should be hidden (user preference)
     if (localStorage.getItem('pyrite_hero_hidden') === 'true') {
       this.elements.heroBanner?.classList.add('hidden');
@@ -1439,6 +1442,80 @@ class MissionControl {
     } catch (e) {
       return dateString;
     }
+  }
+
+  // ============================================================================
+  // Mobile Navigation
+  // ============================================================================
+
+  initMobileNav() {
+    const toggle = document.getElementById('mobileNavToggle');
+    const overlay = document.getElementById('mobileOverlay');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (toggle) {
+      toggle.addEventListener('click', () => this.toggleMobileNav());
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', () => this.closeMobileNav());
+    }
+
+    // Close mobile nav when clicking a tree item
+    if (sidebar) {
+      sidebar.addEventListener('click', (e) => {
+        if (e.target.closest('.tree-node')) {
+          // Small delay to allow the click to register
+          setTimeout(() => this.closeMobileNav(), 150);
+        }
+      });
+    }
+
+    // Handle resize - close mobile nav when switching to desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 640) {
+        this.closeMobileNav();
+      }
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeMobileNav();
+      }
+    });
+  }
+
+  toggleMobileNav() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    const toggle = document.getElementById('mobileNavToggle');
+
+    const isOpen = sidebar?.classList.contains('mobile-open');
+
+    if (isOpen) {
+      this.closeMobileNav();
+    } else {
+      sidebar?.classList.add('mobile-open');
+      overlay?.classList.add('active');
+      toggle.innerHTML = '✕';
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden'; // Prevent scroll
+    }
+  }
+
+  closeMobileNav() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    const toggle = document.getElementById('mobileNavToggle');
+
+    sidebar?.classList.remove('mobile-open');
+    overlay?.classList.remove('active');
+    if (toggle) {
+      toggle.innerHTML = '☰';
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    document.body.style.overflow = ''; // Restore scroll
   }
 
   showEmptyDetailState() {
