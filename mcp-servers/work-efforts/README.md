@@ -19,7 +19,7 @@ MCP server for managing work efforts and tickets with date-based IDs.
 ```
 _work_efforts_/
 ├── WE-251227-a1b2_api_architecture/
-│   ├── WE-251227-a1b2_index.md
+│   ├── WE-251227-a1b2_index.md      # Main WE file
 │   └── tickets/
 │       ├── TKT-a1b2-001_define_endpoints.md
 │       ├── TKT-a1b2-002_implement_api.md
@@ -28,170 +28,80 @@ _work_efforts_/
 
 ## Tools
 
-### `create_work_effort`
-Create a new work effort with folder, index.md, and tickets/ subfolder.
-
-**Parameters:**
-- `repo_path` (required) - Full path to repository
-- `title` (required) - Work effort title
-- `objective` (required) - What needs to be done and why
-- `branch` - Git branch name (auto-generated if not provided)
-- `repository` - Repository name for reference
-- `tickets` - Array of initial tickets to create
-  - Each ticket: `{ title, description?, acceptance_criteria? }`
-
-**Example:**
-```
-Create a work effort titled "API Architecture" with objective "Build REST API endpoints"
-in repo /path/to/repo with initial tickets for "Define endpoints" and "Implement handlers"
-```
-
-### `create_ticket`
-Create a new ticket in an existing work effort.
-
-**Parameters:**
-- `work_effort_path` (required) - Full path to work effort directory
-- `title` (required) - Ticket title
-- `description` - What needs to be done
-- `acceptance_criteria` - Array of acceptance criteria strings
-
-**Example:**
-```
-Create a ticket "Add caching layer" in work effort at /path/to/repo/_work_efforts_/WE-251227-a1b2_api
-```
-
-### `list_work_efforts`
-List all work efforts in a repository.
-
-**Parameters:**
-- `repo_path` (required) - Full path to repository
-- `status` - Filter: "active", "paused", "completed", "all" (default: "all")
-
-### `list_tickets`
-List all tickets in a work effort.
-
-**Parameters:**
-- `work_effort_path` (required) - Full path to work effort directory
-- `status` - Filter: "pending", "in_progress", "completed", "blocked", "all" (default: "all")
-
-### `update_work_effort`
-Update a work effort status or add progress notes.
-
-**Parameters:**
-- `work_effort_path` (required) - Full path to work effort directory
-- `status` - New status: "active", "paused", "completed"
-- `progress` - Progress note to add
-- `commit` - Commit hash to add to commits list
-
-### `update_ticket`
-Update a ticket status, files changed, or notes.
-
-**Parameters:**
-- `ticket_path` (required) - Full path to ticket file
-- `status` - New status: "pending", "in_progress", "completed", "blocked"
-- `files_changed` - Array of file paths that were modified
-- `notes` - Implementation notes to add
-- `commit` - Commit hash to add
-
-### `search_work_efforts`
-Search work efforts and tickets by keyword.
-
-**Parameters:**
-- `repo_path` (required) - Full path to repository
-- `query` (required) - Search keyword
-- `include_tickets` - Also search within tickets (default: true)
+| Tool | Description |
+|------|-------------|
+| `create_work_effort` | Create WE folder + index.md + tickets/ subfolder |
+| `create_ticket` | Create TKT in work effort's tickets/ folder |
+| `list_work_efforts` | List all WEs with status and ticket count |
+| `list_tickets` | List tickets in a specific WE |
+| `update_work_effort` | Update WE status, add progress/commits |
+| `update_ticket` | Update ticket status, files changed, notes |
+| `search_work_efforts` | Search WEs and tickets by keyword |
 
 ## Usage Examples
 
-**Create a work effort with tickets:**
-```
-Create a work effort "User Authentication" with objective "Implement secure login"
-and tickets for "Design auth flow", "Implement JWT", "Add password reset"
-```
-
-**Update ticket status:**
-```
-Mark ticket TKT-a1b2-001 as completed with files changed: src/auth.js, src/jwt.js
-```
-
-**Search for work:**
-```
-Search for "authentication" in work efforts
-```
-
-## Templates
-
-### Work Effort Index
-```markdown
----
-id: WE-251227-a1b2
-title: "Title"
-status: active
-created: 2025-12-27T09:13:45.000Z
-created_by: username
-last_updated: 2025-12-27T09:13:45.000Z
-branch: feature/WE-251227-a1b2-title
-repository: repo-name
----
-
-# WE-251227-a1b2: Title
-
-## Objective
-...
-
-## Tickets
-| ID | Title | Status |
-|----|-------|--------|
-
-## Commits
-...
-
-## Related
-...
+### Create Work Effort
+```javascript
+{
+  "repo_path": "/path/to/repo",
+  "title": "API Architecture",
+  "objective": "Build clean API layer for wiki",
+  "repository": "fogsift",
+  "tickets": [
+    "Define API endpoints",
+    "Implement WikiAPI client",
+    "Add caching layer"
+  ]
+}
 ```
 
-### Ticket
-```markdown
----
-id: TKT-a1b2-001
-parent: WE-251227-a1b2
-title: "Title"
-status: pending
-created: 2025-12-27T09:15:22.000Z
-created_by: username
-assigned_to: null
----
-
-# TKT-a1b2-001: Title
-
-## Description
-...
-
-## Acceptance Criteria
-- [ ] ...
-
-## Files Changed
-...
-
-## Implementation Notes
-...
-
-## Commits
-...
+### Create Ticket
+```javascript
+{
+  "work_effort_path": "/path/to/repo/_work_efforts_/WE-251227-a1b2_api_architecture",
+  "title": "Add error handling",
+  "description": "Implement proper error handling for API calls",
+  "acceptance_criteria": [
+    "All API errors return proper status codes",
+    "Error messages are user-friendly",
+    "Errors are logged for debugging"
+  ]
+}
 ```
 
-## Changelog
+### Update Ticket
+```javascript
+{
+  "ticket_path": "/path/to/ticket.md",
+  "status": "completed",
+  "files_changed": ["src/js/api.js", "src/js/debug.js"],
+  "commit": "abc1234"
+}
+```
 
-### v0.3.0 (2025-12-27)
-- New ID format: `WE-YYMMDD-xxxx` for work efforts
-- New ID format: `TKT-xxxx-NNN` for tickets
-- New folder structure with `tickets/` subfolder
-- Added `create_ticket` tool
-- Added `list_tickets` tool
-- Added `update_ticket` tool
-- Enhanced metadata in templates
-- Search now includes tickets
+## Installation
 
-### v0.2.0
-- Initial release with Johnny Decimal numbering
-- Basic CRUD operations for work efforts
+```bash
+# Copy to local MCP servers
+cp -r work-efforts ~/.mcp-servers/
+
+# Install dependencies
+cd ~/.mcp-servers/work-efforts
+npm install
+
+# Add to ~/.cursor/mcp.json
+{
+  "work-efforts": {
+    "command": "node",
+    "args": ["~/.mcp-servers/work-efforts/server.js"]
+  }
+}
+
+# Restart Cursor
+```
+
+## Version History
+
+- **v0.3.0** - Date-based IDs (WE-YYMMDD-xxxx), ticket system, 7 tools
+- **v0.2.0** - Johnny Decimal numbering (00.01, 00.02)
+- **v0.1.0** - Initial release
