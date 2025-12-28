@@ -190,6 +190,43 @@ Provides direct GitHub API integration. Complements the `gh` CLI for MCP-native 
 
 ---
 
+## Dashboard (Human Interface)
+
+The work efforts system includes a web dashboard for visual monitoring.
+
+**Location:** `mcp-servers/dashboard/` (in _pyrite)
+
+**Start:**
+```bash
+cd /Users/ctavolazzi/Code/active/_pyrite/mcp-servers/dashboard
+npm install  # first time only
+npm start
+```
+
+**URL:** http://localhost:3847
+
+**Features:**
+- Real-time WebSocket updates
+- Multi-repo support (configurable)
+- Parses both Johnny Decimal and WE-YYMMDD-xxxx formats
+- Fogsift dark theme
+
+**Configuration:** Edit `config.json` to add repositories:
+```json
+{
+  "port": 3847,
+  "repos": [
+    { "name": "_pyrite", "path": "/Users/ctavolazzi/Code/active/_pyrite" },
+    { "name": "fogsift", "path": "/Users/ctavolazzi/Code/fogsift" }
+  ],
+  "debounceMs": 300
+}
+```
+
+**Documentation:** See [work-efforts-system.md](../work-efforts-system.md)
+
+---
+
 ## Testing
 
 ### Run Full Test Suite
@@ -375,8 +412,9 @@ Global MCP config: `~/.cursor/mcp.json`
 | Server | Start Command | Port |
 |--------|--------------|------|
 | browser-tools middleware | `npx @agentdeskai/browser-tools-server@1.2.0` | 3025 |
-| All others | Auto-started by Cursor | N/A |
+| dashboard | `npm start` (in mcp-servers/dashboard/) | 3847 |
+| All MCP servers | Auto-started by Cursor | N/A |
 
 ---
 
-*Last updated: 2025-12-21*
+*Last updated: 2025-12-27*

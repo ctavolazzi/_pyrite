@@ -1,0 +1,21 @@
+{
+  "name": "mission-control-dashboard",
+  "version": "1.0.0",
+  "description": "Real-time dashboard for monitoring work efforts across multiple repositories",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "chokidar": "^3.5.3",
+    "gray-matter": "^4.0.3"
+  },
+  "keywords": ["dashboard", "work-efforts", "mission-control"],
+  "author": "ctavolazzi",
+  "license": "MIT"
+}
+

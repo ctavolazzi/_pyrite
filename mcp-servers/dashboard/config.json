@@ -1,0 +1,14 @@
+{
+  "port": 3847,
+  "repos": [
+    {
+      "name": "_pyrite",
+      "path": "/Users/ctavolazzi/Code/active/_pyrite"
+    },
+    {
+      "name": "fogsift",
+      "path": "/Users/ctavolazzi/Code/fogsift"
+    }
+  ],
+  "debounceMs": 300
+}

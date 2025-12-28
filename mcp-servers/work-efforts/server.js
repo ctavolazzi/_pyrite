@@ -101,7 +101,7 @@ function slugify(title) {
  * Find all work effort directories in a repo
  */
 async function findWorkEfforts(repoPath) {
-  const workEffortsDir = path.join(repoPath, '_work_efforts_');
+  const workEffortsDir = path.join(repoPath, '_work_efforts');
   const results = [];
 
   try {
@@ -415,7 +415,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const slug = slugify(title);
       const folderName = `${weId}_${slug}`;
 
-      const workEffortsDir = path.join(repo_path, '_work_efforts_');
+      const workEffortsDir = path.join(repo_path, '_work_efforts');
       const weDir = path.join(workEffortsDir, folderName);
       const ticketsDir = path.join(weDir, 'tickets');
 

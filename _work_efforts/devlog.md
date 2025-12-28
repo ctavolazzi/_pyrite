@@ -209,3 +209,308 @@
 **Work Effort:** 10.02 - CI Pipeline Setup
 
 **Status:** ✅ All tasks completed and verified
+
+## 2025-12-27
+
+### 11:48 - Mission Control Dashboard Built
+
+**Task:** Build a visual dashboard for monitoring work efforts across repositories
+
+**Actions:**
+1. ✅ Fixed MCP server folder path (`_work_efforts_` → `_work_efforts`)
+2. ✅ Created `mcp-servers/dashboard/` with:
+   - `server.js` - Express + WebSocket + file watchers
+   - `lib/parser.js` - Dual-format parsing (Johnny Decimal + MCP v0.3.0)
+   - `lib/watcher.js` - Debounced file watcher (300ms)
+   - `public/index.html` - Dashboard shell
+   - `public/styles.css` - Fogsift dark theme
+   - `public/app.js` - Client with WS reconnection
+   - `config.json` - Repo configuration
+   - `README.md` - Documentation
+
+**Features:**
+- Multi-repo support (configurable)
+- Real-time WebSocket updates
+- Parses both Johnny Decimal and WE-YYMMDD-xxxx formats
+- Fogsift dark theme (amber/orange accents)
+- Graceful shutdown
+
+**URL:** http://localhost:3847
+
+### 12:30 - CLI Infrastructure Discovery
+
+**Task:** Search for existing CLI infrastructure in NovaSystem and related repos
+
+**Findings:**
+
+| Component | Location | Type |
+|-----------|----------|------|
+| NovaSystem CLI | `NovaSystem-Codex/novasystem/cli/main.py` | Typer/Rich |
+| Session CLI | `NovaSystem-Codex/novasystem/cli/session_cli.py` | argparse |
+| Work Effort Creator | `coding-with-AI-for-beginners/scripts/create-work-effort.py` | argparse |
+| Cursor Protocols CLI | `coding-with-AI-for-beginners/scripts/cursor-protocols-cli.js` | Node.js |
+| MCP Server (global) | `.mcp-servers/work-efforts/server.js` | MCP v0.3.0 |
+
+**Key Insight:** Infrastructure exists but is scattered. No unified core library.
+
+### 13:00 - Documentation Created
+
+**Task:** Create comprehensive documentation for work efforts system
+
+**Created:**
+- `docs/work-efforts-system.md` - Full system documentation
+  - Architecture overview
+  - ID format reference (WE-YYMMDD-xxxx, TKT-xxxx-NNN)
+  - Component descriptions
+  - File templates
+  - Workflow guides
+  - Troubleshooting
+
+**Next Steps:**
+1. Extract core library from scattered implementations
+2. Build unified CLI on top of core
+3. Create global startup command
+
+**Status:** ✅ Documentation complete
+
+### 12:45 - Dashboard Real-Time Demo
+
+**Task:** Demonstrate real-time WebSocket updates in dashboard
+
+**Actions:**
+1. ✅ Created work effort WE-251227-1gku via MCP tools
+2. ✅ Fixed folder placement (moved to correct `_work_efforts/`)
+3. ✅ Dashboard updated in real-time (4→5 WEs, 0→4 TKTs)
+4. ✅ Updated ticket statuses (3 completed, 1 in_progress)
+5. ✅ Captured screenshots showing real-time updates
+6. ✅ Fixed global MCP server path bug
+
+**Screenshots:**
+- `.playwright-mcp/dashboard-before-update.png`
+- `.playwright-mcp/dashboard-after-update.png`
+- `.playwright-mcp/dashboard-tickets-expanded.png`
+- `.playwright-mcp/dashboard-full.png`
+
+**Summary:**
+- Real-time WebSocket updates ✅
+- Dual-format parsing ✅ (JD + MCP)
+- Expandable ticket views ✅
+- Status badges with color coding ✅
+
+**Work Effort:** WE-251227-1gku - Mission Control Dashboard
+**Status:** ✅ Complete
+
+### 13:30 - Mission Control V2 Command Center
+
+**Task:** Build a robust command center dashboard with tree navigation, search, real-time monitoring, and visual indicators
+
+**User Stories Implemented:**
+1. ✅ Visual tree navigation of all work efforts (expandable/collapsible)
+2. ✅ Search with real-time filtering and text highlighting
+3. ✅ Command center queue view with status filters
+4. ✅ Toast notifications with actions and progress bars
+5. ✅ Detail page view with breadcrumbs
+6. ✅ Start/Stop/Complete controls
+7. ✅ Real-time visual indicators (pulsing, color-coded badges, animated numbers)
+
+**Features:**
+- Sidebar with collapsible tree (repo > work effort > ticket)
+- Global search across all work efforts and tickets
+- Queue view with All/Active/Pending/Completed filters
+- Click-to-expand work efforts showing tickets
+- Animated stat counters
+- WebSocket real-time updates with toast notifications
+- Detail view with action buttons (Pause, Complete)
+- Fogsift dark theme with amber/orange accents
+
+**Screenshots:**
+- `.playwright-mcp/mission-control-v2.png` - Dashboard overview
+- `.playwright-mcp/detail-view.png` - Work effort detail view
+- `.playwright-mcp/search-results.png` - Search with highlighting
+- `.playwright-mcp/mission-control-final.png` - All completed
+
+**Work Effort:** WE-251227-hldk - Mission Control V2 Command Center
+**Status:** ✅ All 7 tickets complete
+
+### 14:15 - Notification Center with Activity Tracking
+
+**Task:** Build notification center with intelligent routing based on user activity
+
+**How It Works:**
+- **Active** (green): User is focused and interacting → Show toasts
+- **Idle** (amber): User focused but inactive for 30s+ → Queue to bell
+- **Away** (gray): Window not focused → Queue to bell + browser notification
+
+**Features Implemented:**
+1. ✅ Activity tracking (Active/Idle/Away states)
+2. ✅ Bell icon with unread count badge
+3. ✅ Notification panel with full history
+4. ✅ Dismiss individual or all notifications
+5. ✅ Click notification to navigate to work effort
+6. ✅ Browser notifications when away (if permitted)
+7. ✅ Color-coded indicators (blue=info, green=success)
+8. ✅ Timestamps ("Just now", "5m ago", etc.)
+
+**Smart Routing Logic:**
+```javascript
+shouldUseNotificationCenter() {
+  return !this.isWindowFocused ||
+         this.activityState === 'idle' ||
+         this.activityState === 'away' ||
+         this.isPanelOpen;
+}
+```
+
+**Screenshots:**
+- `.playwright-mcp/notification-bell.png` - Bell and activity indicator
+- `.playwright-mcp/notification-panel-empty.png` - Empty panel
+- `.playwright-mcp/notification-with-badge.png` - Badge with count
+- `.playwright-mcp/notification-center-working.png` - Multiple notifications
+
+**Work Effort:** WE-251227-g6nh - Notification Center Feature
+**Status:** ✅ All 3 tickets complete
+
+### 15:00 - Repository Browser & Multi-Repo Support
+
+**Task:** Add ability to browse and add additional repositories from Code folder
+
+**Features Implemented:**
+1. ✅ "Add Repository" button in sidebar
+2. ✅ Visual file browser modal
+3. ✅ Auto-detect folders with `_work_efforts` or `_work_efforts_`
+4. ✅ Green highlighting for repos with work efforts
+5. ✅ "ADDED" badge for already-added repos
+6. ✅ Work effort count display (e.g., "8 WEs")
+7. ✅ Navigate into folders to find nested repos
+8. ✅ Multi-select with checkboxes
+9. ✅ Bulk add with success/error feedback
+
+**API Endpoints Added:**
+- `GET /api/browse?path=...` - Browse directories
+- `POST /api/repos/bulk` - Add multiple repos at once
+
+**Screenshot:** `.playwright-mcp/multi-repo-dashboard.png`
+- Shows 2 repos (_pyrite + fogsift)
+- 16 work efforts, 14 tickets, 2 active
+- Tree view with both repos expanded
+
+### 16:00 - Bulletproof Event System & Toast Notifications
+
+**Task:** Build robust event management system with animations and type-based toast durations
+
+**Work Effort:** WE-251227-8w5z - Bulletproof Event System & Toast Notifications
+
+**Architecture:**
+```
+WebSocket Message
+       ↓
+handleMessage()
+       ↓
+detectAndEmitChanges()
+       ↓
+EventBus.emit('workeffort:created', data)
+       ↓
+handleWorkEffortEvent() [listener]
+       ↓
+smartNotify() [routes based on activity]
+       ↓
+├─ Active user → ToastManager.show()
+└─ Idle/Away → addNotification() + bell animation
+```
+
+**Features Implemented:**
+
+1. **EventBus** (`events.js`):
+   - Wildcard subscriptions (`workeffort:*`)
+   - Middleware support (intercept/modify events)
+   - Event batching for rapid updates
+   - Event history (last 100 events)
+   - Metrics tracking
+
+2. **ToastManager** (`events.js`):
+   - Type-based durations:
+     - `error`/`critical`: Persistent (must dismiss)
+     - `warning`: 10 seconds
+     - `success`: 6 seconds
+     - `info`: 5 seconds
+   - Max 5 visible toasts with stacking
+   - Pause timer on hover
+   - Progress bar countdown
+   - Action buttons
+
+3. **AnimationController** (`events.js`):
+   - `pulse` - gentle attention grab
+   - `shake` - error/warning indication
+   - `highlight` - status change flash
+   - `celebrate` - confetti for completions
+   - `bounce` - notification bell
+
+4. **CSS Animations** (`styles.css`):
+   - 12 keyframe animation types
+   - Toast enter/exit animations
+   - Celebration particles effect
+   - Connection status indicators
+
+**Decision:** Evaluated mitt, eventemitter3, nanoevents, RxJS. Chose custom implementation for:
+- Zero dependencies
+- Exact feature match (wildcards, middleware, batching)
+- Full control
+
+**Documentation:** `mcp-servers/dashboard/docs/EVENT-SYSTEM-DECISION.md`
+
+**Files Created/Modified:**
+- `public/events.js` - EventBus, ToastManager, AnimationController
+- `public/app.js` - Integrated event system
+- `public/styles.css` - Animation keyframes
+- `public/index.html` - Added events.js script
+- `docs/EVENT-SYSTEM-DECISION.md` - Library decision matrix
+
+**Status:** ✅ All 6 tickets complete
+
+**Using the System to Build the System:** ✅ Yes!
+- Created work effort WE-251227-8w5z
+- 6 tickets tracked and completed
+- Fixed MCP server bug (line 418 still had `_work_efforts_`)
+
+### 17:00 - Branding & Design Polish
+
+**Task:** Brand the dashboard as "_pyrite Mission Control" with explanation and kickass design
+
+**Features Added:**
+
+1. **Brand Identity:**
+   - New logo with animated gem (◈) that rotates and glows
+   - "_pyrite" prefix with "MISSION CONTROL" name
+   - Tagline: "Work Effort Command Center"
+   - Version badge (v0.2.0)
+
+2. **Hero Banner:**
+   - ASCII art header with "PYRITE MC" in block letters
+   - Gradient background with glow effects
+   - Subtitle: "Real-time monitoring • Multi-repo support • AI-assisted workflows"
+   - Dismissable with localStorage persistence
+
+3. **About Modal:**
+   - Explains what _pyrite is ("Fool's gold" philosophy)
+   - Lists features with icons
+   - Shows supported work effort formats
+   - Author credit and version info
+   - Accessible via "?" button in sidebar or footer "Docs" link
+
+4. **Footer:**
+   - Brand name and version
+   - Docs and GitHub links
+   - Live system status indicator
+
+5. **Enhanced Animations:**
+   - Gem rotation animation (8s cycle)
+   - Glow pulse effects
+   - ASCII text glow animation
+   - Status dot pulse
+
+**Files Modified:**
+- `public/index.html` - Complete branding overhaul
+- `public/styles.css` - 300+ lines of new brand styles
+- `public/app.js` - About modal and hero banner handlers
+
+**Status:** ✅ Complete
