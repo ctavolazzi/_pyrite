@@ -1085,63 +1085,228 @@ class MissionControl {
   }
 
   renderMetadataPanel(we, repo) {
-    const grid = document.getElementById('metadataGrid');
-    if (!grid) return;
+    // Update individual metadata elements
+    const metaId = document.getElementById('metaId');
+    const metaRepo = document.getElementById('metaRepo');
+    const metaFormat = document.getElementById('metaFormat');
+    const metaBranch = document.getElementById('metaBranch');
 
-    const created = we.created ? this.formatDate(we.created) : '—';
-    const updated = we.updated || we.lastModified ? this.formatDate(we.updated || we.lastModified) : '—';
-
-    grid.innerHTML = `
-      <div class="metadata-item">
-        <span class="metadata-label">ID</span>
-        <span class="metadata-value">${this.escapeHtml(we.id)}</span>
-      </div>
-      <div class="metadata-item">
-        <span class="metadata-label">Repository</span>
-        <span class="metadata-value">${this.escapeHtml(repo)}</span>
-      </div>
-      <div class="metadata-item">
-        <span class="metadata-label">Format</span>
-        <span class="metadata-value badge">${(we.format || 'unknown').toUpperCase()}</span>
-      </div>
-      <div class="metadata-item">
-        <span class="metadata-label">Status</span>
-        <span class="metadata-value queue-badge ${this.escapeHtml(we.status)}">${this.escapeHtml(we.status)}</span>
-      </div>
-      <div class="metadata-item">
-        <span class="metadata-label">Priority</span>
-        <span class="metadata-value">${we.priority || 'Normal'}</span>
-      </div>
-      <div class="metadata-item">
-        <span class="metadata-label">Path</span>
-        <span class="metadata-value" style="font-size: 0.65rem; word-break: break-all;">${this.escapeHtml(we.path || '—')}</span>
-      </div>
-    `;
+    if (metaId) metaId.textContent = we.id || '—';
+    if (metaRepo) metaRepo.textContent = repo || '—';
+    if (metaFormat) {
+      const format = (we.format || 'unknown').toUpperCase();
+      metaFormat.innerHTML = `<span class="badge">${format}</span>`;
+    }
+    if (metaBranch) metaBranch.textContent = we.branch || 'main';
   }
 
   renderProgressPanel(we) {
     const tickets = we.tickets || [];
     const completedCount = tickets.filter(t => t.status === 'completed').length;
+    const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
+    const pendingCount = tickets.filter(t => t.status === 'pending').length;
+    const blockedCount = tickets.filter(t => t.status === 'blocked').length;
     const totalCount = tickets.length;
     const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-    // Update progress ring
-    const progressRing = document.getElementById('progressRing');
-    if (progressRing) {
-      const circumference = 2 * Math.PI * 45;
-      const offset = circumference - (progressPercent / 100) * circumference;
-      progressRing.style.strokeDashoffset = offset;
+    // Render progress ring using Charts
+    const ringContainer = document.getElementById('progressRingContainer');
+    if (ringContainer && window.Charts) {
+      const color = progressPercent === 100 ? '#10b981' : 
+                    progressPercent > 50 ? '#ff9d3d' : '#e6a23c';
+      Charts.progressRing(ringContainer, progressPercent, {
+        size: 100,
+        thickness: 10,
+        color: color,
+        bgColor: 'var(--bg-primary)',
+        showPercent: true,
+        animate: true
+      });
     }
 
-    const progressPercentEl = document.getElementById('progressPercent');
-    if (progressPercentEl) {
-      progressPercentEl.textContent = `${progressPercent}%`;
-    }
-
+    // Update mini stats
     const ticketsCompleted = document.getElementById('ticketsCompleted');
-    const ticketsTotal = document.getElementById('ticketsTotal');
+    const ticketsInProgress = document.getElementById('ticketsInProgress');
+    const ticketsPending = document.getElementById('ticketsPending');
+    
     if (ticketsCompleted) ticketsCompleted.textContent = completedCount;
-    if (ticketsTotal) ticketsTotal.textContent = totalCount;
+    if (ticketsInProgress) ticketsInProgress.textContent = inProgressCount;
+    if (ticketsPending) ticketsPending.textContent = pendingCount + blockedCount;
+
+    // Render ticket distribution donut chart
+    const distributionContainer = document.getElementById('ticketDistributionChart');
+    if (distributionContainer && window.Charts) {
+      const statusData = {};
+      if (completedCount > 0) statusData.completed = completedCount;
+      if (inProgressCount > 0) statusData.in_progress = inProgressCount;
+      if (pendingCount > 0) statusData.pending = pendingCount;
+      if (blockedCount > 0) statusData.blocked = blockedCount;
+
+      if (Object.keys(statusData).length > 0) {
+        Charts.donut(distributionContainer, statusData, {
+          size: 120,
+          thickness: 24,
+          showLabels: true,
+          showCenter: true,
+          centerValue: totalCount,
+          centerText: 'Tickets'
+        });
+      } else {
+        distributionContainer.innerHTML = '<div class="chart-empty">No tickets yet</div>';
+      }
+    }
+
+    // Render velocity stats
+    this.renderVelocityStats(we);
+
+    // Render progress line chart
+    this.renderProgressLineChart(we);
+
+    // Render activity heatmap
+    this.renderActivityHeatmap(we);
+  }
+
+  renderVelocityStats(we) {
+    const velocityRate = document.getElementById('velocityRate');
+    const velocityEta = document.getElementById('velocityEta');
+    const sparklineContainer = document.getElementById('velocitySparkline');
+
+    const tickets = we.tickets || [];
+    const completed = tickets.filter(t => t.status === 'completed');
+    const remaining = tickets.filter(t => t.status !== 'completed').length;
+
+    // Calculate simple velocity (completed per day based on work effort age)
+    let velocity = null;
+    if (completed.length >= 1 && we.created) {
+      const created = new Date(we.created);
+      const now = new Date();
+      const days = Math.max(1, (now - created) / (1000 * 60 * 60 * 24));
+      velocity = (completed.length / days).toFixed(1);
+    }
+
+    if (velocityRate) {
+      velocityRate.textContent = velocity ? velocity : '—';
+    }
+
+    if (velocityEta) {
+      if (velocity && velocity > 0 && remaining > 0) {
+        const daysRemaining = Math.ceil(remaining / parseFloat(velocity));
+        const eta = new Date();
+        eta.setDate(eta.getDate() + daysRemaining);
+        velocityEta.textContent = this.formatDateShort(eta);
+      } else if (remaining === 0) {
+        velocityEta.textContent = 'Done!';
+      } else {
+        velocityEta.textContent = '—';
+      }
+    }
+
+    // Sparkline showing ticket completion trend
+    if (sparklineContainer && window.Charts && completed.length > 0) {
+      // Generate cumulative completion data points
+      const points = [];
+      let cumulative = 0;
+      
+      // Sort completed tickets by some date (fallback to current if no date)
+      const sortedTickets = [...completed].sort((a, b) => {
+        const dateA = a.completedAt ? new Date(a.completedAt) : new Date();
+        const dateB = b.completedAt ? new Date(b.completedAt) : new Date();
+        return dateA - dateB;
+      });
+
+      sortedTickets.forEach((t, i) => {
+        cumulative++;
+        points.push(cumulative);
+      });
+
+      // Add current incomplete as potential endpoint
+      points.push(tickets.length);
+
+      if (points.length >= 2) {
+        Charts.sparkline(sparklineContainer, points, {
+          width: 80,
+          height: 25,
+          color: '#ff9d3d',
+          showEndDot: true
+        });
+      }
+    } else if (sparklineContainer) {
+      sparklineContainer.innerHTML = '<span class="chart-sparkline-empty">—</span>';
+    }
+  }
+
+  renderProgressLineChart(we) {
+    const container = document.getElementById('progressLineChart');
+    if (!container || !window.Charts) return;
+
+    const tickets = we.tickets || [];
+    if (tickets.length === 0) {
+      container.innerHTML = '<div class="chart-empty">No data</div>';
+      return;
+    }
+
+    // Generate mock progress data based on ticket count
+    // In a real app, this would come from actual historical data
+    const totalTickets = tickets.length;
+    const completed = tickets.filter(t => t.status === 'completed').length;
+
+    // Create data points representing progress over "time"
+    const points = [];
+    const steps = Math.min(6, totalTickets + 1);
+    
+    for (let i = 0; i <= steps; i++) {
+      const progress = Math.min(completed, Math.round((completed / steps) * i));
+      points.push({
+        value: progress,
+        label: `Day ${i}`
+      });
+    }
+
+    Charts.line(container, points, {
+      width: 180,
+      height: 60,
+      showDots: true,
+      showArea: true,
+      showGrid: false,
+      color: '#ff9d3d',
+      animate: true
+    });
+  }
+
+  renderActivityHeatmap(we) {
+    const container = document.getElementById('activityHeatmap');
+    if (!container || !window.Charts) return;
+
+    // Generate mock activity data for the last 8 weeks
+    const data = [];
+    const now = new Date();
+    
+    for (let i = 55; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      
+      // Random activity count (in real app, this would be actual activity)
+      const count = Math.floor(Math.random() * 5);
+      
+      data.push({
+        date: date.toISOString().split('T')[0],
+        count: count
+      });
+    }
+
+    Charts.heatmap(container, data, {
+      weeks: 8,
+      cellSize: 10,
+      gap: 2
+    });
+  }
+
+  formatDateShort(date) {
+    if (!date) return '—';
+    const d = new Date(date);
+    const month = d.toLocaleDateString('en-US', { month: 'short' });
+    const day = d.getDate();
+    return `${month} ${day}`;
   }
 
   renderTicketsTab(we, highlightTicketId) {
