@@ -455,22 +455,8 @@
   </style>
 </head>
 <body class="docs-page">
-  <!-- Site Navigation -->
-  <nav class="site-nav">
-    <a href="/" class="site-nav-brand">
-      <span class="site-nav-gem">◈</span>
-      <span class="site-nav-text">_pyrite</span>
-    </a>
-    <ul class="site-nav-links" id="siteNavLinks">
-      <li><a href="/" class="site-nav-link">Dashboard</a></li>
-      <li><a href="/docs/" class="site-nav-link site-nav-link-active">Docs</a></li>
-      <li class="site-nav-status">
-        <span class="site-nav-status-dot" id="apiStatusDot"></span>
-        <span>API</span>
-      </li>
-    </ul>
-    <button class="site-nav-toggle" id="siteNavToggle" aria-label="Toggle navigation">☰</button>
-  </nav>
+  <!-- Site Navigation (rendered by components/nav.js) -->
+  <div id="site-nav"></div>
 
   <div class="docs-content">
     <header class="docs-header">
@@ -942,6 +928,9 @@
 
   <div class="toast" id="toast">Copied to clipboard!</div>
 
+  <!-- Shared Components -->
+  <script src="../components/nav.js"></script>
+
   <script>
     // Toggle server card expansion
     function toggleServer(id) {
@@ -987,22 +976,6 @@
           showToast('Could not load AI docs');
         });
     }
-
-    // Mobile nav toggle
-    document.getElementById('siteNavToggle')?.addEventListener('click', function() {
-      document.getElementById('siteNavLinks')?.classList.toggle('open');
-    });
-
-    // Check API status for site nav indicator
-    fetch('/api/health')
-      .then(r => r.ok ? 'connected' : 'disconnected')
-      .catch(() => 'disconnected')
-      .then(status => {
-        const dot = document.getElementById('apiStatusDot');
-        if (dot && status === 'connected') {
-          dot.classList.add('connected');
-        }
-      });
   </script>
 </body>
 </html>

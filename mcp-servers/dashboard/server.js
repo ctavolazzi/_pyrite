@@ -1,4 +1,15 @@
 #!/usr/bin/env node
+/**
+ * @fileoverview Mission Control Dashboard Server
+ *
+ * Express + WebSocket server for real-time work effort monitoring.
+ * Supports multi-repository watching with dual format parsing
+ * (Johnny Decimal + MCP v0.3.0).
+ *
+ * @author _pyrite
+ * @version 0.2.0
+ */
+
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
@@ -6,8 +17,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import chokidar from 'chokidar';
+import chalk from 'chalk';
 import { parseRepo, getRepoStats } from './lib/parser.js';
 import { DebouncedWatcher } from './lib/watcher.js';
+import logger from './lib/logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,13 +28,32 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Configuration
 // ============================================================================
 
+/**
+ * @typedef {Object} RepoConfig
+ * @property {string} name - Display name for the repository
+ * @property {string} path - Absolute path to repository root
+ */
+
+/**
+ * @typedef {Object} Config
+ * @property {number} port - Server port (default: 3847)
+ * @property {RepoConfig[]} repos - Array of repository configurations
+ * @property {number} debounceMs - File watcher debounce in milliseconds
+ */
+
+/**
+ * Load configuration from config.json.
+ * Returns default config if file doesn't exist or is invalid.
+ *
+ * @returns {Promise<Config>} Server configuration
+ */
 async function loadConfig() {
   const configPath = path.join(__dirname, 'config.json');
   try {
     const content = await fs.readFile(configPath, 'utf-8');
     return JSON.parse(content);
   } catch (error) {
-    console.error('Failed to load config.json:', error.message);
+    logger.warn({ err: error }, 'Failed to load config.json, using defaults');
     return {
       port: 3847,
       repos: [],
@@ -30,6 +62,12 @@ async function loadConfig() {
   }
 }
 
+/**
+ * Save configuration to config.json.
+ *
+ * @param {Config} config - Configuration to save
+ * @returns {Promise<void>}
+ */
 async function saveConfig(config) {
   const configPath = path.join(__dirname, 'config.json');
   await fs.writeFile(configPath, JSON.stringify(config, null, 2));
@@ -39,10 +77,25 @@ async function saveConfig(config) {
 // State
 // ============================================================================
 
+/**
+ * @typedef {Object} RepoState
+ * @property {Array} workEfforts - Parsed work efforts
+ * @property {Object} stats - Summary statistics
+ * @property {string|null} error - Error message if parsing failed
+ * @property {string} lastUpdated - ISO timestamp of last update
+ */
+
+/** @type {Config} */
 let config = await loadConfig();
-const repoState = new Map(); // repo name -> { workEfforts, stats, error }
+
+/** @type {Map<string, RepoState>} Repository name -> state mapping */
+const repoState = new Map();
+
+/** @type {DebouncedWatcher} File system watcher instance */
 const watcher = new DebouncedWatcher(config.debounceMs);
-const clients = new Set(); // WebSocket clients
+
+/** @type {Set<WebSocket>} Connected WebSocket clients */
+const clients = new Set();
 
 // ============================================================================
 // Express App
@@ -189,7 +242,7 @@ app.patch('/api/repos/:name/work-efforts/:weId/status', async (req, res) => {
 
     res.status(404).json({ error: 'Work effort not found' });
   } catch (error) {
-    console.error('Error updating status:', error);
+    logger.error({ err: error }, 'Error updating status');
     res.status(500).json({ error: 'Failed to update status' });
   }
 });
@@ -273,7 +326,7 @@ app.get('/api/browse', async (req, res) => {
       items
     });
   } catch (error) {
-    console.error('Browse error:', error);
+    logger.error({ err: error }, 'Browse error');
     res.status(500).json({ error: 'Failed to browse directory' });
   }
 });
@@ -341,7 +394,12 @@ app.post('/api/repos/bulk', async (req, res) => {
 // Demo API
 // ============================================================================
 
-// Generate random 4-char ID
+/**
+ * Generate a random 4-character alphanumeric ID.
+ * Used for work effort and ticket IDs in MCP v0.3.0 format.
+ *
+ * @returns {string} 4-character ID (a-z, 0-9)
+ */
 function generateId() {
   return Math.random().toString(36).substring(2, 6);
 }
@@ -399,7 +457,7 @@ ${objective || 'This is a demo work effort created to demonstrate the Mission Co
       }
     });
   } catch (error) {
-    console.error('Error creating demo work effort:', error);
+    logger.error({ err: error }, 'Error creating demo work effort');
     res.status(500).json({ error: error.message });
   }
 });
@@ -459,7 +517,7 @@ ${description || 'This is a demo ticket created to demonstrate the Mission Contr
       }
     });
   } catch (error) {
-    console.error('Error creating demo ticket:', error);
+    logger.error({ err: error }, 'Error creating demo ticket');
     res.status(500).json({ error: error.message });
   }
 });
@@ -476,7 +534,7 @@ app.patch('/api/demo/ticket/:ticketPath', async (req, res) => {
 
     res.json({ success: true, status });
   } catch (error) {
-    console.error('Error updating ticket:', error);
+    logger.error({ err: error }, 'Error updating ticket');
     res.status(500).json({ error: error.message });
   }
 });
@@ -502,7 +560,7 @@ app.patch('/api/demo/work-effort/:wePath', async (req, res) => {
 
     res.json({ success: true, status });
   } catch (error) {
-    console.error('Error updating work effort:', error);
+    logger.error({ err: error }, 'Error updating work effort');
     res.status(500).json({ error: error.message });
   }
 });
@@ -531,7 +589,7 @@ app.delete('/api/demo/cleanup', async (req, res) => {
 
     res.json({ success: true, cleaned });
   } catch (error) {
-    console.error('Error cleaning up demos:', error);
+    logger.error({ err: error }, 'Error cleaning up demos');
     res.status(500).json({ error: error.message });
   }
 });
@@ -540,11 +598,21 @@ app.delete('/api/demo/cleanup', async (req, res) => {
 // WebSocket Server
 // ============================================================================
 
+/**
+ * HTTP server instance for Express and WebSocket.
+ * @type {import('http').Server}
+ */
 const server = createServer(app);
+
+/**
+ * WebSocket server for real-time updates.
+ * Broadcasts repository changes to all connected clients.
+ * @type {WebSocketServer}
+ */
 const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
-  console.log('Client connected');
+  logger.info({ clients: clients.size + 1 }, 'Client connected');
   clients.add(ws);
 
   // Send initial state
@@ -566,21 +634,27 @@ wss.on('connection', (ws) => {
         }
       }
     } catch (error) {
-      console.error('WebSocket message error:', error);
+      logger.error({ err: error }, 'WebSocket message error');
     }
   });
 
   ws.on('close', () => {
-    console.log('Client disconnected');
     clients.delete(ws);
+    logger.info({ clients: clients.size }, 'Client disconnected');
   });
 
   ws.on('error', (error) => {
-    console.error('WebSocket error:', error);
     clients.delete(ws);
+    logger.error({ err: error }, 'WebSocket error');
   });
 });
 
+/**
+ * Broadcast a message to all connected WebSocket clients.
+ *
+ * @param {Object} message - Message object to broadcast
+ * @param {string} message.type - Message type (init, update, repo_change, error, hot_reload)
+ */
 function broadcast(message) {
   const data = JSON.stringify(message);
   for (const client of clients) {
@@ -594,8 +668,16 @@ function broadcast(message) {
 // Repository Management
 // ============================================================================
 
+/**
+ * Initialize a repository for monitoring.
+ * Parses initial state and starts file watching.
+ *
+ * @param {string} name - Display name for the repository
+ * @param {string} repoPath - Absolute path to repository root
+ * @returns {Promise<void>}
+ */
 async function initRepo(name, repoPath) {
-  console.log(`Initializing repo: ${name} at ${repoPath}`);
+  logger.info({ repo: name, path: repoPath }, 'Initializing repository');
 
   // Parse initial state
   const result = await parseRepo(repoPath);
@@ -612,8 +694,16 @@ async function initRepo(name, repoPath) {
   watcher.watch(name, repoPath);
 }
 
+/**
+ * Refresh repository state and broadcast updates.
+ * Called when file changes are detected.
+ *
+ * @param {string} name - Repository display name
+ * @param {string} repoPath - Absolute path to repository root
+ * @returns {Promise<void>}
+ */
 async function refreshRepo(name, repoPath) {
-  console.log(`Refreshing repo: ${name}`);
+  logger.debug({ repo: name }, 'Refreshing repository');
 
   const result = await parseRepo(repoPath);
   const stats = getRepoStats(result.workEfforts);
@@ -646,7 +736,7 @@ watcher.on('update', async ({ repo }) => {
 });
 
 watcher.on('error', ({ repo, error }) => {
-  console.error(`Watcher error for ${repo}:`, error);
+  logger.error({ repo, err: error }, 'Watcher error');
   broadcast({ type: 'error', repo, message: error.message });
 });
 
@@ -654,6 +744,13 @@ watcher.on('error', ({ repo, error }) => {
 // Startup
 // ============================================================================
 
+/**
+ * Start the Mission Control server.
+ * Initializes all configured repositories, sets up hot reload in dev mode,
+ * and finds an available port.
+ *
+ * @returns {Promise<void>}
+ */
 async function start() {
   // Initialize all configured repos
   for (const repo of config.repos) {
@@ -673,12 +770,12 @@ async function start() {
       if (reloadDebounce) clearTimeout(reloadDebounce);
       reloadDebounce = setTimeout(() => {
         const fileName = path.basename(filePath);
-        console.log(`🔥 [Hot Reload] ${event}: ${fileName}`);
+        logger.debug({ event, file: fileName }, 'Hot reload triggered');
         broadcast({ type: 'hot_reload', file: fileName });
       }, 500); // 500ms debounce to batch rapid saves
     });
 
-    console.log('🔥 Hot reload enabled for development');
+    logger.info('Hot reload enabled for development');
   }
 
   // Try to find an available port
@@ -690,7 +787,7 @@ async function start() {
       await new Promise((resolve, reject) => {
         server.once('error', (err) => {
           if (err.code === 'EADDRINUSE') {
-            console.log(`Port ${port} in use, trying ${port + 1}...`);
+            logger.warn({ port, nextPort: port + 1 }, 'Port in use, trying next');
             port++;
             reject(err);
           } else {
@@ -705,32 +802,48 @@ async function start() {
       break;
     } catch (err) {
       if (attempt === maxAttempts - 1) {
-        console.error(`Could not find available port after ${maxAttempts} attempts`);
+        logger.fatal({ attempts: maxAttempts }, 'Could not find available port');
         process.exit(1);
       }
     }
   }
 
+  // Startup banner with colors
+  const c = chalk;
+  const dim = c.dim;
+  const accent = c.hex('#ff9d3d'); // Fogsift amber
+  const url = c.cyan.underline;
+
   console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║                    MISSION CONTROL                           ║
-║══════════════════════════════════════════════════════════════║
-║  Dashboard: http://localhost:${port}                           ║
-║  API:       http://localhost:${port}/api/repos                 ║
-║  Health:    http://localhost:${port}/api/health                ║
-╠══════════════════════════════════════════════════════════════╣
-║  Watching ${config.repos.length} repo(s):                                         ║
-${config.repos.map(r => `║    • ${r.name.padEnd(54)}║`).join('\n')}
-╚══════════════════════════════════════════════════════════════╝
+${dim('╔══════════════════════════════════════════════════════════════╗')}
+${dim('║')}        ${accent.bold('◈ MISSION CONTROL')}                              ${dim('║')}
+${dim('╠══════════════════════════════════════════════════════════════╣')}
+${dim('║')}  ${c.white('Dashboard:')} ${url(`http://localhost:${port}`).padEnd(53)}${dim('║')}
+${dim('║')}  ${c.white('API:')}       ${url(`http://localhost:${port}/api/repos`).padEnd(53)}${dim('║')}
+${dim('║')}  ${c.white('Health:')}    ${url(`http://localhost:${port}/api/health`).padEnd(53)}${dim('║')}
+${dim('╠══════════════════════════════════════════════════════════════╣')}
+${dim('║')}  ${c.white(`Watching ${c.bold(config.repos.length)} repo(s):`)}                                       ${dim('║')}
+${config.repos.map(r => `${dim('║')}    ${accent('•')} ${c.white(r.name.padEnd(54))}${dim('║')}`).join('\n')}
+${dim('╚══════════════════════════════════════════════════════════════╝')}
   `);
+
+  logger.info({ port, repos: config.repos.length }, 'Server started');
 }
 
 // ============================================================================
 // Graceful Shutdown
 // ============================================================================
 
+/**
+ * Gracefully shutdown the server.
+ * Closes all WebSocket connections, file watchers, and HTTP server.
+ * Forces exit after 5 second timeout.
+ *
+ * @param {string} signal - Signal that triggered shutdown (SIGINT, SIGTERM)
+ * @returns {Promise<void>}
+ */
 async function shutdown(signal) {
-  console.log(`\nReceived ${signal}, shutting down gracefully...`);
+  logger.info({ signal }, 'Shutting down gracefully');
 
   // Close WebSocket connections
   for (const client of clients) {
@@ -743,13 +856,13 @@ async function shutdown(signal) {
 
   // Close HTTP server
   server.close(() => {
-    console.log('Server closed');
+    logger.info('Server closed');
     process.exit(0);
   });
 
   // Force exit after 5 seconds
   setTimeout(() => {
-    console.error('Forced shutdown after timeout');
+    logger.error('Forced shutdown after timeout');
     process.exit(1);
   }, 5000);
 }
@@ -759,7 +872,7 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 // Start the server
 start().catch((error) => {
-  console.error('Failed to start server:', error);
+  logger.fatal({ err: error }, 'Failed to start server');
   process.exit(1);
 });
 

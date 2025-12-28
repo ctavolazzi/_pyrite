@@ -1,7 +1,7 @@
 ---
 id: WE-251227-hldk
 title: "Mission Control V2 - Command Center"
-status: pending
+status: completed
 created: 2025-12-27T20:45:52.644Z
 created_by: ctavolazzi
 last_updated: 2025-12-27T20:52:14.176Z

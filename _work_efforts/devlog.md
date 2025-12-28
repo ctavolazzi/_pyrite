@@ -514,3 +514,189 @@ smartNotify() [routes based on activity]
 - `public/app.js` - About modal and hero banner handlers
 
 **Status:** ✅ Complete
+
+## 2025-12-28
+
+### 14:00 - Documentation Deep Dive
+
+**Task:** Comprehensive documentation overhaul for Mission Control
+
+**Actions Completed:**
+
+1. **Screenshots Captured:**
+   - `docs/images/dashboard-hero.png` - Main dashboard view
+   - `docs/images/detail-view.png` - Work effort detail
+   - `docs/images/mobile-view.png` - Mobile responsive design
+
+2. **Architecture Documentation (`docs/ARCHITECTURE.md`):**
+   - System architecture mermaid diagram
+   - Component responsibility matrix
+   - Data flow documentation
+   - Request lifecycle diagram
+   - File structure reference
+   - Tech stack overview
+
+3. **README Expansion (`README.md`):**
+   - Quick start with prerequisites
+   - Feature overview with screenshots
+   - API reference with curl examples
+   - WebSocket message format
+   - Configuration guide
+   - Troubleshooting section
+   - Development setup instructions
+
+4. **JSDoc Comments Added:**
+   - `server.js` - All major functions documented
+   - `app.js` - MissionControl class and methods
+   - `events.js` - EventBus, ToastManager, AnimationController
+   - `parser.js` - Type definitions and function docs
+
+5. **User Guide Created (`docs/USER-GUIDE.md`):**
+   - Getting started guide
+   - Dashboard navigation
+   - Work effort lifecycle
+   - Live Demo walkthrough
+   - Keyboard shortcuts
+   - Mobile usage tips
+   - API usage examples
+
+6. **Cleanup:**
+   - Removed duplicate BACKUP_diamond_animations.css
+   - Updated _docs index with Mission Control links
+   - Updated development category index
+
+**Documentation Structure:**
+```
+mcp-servers/dashboard/
+├── README.md                    # Complete documentation
+├── docs/
+│   ├── ARCHITECTURE.md          # Technical architecture
+│   ├── USER-GUIDE.md            # End-user documentation
+│   ├── EVENT-SYSTEM-DECISION.md # Library decision matrix
+│   └── images/
+│       ├── dashboard-hero.png
+│       ├── detail-view.png
+│       └── mobile-view.png
+└── public/
+    └── assets/brand-backup/
+        └── README.md            # Brand guidelines
+```
+
+**Status:** ✅ Complete
+
+### 01:04 - Shared Components System
+
+**Task:** Create reusable navigation and footer components for DRY code across dashboard pages
+
+**Actions Completed:**
+
+1. **Created Shared Navigation Component (`components/nav.js`):**
+   - Auto-detects current page and highlights active link
+   - API status indicator (green/red dot)
+   - Mobile hamburger menu with dropdown
+   - Click-outside-to-close behavior
+   - Escape key to close dropdown
+   - Renders brand, nav links, and status badge
+
+2. **Created Shared Footer Component (`components/footer.js`):**
+   - Brand name and version display
+   - Docs and GitHub links
+   - System status indicator with pulse animation
+
+3. **Updated Dashboard Pages:**
+   - `index.html` - Replaced inline nav/footer with component placeholders
+   - `docs/index.html` - Added nav component integration
+   - `styles.css` - Unified mobile nav behavior, added footer status states
+
+4. **Testing Results:**
+   - Desktop navigation: ✅
+   - Mobile hamburger menu: ✅
+   - Dropdown open/close: ✅
+   - Page navigation: ✅
+   - API status indicator: ✅
+
+**Files Created:**
+- `mcp-servers/dashboard/public/components/nav.js`
+- `mcp-servers/dashboard/public/components/footer.js`
+
+**Files Modified:**
+- `mcp-servers/dashboard/public/index.html`
+- `mcp-servers/dashboard/public/docs/index.html`
+- `mcp-servers/dashboard/public/styles.css`
+
+**Work Effort:** WE-251227-fwmv - Mission Control Responsive & Interactive Features
+**Ticket:** TKT-fwmv-001 - Responsive CSS framework and breakpoints
+
+**Status:** ✅ Complete
+
+## 2025-12-28
+
+### 01:14 - Structured Logging & CLI Graphics
+
+**Task:** Add structured logging with pino and colored CLI output with chalk
+
+**Audit Results:**
+- Found 50 `console.log/error/warn` calls across 7 files
+- Animation system already complete (AnimationController + ToastManager)
+- Async control already robust (EventBus + DebouncedWatcher)
+- No media processing use case for ffmpeg
+
+**Decisions:**
+| Category | Decision | Library | Rationale |
+|----------|----------|---------|-----------|
+| Logging | ADD | pino | Structured JSON logs, log levels, faster than console |
+| CLI Graphics | ADD | chalk | Colored output for status messages, zero overhead |
+| Animation | SKIP | - | Already have complete system |
+| ffmpeg | DEFER | - | No media processing use case |
+| Async Control | SKIP | - | EventBus already handles this |
+
+**Actions Completed:**
+
+1. **Created Decision Document (`docs/DECISION-logging-cli-graphics.md`):**
+   - Context and audit results
+   - Library comparison tables
+   - Implementation details
+   - Alternatives considered
+
+2. **Installed Dependencies:**
+   - `pino` - Structured JSON logging
+   - `pino-pretty` - Dev-friendly output formatting
+   - `chalk` - Terminal colors
+
+3. **Created Logger Module (`lib/logger.js`):**
+   - Configurable log level via LOG_LEVEL env var
+   - Pretty printing for development
+   - JSON output for production
+   - ISO timestamps
+   - Child logger factory
+
+4. **Refactored Server Logging (`server.js`):**
+   - Replaced ~20 console.log calls with pino logger
+   - Added structured context (repo, port, clients, etc.)
+   - Updated startup banner with chalk colors
+   - Error logs include err object for stack traces
+
+5. **Refactored Watcher Logging (`lib/watcher.js`):**
+   - Replaced 5 console.log/error calls with pino
+   - Added structured context (repo, path)
+
+**Example Output (Development):**
+```
+[09:14:44] INFO: Initializing repository
+    repo: "_pyrite"
+    path: "/Users/ctavolazzi/Code/active/_pyrite"
+[09:14:44] INFO: Server started
+    port: 3847
+    repos: 2
+```
+
+**Files Created:**
+- `mcp-servers/dashboard/lib/logger.js`
+- `mcp-servers/dashboard/docs/DECISION-logging-cli-graphics.md`
+
+**Files Modified:**
+- `mcp-servers/dashboard/server.js`
+- `mcp-servers/dashboard/lib/watcher.js`
+- `mcp-servers/dashboard/package.json`
+
+**Status:** ✅ Complete

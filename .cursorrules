@@ -2,7 +2,7 @@
 
 ## Session Startup
 1. Run `date` to verify current date/time
-2. Check `_work_efforts_/` for active work
+2. Check `_work_efforts/` for active work
 3. Read recent devlog entries if available
 
 ## The Workflow (MANDATORY for non-trivial tasks)
@@ -10,7 +10,7 @@
 ```
 STEP 0: ECHO      → Repeat understanding, WAIT for confirmation
 STEP 1: THINK     → Use sequential-thinking MCP for complex problems
-STEP 2: SEARCH    → Check _work_efforts_ for related work (search_work_efforts)
+STEP 2: SEARCH    → Check _work_efforts for related work (search_work_efforts)
 STEP 3: PLAN      → Create Work Effort with tickets (create_work_effort)
                    → STOP and wait for user approval
 STEP 4: EXECUTE   → Work through tickets, update status (update_ticket)
@@ -87,7 +87,7 @@ STEP 8: PERSIST   → Store learnings in memory MCP
 - Comment: `// TKT-xxxx-NNN: reason`
 
 ## File Locations
-- Work efforts: `_work_efforts_/`
+- Work efforts: `_work_efforts/`
 - Documentation: `_docs/`
 - MCP servers: `/Users/ctavolazzi/Code/.mcp-servers/`
 

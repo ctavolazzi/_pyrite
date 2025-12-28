@@ -2,35 +2,92 @@
 // Mission Control V2 - Command Center Application
 // ============================================================================
 
+/**
+ * @fileoverview Main client application for Mission Control dashboard.
+ * Provides real-time work effort monitoring with WebSocket updates,
+ * activity tracking, and interactive visualizations.
+ *
+ * @author _pyrite
+ * @version 0.2.0
+ */
+
+/**
+ * Main application class for Mission Control dashboard.
+ * Manages WebSocket connection, repository state, UI rendering,
+ * and event handling.
+ *
+ * @class
+ */
 class MissionControl {
+  /**
+   * Create a MissionControl instance.
+   * Initializes state, binds DOM elements, sets up event handlers,
+   * and establishes WebSocket connection.
+   */
   constructor() {
+    /** @type {WebSocket|null} WebSocket connection to server */
     this.ws = null;
+
+    /** @type {Object.<string, RepoState>} Repository states keyed by name */
     this.repos = {};
+
+    /** @type {Object|null} Currently selected work effort or ticket */
     this.selectedItem = null;
+
+    /** @type {string} Current filter ('all', 'active', 'pending', 'completed') */
     this.currentFilter = 'all';
+
+    /** @type {string} Current search query */
     this.searchQuery = '';
+
+    /** @type {number} Current reconnection attempt count */
     this.reconnectAttempts = 0;
+
+    /** @type {number} Maximum reconnection delay in ms */
     this.maxReconnectDelay = 30000;
+
+    /** @type {number} Base reconnection delay in ms */
     this.baseReconnectDelay = 1000;
 
     // Activity tracking
+    /** @type {boolean} Whether the window is currently focused */
     this.isWindowFocused = document.hasFocus();
+
+    /** @type {number} Timestamp of last user activity */
     this.lastActivityTime = Date.now();
+
+    /** @type {number} Milliseconds before user considered idle */
     this.idleThreshold = 30000; // 30 seconds
-    this.activityState = 'active'; // 'active', 'idle', 'away'
+
+    /** @type {string} Current activity state ('active', 'idle', 'away') */
+    this.activityState = 'active';
+
+    /** @type {number|null} Interval ID for activity checks */
     this.activityCheckInterval = null;
 
     // Notification center
+    /** @type {Array} Notification history */
     this.notifications = [];
+
+    /** @type {number} Count of unread notifications */
     this.unreadCount = 0;
+
+    /** @type {boolean} Whether notification panel is open */
     this.isPanelOpen = false;
 
     // Event system - initialized after bindElements
+    /** @type {EventBus} Event bus for application-wide events */
     this.eventBus = window.eventBus || new EventBus({ debug: false });
+
+    /** @type {ToastManager|null} Toast notification manager */
     this.toastManager = null;
+
+    /** @type {AnimationController|null} Animation controller */
     this.animationController = null;
 
+    /** @type {Object} DOM element references */
     this.elements = {};
+
     this.bindElements();
     this.bindEvents();
     this.initEventSystem();
@@ -42,6 +99,11 @@ class MissionControl {
   // Event System Integration
   // ============================================================================
 
+  /**
+   * Initialize the event system with toast manager and animation controller.
+   * Sets up event subscriptions for work efforts, tickets, repos, and system events.
+   * @private
+   */
   initEventSystem() {
     // Initialize toast manager with container
     this.toastManager = new ToastManager(
@@ -425,6 +487,11 @@ class MissionControl {
   // WebSocket
   // ============================================================================
 
+  /**
+   * Establish WebSocket connection to server.
+   * Sets up event handlers for open, message, close, and error events.
+   * Auto-reconnects on disconnect with exponential backoff.
+   */
   connect() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}`;
@@ -457,6 +524,11 @@ class MissionControl {
     };
   }
 
+  /**
+   * Schedule a reconnection attempt with exponential backoff.
+   * Delay doubles with each attempt up to maxReconnectDelay.
+   * @private
+   */
   scheduleReconnect() {
     const delay = Math.min(
       this.baseReconnectDelay * Math.pow(2, this.reconnectAttempts),
@@ -466,6 +538,13 @@ class MissionControl {
     setTimeout(() => this.connect(), delay);
   }
 
+  /**
+   * Update connection status indicator in UI.
+   *
+   * @param {string} state - Connection state ('connected', 'disconnected')
+   * @param {string} text - Status text to display
+   * @private
+   */
   setConnectionStatus(state, text) {
     if (this.elements.connectionStatus) {
       this.elements.connectionStatus.className = `connection-status ${state}`;
@@ -479,6 +558,13 @@ class MissionControl {
   // Message Handling (with EventBus integration)
   // ============================================================================
 
+  /**
+   * Handle incoming WebSocket messages.
+   * Dispatches based on message type: init, update, repo_change, error, hot_reload.
+   *
+   * @param {Object} message - Parsed WebSocket message
+   * @param {string} message.type - Message type
+   */
   handleMessage(message) {
     switch (message.type) {
       case 'hot_reload':
@@ -608,6 +694,10 @@ class MissionControl {
   // Rendering
   // ============================================================================
 
+  /**
+   * Render all dashboard components.
+   * Called on initial load and after each data update.
+   */
   render() {
     this.elements.treeLoading?.classList.add('hidden');
     this.renderTree();
@@ -624,6 +714,10 @@ class MissionControl {
   // Tree Navigation
   // ============================================================================
 
+  /**
+   * Render the repository tree navigation sidebar.
+   * Displays repositories with expandable work efforts and tickets.
+   */
   renderTree() {
     const repoNames = Object.keys(this.repos);
 
@@ -999,6 +1093,14 @@ class MissionControl {
   // Detail View
   // ============================================================================
 
+  /**
+   * Show the detail view for a work effort.
+   * Displays full command center with tickets, charts, and actions.
+   *
+   * @param {string} repo - Repository name
+   * @param {Object} we - Work effort object
+   * @param {string|null} [ticketId=null] - Optional ticket ID to highlight
+   */
   showDetail(repo, we, ticketId = null) {
     this.selectedItem = { repo, we, ticketId };
     this.ticketFilter = 'all';

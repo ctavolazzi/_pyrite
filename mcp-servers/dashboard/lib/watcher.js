@@ -1,6 +1,7 @@
 import chokidar from 'chokidar';
 import path from 'path';
 import { EventEmitter } from 'events';
+import logger from './logger.js';
 
 /**
  * Debounced file watcher for work efforts directories
@@ -23,7 +24,7 @@ export class DebouncedWatcher extends EventEmitter {
     const workEffortsPath = path.join(repoPath, '_work_efforts');
 
     if (this.watchers.has(repoName)) {
-      console.log(`Already watching ${repoName}`);
+      logger.debug({ repo: repoName }, 'Already watching');
       return;
     }
 
@@ -44,12 +45,12 @@ export class DebouncedWatcher extends EventEmitter {
     watcher.on('unlinkDir', (dirPath) => this.scheduleUpdate(repoName, 'unlinkDir', dirPath));
 
     watcher.on('error', (error) => {
-      console.error(`Watcher error for ${repoName}:`, error);
+      logger.error({ repo: repoName, err: error }, 'Watcher error');
       this.emit('error', { repo: repoName, error });
     });
 
     watcher.on('ready', () => {
-      console.log(`Watcher ready for ${repoName}: ${workEffortsPath}`);
+      logger.info({ repo: repoName, path: workEffortsPath }, 'Watcher ready');
       this.emit('ready', { repo: repoName });
     });
 
@@ -105,7 +106,7 @@ export class DebouncedWatcher extends EventEmitter {
         this.pendingUpdates.delete(repoName);
       }
 
-      console.log(`Stopped watching ${repoName}`);
+      logger.info({ repo: repoName }, 'Stopped watching');
     }
   }
 
@@ -127,7 +128,7 @@ export class DebouncedWatcher extends EventEmitter {
     await Promise.all(closePromises);
     this.watchers.clear();
 
-    console.log('All watchers closed');
+    logger.info('All watchers closed');
   }
 
   /**

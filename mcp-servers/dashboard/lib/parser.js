@@ -1,11 +1,53 @@
+/**
+ * @fileoverview Dual-format work effort parser
+ *
+ * Supports parsing both work effort formats:
+ * - MCP v0.3.0: WE-YYMMDD-xxxx directories with TKT-xxxx-NNN tickets
+ * - Johnny Decimal: XX-XX_category/XX_subcategory/XX.XX_document.md
+ *
+ * @author _pyrite
+ * @version 0.2.0
+ */
+
 import fs from 'fs/promises';
 import path from 'path';
 import matter from 'gray-matter';
 
 /**
- * Parse a repository's _work_efforts folder
- * Supports both Johnny Decimal and MCP v0.3.0 formats
- * Handles both '_work_efforts' and '_work_efforts_' naming conventions
+ * @typedef {Object} Ticket
+ * @property {string} id - Ticket ID (TKT-xxxx-NNN format)
+ * @property {string} title - Ticket title
+ * @property {string} status - Current status
+ * @property {string} path - Absolute path to ticket file
+ * @property {string} parent - Parent work effort ID
+ */
+
+/**
+ * @typedef {Object} WorkEffort
+ * @property {string} id - Work effort ID
+ * @property {string} format - Format type ('mcp' or 'jd')
+ * @property {string} title - Work effort title
+ * @property {string} status - Current status
+ * @property {string} path - Absolute path to work effort
+ * @property {string|null} created - ISO timestamp of creation
+ * @property {Ticket[]} [tickets] - Child tickets (MCP format only)
+ * @property {string|null} [branch] - Git branch (MCP format only)
+ * @property {string} [category] - Category name (JD format only)
+ */
+
+/**
+ * @typedef {Object} ParseResult
+ * @property {WorkEffort[]} workEfforts - Parsed work efforts
+ * @property {string} [error] - Error message if parsing failed
+ */
+
+/**
+ * Parse a repository's _work_efforts folder.
+ * Supports both Johnny Decimal and MCP v0.3.0 formats.
+ * Handles both '_work_efforts' and '_work_efforts_' naming conventions.
+ *
+ * @param {string|{path: string}} repoConfig - Repository path or config object
+ * @returns {Promise<ParseResult>} Parsed work efforts and any error
  */
 export async function parseRepo(repoConfig) {
   // Handle both string paths and config objects
@@ -59,10 +101,21 @@ export async function parseRepo(repoConfig) {
 }
 
 /**
- * Parse MCP v0.3.0 format work effort
- * Structure: WE-YYMMDD-xxxx_slug/
- *   - WE-*_index.md
- *   - tickets/TKT-xxxx-NNN_*.md
+ * Parse MCP v0.3.0 format work effort.
+ *
+ * Directory structure:
+ * ```
+ * WE-YYMMDD-xxxx_slug/
+ * ├── WE-YYMMDD-xxxx_index.md
+ * └── tickets/
+ *     ├── TKT-xxxx-001_task.md
+ *     └── TKT-xxxx-002_task.md
+ * ```
+ *
+ * @param {string} dirPath - Absolute path to work effort directory
+ * @param {string} dirName - Directory name (WE-YYMMDD-xxxx_slug)
+ * @returns {Promise<WorkEffort|null>} Parsed work effort or null if invalid
+ * @private
  */
 async function parseMCPWorkEffort(dirPath, dirName) {
   try {
@@ -100,7 +153,13 @@ async function parseMCPWorkEffort(dirPath, dirName) {
 }
 
 /**
- * Parse tickets in MCP format
+ * Parse tickets within an MCP format work effort.
+ * Looks for TKT-xxxx-NNN_*.md files in the tickets/ subdirectory.
+ *
+ * @param {string} weDirPath - Path to work effort directory
+ * @param {string} parentId - Parent work effort ID
+ * @returns {Promise<Ticket[]>} Array of parsed tickets
+ * @private
  */
 async function parseMCPTickets(weDirPath, parentId) {
   const ticketsDir = path.join(weDirPath, 'tickets');
@@ -135,8 +194,20 @@ async function parseMCPTickets(weDirPath, parentId) {
 }
 
 /**
- * Parse Johnny Decimal category
- * Structure: XX-XX_category/XX_subcategory/XX.XX_document.md
+ * Parse Johnny Decimal category directory.
+ *
+ * Structure:
+ * ```
+ * XX-XX_category/
+ * └── XX_subcategory/
+ *     ├── XX.XX_document.md
+ *     └── XX.XX_other.md
+ * ```
+ *
+ * @param {string} categoryPath - Path to category directory
+ * @param {string} categoryName - Category name (XX-XX_name)
+ * @returns {Promise<WorkEffort[]>} Array of parsed work efforts
+ * @private
  */
 async function parseJohnnyDecimalCategory(categoryPath, categoryName) {
   const workEfforts = [];
@@ -167,7 +238,13 @@ async function parseJohnnyDecimalCategory(categoryPath, categoryName) {
 }
 
 /**
- * Parse a single Johnny Decimal markdown file
+ * Parse a single Johnny Decimal markdown file as a work effort.
+ *
+ * @param {string} filePath - Absolute path to markdown file
+ * @param {string} fileName - File name (XX.XX_name.md)
+ * @param {string} categoryName - Parent category name
+ * @returns {Promise<WorkEffort|null>} Parsed work effort or null if invalid
+ * @private
  */
 async function parseJohnnyDecimalFile(filePath, fileName, categoryName) {
   try {
@@ -199,7 +276,12 @@ async function parseJohnnyDecimalFile(filePath, fileName, categoryName) {
 }
 
 /**
- * Extract title from markdown body (first H1 or H2)
+ * Extract title from markdown body.
+ * Looks for first H1 or H2 heading.
+ *
+ * @param {string} body - Markdown content
+ * @returns {string|null} Extracted title or null
+ * @private
  */
 function extractTitleFromBody(body) {
   const match = body.match(/^#\s+(.+)$/m) || body.match(/^##\s+(.+)$/m);
@@ -207,7 +289,19 @@ function extractTitleFromBody(body) {
 }
 
 /**
- * Get summary stats for a repo
+ * @typedef {Object} RepoStats
+ * @property {number} total - Total work efforts
+ * @property {Object.<string, number>} byFormat - Count by format (mcp, jd)
+ * @property {Object.<string, number>} byStatus - Count by status
+ * @property {number} totalTickets - Total tickets across all work efforts
+ * @property {Object.<string, number>} ticketsByStatus - Ticket count by status
+ */
+
+/**
+ * Calculate summary statistics for parsed work efforts.
+ *
+ * @param {WorkEffort[]} workEfforts - Array of parsed work efforts
+ * @returns {RepoStats} Summary statistics
  */
 export function getRepoStats(workEfforts) {
   const stats = {

@@ -14,25 +14,8 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="has-sidebar">
-  <!-- Site Navigation -->
-  <nav class="site-nav">
-    <a href="/" class="site-nav-brand">
-      <span class="site-nav-gem">◈</span>
-      <span class="site-nav-text">_pyrite</span>
-    </a>
-    <ul class="site-nav-links">
-      <li><a href="/" class="site-nav-link site-nav-link-active">Dashboard</a></li>
-      <li><a href="/docs/" class="site-nav-link">Docs</a></li>
-      <li class="site-nav-status">
-        <span class="site-nav-status-dot" id="apiStatusDot"></span>
-        <span>API</span>
-      </li>
-    </ul>
-  </nav>
-
-  <!-- Mobile Navigation Toggle -->
-  <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">☰</button>
-  <div class="mobile-overlay" id="mobileOverlay"></div>
+  <!-- Site Navigation (rendered by components/nav.js) -->
+  <div id="site-nav"></div>
 
   <div class="app">
     <!-- Sidebar - Tree Navigation -->
@@ -51,12 +34,6 @@
         <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
           <span class="toggle-icon">◂</span>
         </button>
-      </div>
-
-      <!-- Mobile Nav Links (shown on mobile inside sidebar) -->
-      <div class="sidebar-nav-links">
-        <a href="/" class="sidebar-nav-link active">Dashboard</a>
-        <a href="/docs/" class="sidebar-nav-link">Docs</a>
       </div>
 
       <!-- Tagline -->
@@ -230,24 +207,8 @@
           </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="dashboard-footer">
-          <div class="footer-left">
-            <span class="footer-brand">◈ _pyrite Mission Control</span>
-            <span class="footer-sep">•</span>
-            <span class="footer-version">v0.2.0</span>
-          </div>
-          <div class="footer-right">
-            <a href="docs/" class="footer-link" id="footerDocs">Docs</a>
-            <span class="footer-sep">•</span>
-            <span class="footer-link" id="footerGithub">GitHub</span>
-            <span class="footer-sep">•</span>
-            <span class="footer-status" id="footerStatus">
-              <span class="status-dot"></span>
-              <span class="status-label">System Online</span>
-            </span>
-          </div>
-        </footer>
+        <!-- Footer (rendered by components/footer.js) -->
+        <div id="site-footer"></div>
       </div>
 
       <!-- Detail View (shown when clicking a work effort) -->
@@ -630,18 +591,14 @@
     </div>
   </div>
 
+  <!-- Shared Components -->
+  <script src="components/nav.js"></script>
+  <script src="components/footer.js"></script>
+
+  <!-- App Scripts -->
   <script src="datastore.js"></script>
   <script src="charts.js"></script>
   <script src="events.js"></script>
   <script src="app.js"></script>
-  <script>
-    // Check API status for site nav indicator
-    fetch('/api/health')
-      .then(r => r.ok ? 'online' : 'offline')
-      .catch(() => 'offline')
-      .then(status => {
-        document.getElementById('apiStatusDot')?.classList.add(status);
-      });
-  </script>
 </body>
 </html>

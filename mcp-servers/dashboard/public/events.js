@@ -1,12 +1,25 @@
 // ============================================================================
 // EventBus - Bulletproof Event Management System
 // ============================================================================
-// A lightweight, typed event system with middleware support, debugging,
-// and smart notification routing.
 
 /**
- * Event Types Registry
- * Each event type has metadata for handling behavior
+ * @fileoverview Mission Control Event System
+ *
+ * A lightweight, typed event system with:
+ * - Middleware support for event interception
+ * - Wildcard subscriptions (e.g., 'workeffort:*')
+ * - Event history tracking
+ * - Batched emissions for rapid events
+ * - Metrics collection
+ *
+ * @author _pyrite
+ * @version 0.2.0
+ */
+
+/**
+ * Event Types Registry.
+ * Each event type has metadata for handling behavior.
+ * @type {Object.<string, {priority: string, duration?: number, animate?: string}>}
  */
 const EVENT_TYPES = {
   // System events
@@ -80,21 +93,54 @@ const ANIMATIONS = {
 };
 
 /**
- * EventBus - Central event management
+ * Central event management system.
+ * Provides pub/sub pattern with wildcard support, middleware, and batching.
+ *
+ * @class
+ * @example
+ * const bus = new EventBus({ debug: true });
+ * bus.on('workeffort:*', (event) => console.log(event));
+ * bus.emit('workeffort:created', { id: 'WE-123' });
  */
 class EventBus {
+  /**
+   * Create an EventBus instance.
+   *
+   * @param {Object} [options={}] - Configuration options
+   * @param {number} [options.maxHistory=100] - Max events to keep in history
+   * @param {boolean} [options.debug=false] - Enable debug logging
+   * @param {number} [options.batchDelay=50] - Delay for batching rapid events
+   */
   constructor(options = {}) {
+    /** @type {Map<string, Set<Function>>} Event type -> listener functions */
     this.listeners = new Map();
+
+    /** @type {Map<string, Set<Function>>} One-time listeners */
     this.onceListeners = new Map();
+
+    /** @type {Array<Function>} Middleware functions */
     this.middleware = [];
+
+    /** @type {Array<Object>} Event history */
     this.history = [];
+
+    /** @type {number} Maximum history entries */
     this.maxHistory = options.maxHistory || 100;
+
+    /** @type {boolean} Debug mode enabled */
     this.debug = options.debug || false;
+
+    /** @type {boolean} Whether emissions are paused */
     this.paused = false;
 
     // Event queue for batching rapid events
+    /** @type {Array<Object>} Queued events awaiting batch emission */
     this.queue = [];
+
+    /** @type {number|null} Batch timeout ID */
     this.queueTimeout = null;
+
+    /** @type {number} Batch delay in ms */
     this.batchDelay = options.batchDelay || 50;
 
     // Metrics
@@ -349,18 +395,46 @@ class EventBus {
 }
 
 /**
- * ToastManager - Enhanced toast notification system
+ * Enhanced toast notification system.
+ * Provides type-based durations, progress bars, pause on hover,
+ * action buttons, and maximum visible limit.
+ *
+ * @class
+ * @example
+ * const manager = new ToastManager(container, eventBus, { maxVisible: 5 });
+ * manager.show({ type: 'success', title: 'Done!', message: 'Task completed' });
  */
 class ToastManager {
+  /**
+   * Create a ToastManager instance.
+   *
+   * @param {HTMLElement} container - DOM container for toast notifications
+   * @param {EventBus} eventBus - Event bus for toast events
+   * @param {Object} [options={}] - Configuration options
+   * @param {number} [options.maxVisible=5] - Maximum visible toasts
+   * @param {number} [options.defaultDuration] - Default toast duration in ms
+   * @param {string} [options.position='bottom-right'] - Position on screen
+   */
   constructor(container, eventBus, options = {}) {
+    /** @type {HTMLElement} Toast container element */
     this.container = container;
+
+    /** @type {EventBus} Event bus reference */
     this.eventBus = eventBus;
+
+    /** @type {Map<string, Object>} Active toasts by ID */
     this.toasts = new Map();
+
+    /** @type {number} Maximum visible toasts */
     this.maxVisible = options.maxVisible || 5;
+
+    /** @type {number} Default duration in ms */
     this.defaultDuration = options.defaultDuration || TOAST_DURATIONS.default;
+
+    /** @type {string} Toast position */
     this.position = options.position || 'bottom-right';
 
-    // Toast ID counter
+    /** @type {number} Toast ID counter */
     this.idCounter = 0;
 
     // Initialize container positioning
@@ -644,12 +718,29 @@ class ToastManager {
 }
 
 /**
- * AnimationController - Trigger UI animations on events
+ * UI animation controller triggered by events.
+ * Provides element-specific animations, celebration effects,
+ * and selector-based batch animations.
+ *
+ * @class
+ * @example
+ * const controller = new AnimationController(eventBus);
+ * controller.animate(element, 'pulse', { duration: 1000 });
  */
 class AnimationController {
+  /**
+   * Create an AnimationController instance.
+   *
+   * @param {EventBus} eventBus - Event bus to listen for animation triggers
+   */
   constructor(eventBus) {
+    /** @type {EventBus} Event bus reference */
     this.eventBus = eventBus;
+
+    /** @type {Map<HTMLElement, string>} Active animations by element */
     this.activeAnimations = new Map();
+
+    /** @type {Array<Object>} Queued animations */
     this.animationQueue = [];
 
     // Subscribe to events

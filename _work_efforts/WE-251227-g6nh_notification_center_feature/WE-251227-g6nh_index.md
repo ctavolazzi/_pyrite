@@ -1,7 +1,7 @@
 ---
 id: WE-251227-g6nh
 title: "Notification Center Feature"
-status: active
+status: completed
 created: 2025-12-27T20:58:03.964Z
 created_by: ctavolazzi
 last_updated: 2025-12-27T20:59:28.910Z
@@ -24,9 +24,9 @@ Test the notification center with activity tracking
 
 | ID | Title | Status |
 |----|-------|--------|
-| TKT-g6nh-001 | Activity tracking works | pending |
-| TKT-g6nh-002 | Bell badge counts unread | pending |
-| TKT-g6nh-003 | Panel shows notifications | pending |
+| TKT-g6nh-001 | Activity tracking works | completed |
+| TKT-g6nh-002 | Bell badge counts unread | completed |
+| TKT-g6nh-003 | Panel shows notifications | completed |
 
 ## Commits
 - 12/27/2025: Notification center with activity tracking complete. Bell badge, panel, dismiss functionality all working.

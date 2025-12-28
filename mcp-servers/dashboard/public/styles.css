@@ -218,52 +218,15 @@ body {
   color: var(--accent);
 }
 
-/* Sidebar Nav Links (for mobile - shown inside sidebar) */
-.sidebar-nav-links {
-  display: none;
-  padding: var(--space-sm) var(--space-md);
-  border-bottom: 1px solid var(--border-subtle);
-  gap: var(--space-xs);
-}
-
-.sidebar-nav-link {
-  display: inline-flex;
-  padding: var(--space-xs) var(--space-sm);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: var(--radius);
-  transition: all var(--transition-fast);
-}
-
-.sidebar-nav-link:hover {
-  color: var(--text-primary);
-  background: var(--bg-elevated);
-}
-
-.sidebar-nav-link.active {
-  color: var(--accent);
-  background: var(--accent-dim);
-}
-
-/* Site Nav Mobile Behavior */
+/* Site Nav Mobile Behavior - Unified across all pages */
 @media (max-width: 768px) {
-  /* Dashboard (has-sidebar): hide site nav links, show them in sidebar instead */
-  .has-sidebar .site-nav-links {
-    display: none;
-  }
-
-  .has-sidebar .sidebar-nav-links {
+  /* Show hamburger toggle on mobile */
+  .site-nav-toggle {
     display: flex;
   }
 
-  /* Docs page: show mobile toggle and dropdown */
-  .docs-page .site-nav-toggle {
-    display: flex;
-  }
-
-  .docs-page .site-nav-links {
+  /* Site nav links become dropdown menu on mobile */
+  .site-nav-links {
     position: absolute;
     top: 100%;
     right: var(--space-md);
@@ -274,15 +237,23 @@ body {
     padding: var(--space-sm);
     box-shadow: var(--shadow-lg);
     display: none;
+    min-width: 160px;
   }
 
-  .docs-page .site-nav-links.open {
+  .site-nav-links.open {
     display: flex;
   }
 
-  .docs-page .site-nav-link {
+  .site-nav-link {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  /* Hamburger toggle active state */
+  .site-nav-toggle.active {
+    background: var(--bg-card);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 }
 
@@ -3296,9 +3267,10 @@ body {
 }
 
 /* ============================================================================
-   Dashboard Footer
+   Site Footer (shared component)
    ============================================================================ */
 
+.site-footer,
 .dashboard-footer {
   display: flex;
   justify-content: space-between;
@@ -3369,7 +3341,18 @@ body {
   50% { box-shadow: 0 0 8px 2px var(--status-completed); }
 }
 
+/* Footer status dot states */
+.footer-status .status-dot.online {
+  background: var(--status-completed);
+}
+
+.footer-status .status-dot.offline {
+  background: var(--status-blocked);
+  animation: none;
+}
+
 @media (max-width: 768px) {
+  .site-footer,
   .dashboard-footer {
     flex-direction: column;
     gap: var(--space-sm);
