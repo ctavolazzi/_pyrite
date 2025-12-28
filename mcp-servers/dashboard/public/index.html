@@ -169,6 +169,13 @@
               <span class="test-label">Test System</span>
             </button>
           </div>
+          <!-- Demo Button -->
+          <div class="stat-card demo-card" data-stat="demo">
+            <button class="demo-btn" id="demoBtn" title="Run Live Demo">
+              <span class="demo-icon">▶</span>
+              <span class="demo-label">Live Demo</span>
+            </button>
+          </div>
         </section>
 
         <!-- Queue Section -->
@@ -232,6 +239,20 @@
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Demo Progress Panel -->
+    <div class="demo-panel hidden" id="demoPanel">
+      <div class="demo-panel-header">
+        <span class="demo-panel-title">▶ Live Demo in Progress</span>
+        <button class="demo-panel-close" id="demoPanelClose">×</button>
+      </div>
+      <div class="demo-panel-steps" id="demoPanelSteps">
+        <!-- Steps will be inserted here -->
+      </div>
+      <div class="demo-panel-footer" id="demoPanelFooter">
+        <span class="demo-status">Initializing...</span>
+      </div>
+    </div>
 
     <!-- Test Results Panel -->
     <div class="test-results hidden" id="testResults">

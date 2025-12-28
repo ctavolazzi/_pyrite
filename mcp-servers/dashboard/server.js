@@ -338,6 +338,205 @@ app.post('/api/repos/bulk', async (req, res) => {
 });
 
 // ============================================================================
+// Demo API
+// ============================================================================
+
+// Generate random 4-char ID
+function generateId() {
+  return Math.random().toString(36).substring(2, 6);
+}
+
+// Create a demo work effort
+app.post('/api/demo/work-effort', async (req, res) => {
+  const { title, objective } = req.body;
+  const repoPath = config.repos[0]?.path; // Use first repo
+
+  if (!repoPath) {
+    return res.status(400).json({ error: 'No repository configured' });
+  }
+
+  const weId = generateId();
+  const date = new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  const slug = (title || 'demo').toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 30);
+  const weFolderId = `WE-${date}-${weId}`;
+  const weFolderName = `${weFolderId}_${slug}`;
+
+  const weDir = path.join(repoPath, '_work_efforts', weFolderName);
+  const ticketsDir = path.join(weDir, 'tickets');
+
+  try {
+    // Create directories
+    await fs.mkdir(weDir, { recursive: true });
+    await fs.mkdir(ticketsDir, { recursive: true });
+
+    // Create index.md
+    const indexContent = `---
+id: ${weFolderId}
+title: "${title || 'Demo Work Effort'}"
+status: active
+created: ${new Date().toISOString()}
+objective: "${objective || 'Demonstrate the Mission Control system'}"
+---
+
+# ${title || 'Demo Work Effort'}
+
+${objective || 'This is a demo work effort created to demonstrate the Mission Control dashboard.'}
+
+## Progress
+
+- Created via Live Demo feature
+`;
+
+    await fs.writeFile(path.join(weDir, `${weFolderId}_index.md`), indexContent);
+
+    res.json({
+      success: true,
+      workEffort: {
+        id: weFolderId,
+        folder: weFolderName,
+        path: weDir,
+        ticketsDir
+      }
+    });
+  } catch (error) {
+    console.error('Error creating demo work effort:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create a demo ticket
+app.post('/api/demo/ticket', async (req, res) => {
+  const { workEffortPath, title, description } = req.body;
+
+  if (!workEffortPath) {
+    return res.status(400).json({ error: 'workEffortPath is required' });
+  }
+
+  // Extract WE ID from path
+  const weFolderName = path.basename(workEffortPath);
+  const weId = weFolderName.split('_')[0].split('-').slice(-1)[0]; // Get the 4-char ID
+  
+  const ticketsDir = path.join(workEffortPath, 'tickets');
+  
+  try {
+    // Count existing tickets
+    let ticketNum = 1;
+    try {
+      const files = await fs.readdir(ticketsDir);
+      ticketNum = files.filter(f => f.startsWith('TKT-')).length + 1;
+    } catch (e) {
+      // Directory might not exist
+    }
+
+    const ticketId = `TKT-${weId}-${String(ticketNum).padStart(3, '0')}`;
+    const slug = (title || 'demo-ticket').toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 30);
+    const ticketFileName = `${ticketId}_${slug}.md`;
+
+    const ticketContent = `---
+id: ${ticketId}
+title: "${title || 'Demo Ticket'}"
+status: pending
+created: ${new Date().toISOString()}
+---
+
+# ${title || 'Demo Ticket'}
+
+${description || 'This is a demo ticket created to demonstrate the Mission Control dashboard.'}
+
+## Acceptance Criteria
+
+- [ ] Demo completed successfully
+`;
+
+    await fs.writeFile(path.join(ticketsDir, ticketFileName), ticketContent);
+
+    res.json({
+      success: true,
+      ticket: {
+        id: ticketId,
+        fileName: ticketFileName,
+        path: path.join(ticketsDir, ticketFileName)
+      }
+    });
+  } catch (error) {
+    console.error('Error creating demo ticket:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update demo ticket status
+app.patch('/api/demo/ticket/:ticketPath', async (req, res) => {
+  const ticketPath = decodeURIComponent(req.params.ticketPath);
+  const { status } = req.body;
+
+  try {
+    let content = await fs.readFile(ticketPath, 'utf-8');
+    content = content.replace(/status: \w+/, `status: ${status}`);
+    await fs.writeFile(ticketPath, content);
+
+    res.json({ success: true, status });
+  } catch (error) {
+    console.error('Error updating ticket:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update demo work effort status
+app.patch('/api/demo/work-effort/:wePath', async (req, res) => {
+  const wePath = decodeURIComponent(req.params.wePath);
+  const { status } = req.body;
+
+  try {
+    // Find the index file
+    const files = await fs.readdir(wePath);
+    const indexFile = files.find(f => f.endsWith('_index.md'));
+    
+    if (!indexFile) {
+      return res.status(404).json({ error: 'Index file not found' });
+    }
+
+    const indexPath = path.join(wePath, indexFile);
+    let content = await fs.readFile(indexPath, 'utf-8');
+    content = content.replace(/status: \w+/, `status: ${status}`);
+    await fs.writeFile(indexPath, content);
+
+    res.json({ success: true, status });
+  } catch (error) {
+    console.error('Error updating work effort:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Clean up demo work efforts
+app.delete('/api/demo/cleanup', async (req, res) => {
+  const repoPath = config.repos[0]?.path;
+  
+  if (!repoPath) {
+    return res.status(400).json({ error: 'No repository configured' });
+  }
+
+  const weDir = path.join(repoPath, '_work_efforts');
+  
+  try {
+    const entries = await fs.readdir(weDir, { withFileTypes: true });
+    let cleaned = 0;
+
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name.includes('_demo')) {
+        const fullPath = path.join(weDir, entry.name);
+        await fs.rm(fullPath, { recursive: true, force: true });
+        cleaned++;
+      }
+    }
+
+    res.json({ success: true, cleaned });
+  } catch (error) {
+    console.error('Error cleaning up demos:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
 // WebSocket Server
 // ============================================================================
 

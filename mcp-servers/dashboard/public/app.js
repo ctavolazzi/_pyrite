@@ -302,6 +302,13 @@ class MissionControl {
     this.elements.testResultsBody = document.getElementById('testResultsBody');
     this.elements.testResultsSummary = document.getElementById('testResultsSummary');
     this.elements.testResultsClose = document.getElementById('testResultsClose');
+
+    // Demo System
+    this.elements.demoBtn = document.getElementById('demoBtn');
+    this.elements.demoPanel = document.getElementById('demoPanel');
+    this.elements.demoPanelSteps = document.getElementById('demoPanelSteps');
+    this.elements.demoPanelFooter = document.getElementById('demoPanelFooter');
+    this.elements.demoPanelClose = document.getElementById('demoPanelClose');
   }
 
   bindEvents() {
@@ -400,6 +407,10 @@ class MissionControl {
     // Test System
     this.elements.testSystemBtn?.addEventListener('click', () => this.runSystemTest());
     this.elements.testResultsClose?.addEventListener('click', () => this.closeTestResults());
+
+    // Demo System
+    this.elements.demoBtn?.addEventListener('click', () => this.runLiveDemo());
+    this.elements.demoPanelClose?.addEventListener('click', () => this.closeDemoPanel());
 
     // Initialize repo browser state
     this.browserPath = '/Users/ctavolazzi/Code';
@@ -1451,6 +1462,220 @@ class MissionControl {
     } catch (e) {
       return { pass: false, message: e.message };
     }
+  }
+
+  // ============================================================================
+  // Live Demo
+  // ============================================================================
+
+  async runLiveDemo() {
+    // Show panel and disable button
+    this.elements.demoPanel?.classList.remove('hidden');
+    this.elements.demoBtn?.classList.add('running');
+
+    // Define demo steps
+    const steps = [
+      { id: 'init', title: 'Initializing Demo', detail: 'Setting up the demonstration...' },
+      { id: 'create-we', title: 'Creating Work Effort', detail: 'Creating a new demo work effort...' },
+      { id: 'detect-we', title: 'File System Detection', detail: 'Waiting for file watcher to detect changes...' },
+      { id: 'create-ticket-1', title: 'Creating Ticket #1', detail: 'Adding first demo ticket...' },
+      { id: 'create-ticket-2', title: 'Creating Ticket #2', detail: 'Adding second demo ticket...' },
+      { id: 'detect-tickets', title: 'Real-time Update', detail: 'Watch the dashboard update in real-time...' },
+      { id: 'update-ticket', title: 'Updating Ticket Status', detail: 'Marking ticket as in_progress...' },
+      { id: 'complete-ticket', title: 'Completing Ticket', detail: 'Marking ticket as completed...' },
+      { id: 'complete-we', title: 'Completing Work Effort', detail: 'Marking entire work effort as completed...' },
+      { id: 'done', title: 'Demo Complete!', detail: 'All systems working correctly!' }
+    ];
+
+    // Render initial state
+    this.renderDemoSteps(steps);
+    this.updateDemoStatus('Starting demo...');
+
+    let workEffort = null;
+    let ticket1 = null;
+    let ticket2 = null;
+
+    try {
+      // Step 1: Initialize
+      await this.runDemoStep('init', steps, async () => {
+        await this.delay(800);
+        return 'Ready to begin';
+      });
+
+      // Step 2: Create Work Effort
+      await this.runDemoStep('create-we', steps, async () => {
+        const res = await fetch('/api/demo/work-effort', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'Demo Work Effort',
+            objective: 'Demonstrate the full Mission Control event system'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        workEffort = data.workEffort;
+        return `Created ${workEffort.id}`;
+      });
+
+      // Step 3: Wait for detection
+      await this.runDemoStep('detect-we', steps, async () => {
+        await this.delay(1500); // Wait for file watcher
+        return 'Work effort detected!';
+      });
+
+      // Step 4: Create Ticket 1
+      await this.runDemoStep('create-ticket-1', steps, async () => {
+        const res = await fetch('/api/demo/ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workEffortPath: workEffort.path,
+            title: 'Setup demo environment',
+            description: 'Initialize and configure the demo workspace'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        ticket1 = data.ticket;
+        return `Created ${ticket1.id}`;
+      });
+
+      // Step 5: Create Ticket 2
+      await this.runDemoStep('create-ticket-2', steps, async () => {
+        const res = await fetch('/api/demo/ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workEffortPath: workEffort.path,
+            title: 'Verify event system',
+            description: 'Test all event types and notifications'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        ticket2 = data.ticket;
+        return `Created ${ticket2.id}`;
+      });
+
+      // Step 6: Wait for real-time update
+      await this.runDemoStep('detect-tickets', steps, async () => {
+        await this.delay(1500);
+        return 'Dashboard updated!';
+      });
+
+      // Step 7: Update ticket to in_progress
+      await this.runDemoStep('update-ticket', steps, async () => {
+        const res = await fetch(`/api/demo/ticket/${encodeURIComponent(ticket1.path)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'in_progress' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        await this.delay(1000);
+        return 'Status → in_progress';
+      });
+
+      // Step 8: Complete ticket
+      await this.runDemoStep('complete-ticket', steps, async () => {
+        const res = await fetch(`/api/demo/ticket/${encodeURIComponent(ticket1.path)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        await this.delay(1000);
+        return 'Status → completed ✓';
+      });
+
+      // Step 9: Complete work effort
+      await this.runDemoStep('complete-we', steps, async () => {
+        const res = await fetch(`/api/demo/work-effort/${encodeURIComponent(workEffort.path)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        await this.delay(1000);
+        return 'Work effort completed!';
+      });
+
+      // Step 10: Done
+      await this.runDemoStep('done', steps, async () => {
+        return '🎉 All systems operational!';
+      });
+
+      // Success!
+      this.updateDemoStatus('Demo completed successfully!', 'success');
+      this.showToast('success', '🎉 Demo Complete!', 'All Mission Control systems verified');
+
+      if (this.animationController) {
+        this.animationController._celebrationEffect();
+      }
+
+    } catch (error) {
+      console.error('Demo error:', error);
+      this.updateDemoStatus(`Error: ${error.message}`, 'error');
+      this.showToast('error', 'Demo Failed', error.message);
+    }
+
+    // Re-enable button
+    this.elements.demoBtn?.classList.remove('running');
+  }
+
+  renderDemoSteps(steps) {
+    this.elements.demoPanelSteps.innerHTML = steps.map(step => `
+      <div class="demo-step pending" data-step="${step.id}">
+        <div class="demo-step-icon">○</div>
+        <div class="demo-step-content">
+          <div class="demo-step-title">${this.escapeHtml(step.title)}</div>
+          <div class="demo-step-detail">${this.escapeHtml(step.detail)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async runDemoStep(stepId, steps, action) {
+    const stepEl = this.elements.demoPanelSteps.querySelector(`[data-step="${stepId}"]`);
+    if (!stepEl) return;
+
+    // Set to running
+    stepEl.className = 'demo-step running';
+    stepEl.querySelector('.demo-step-icon').textContent = '◌';
+
+    try {
+      const result = await action();
+
+      // Set to complete
+      stepEl.className = 'demo-step complete';
+      stepEl.querySelector('.demo-step-icon').textContent = '✓';
+      stepEl.querySelector('.demo-step-detail').textContent = result;
+
+      return result;
+    } catch (error) {
+      stepEl.className = 'demo-step error';
+      stepEl.querySelector('.demo-step-icon').textContent = '✗';
+      stepEl.querySelector('.demo-step-detail').textContent = error.message;
+      throw error;
+    }
+  }
+
+  updateDemoStatus(message, type = '') {
+    const footer = this.elements.demoPanelFooter;
+    if (footer) {
+      footer.innerHTML = `<span class="demo-status ${type}">${this.escapeHtml(message)}</span>`;
+    }
+  }
+
+  closeDemoPanel() {
+    this.elements.demoPanel?.classList.add('hidden');
+  }
+
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   // ============================================================================
