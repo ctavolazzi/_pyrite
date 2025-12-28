@@ -77,7 +77,7 @@ class MissionControl {
       updated: '◇ Updated',
       started: '▶️ Started',
       completed: '✅ Completed',
-      paused: '⏸️ Paused',
+      paused: '‖ Paused',
       deleted: '🗑️ Deleted',
     };
 
@@ -846,7 +846,7 @@ class MissionControl {
             <button class="queue-action-btn" data-action="complete" title="Mark Complete">✓</button>
           ` : ''}
           ${we.status === 'active' || we.status === 'in_progress' ? `
-            <button class="queue-action-btn" data-action="pause" title="Pause">⏸</button>
+            <button class="queue-action-btn" data-action="pause" title="Pause">‖</button>
           ` : ''}
           ${we.status === 'paused' || we.status === 'pending' ? `
             <button class="queue-action-btn" data-action="start" title="Start">▶</button>
@@ -1345,7 +1345,7 @@ class MissionControl {
               <button class="ticket-action-btn primary" data-action="start" data-ticket="${this.escapeHtml(ticket.id)}">▶ Start</button>
             ` : ''}
             ${ticket.status === 'in_progress' ? `
-              <button class="ticket-action-btn" data-action="pause" data-ticket="${this.escapeHtml(ticket.id)}">⏸ Pause</button>
+              <button class="ticket-action-btn" data-action="pause" data-ticket="${this.escapeHtml(ticket.id)}">‖ Pause</button>
             ` : ''}
             ${ticket.status !== 'completed' ? `
               <button class="ticket-action-btn primary" data-action="complete" data-ticket="${this.escapeHtml(ticket.id)}">✓ Complete</button>
