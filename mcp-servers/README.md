@@ -2,13 +2,18 @@
 
 Custom Model Context Protocol servers for use with Cursor and other MCP-compatible tools.
 
+📚 **[View Full API Documentation](dashboard/public/docs/index.html)** | 🤖 **[AI-Friendly Docs](dashboard/public/docs/ai-docs.txt)**
+
+> **Tip:** When the dashboard is running, access docs at `http://localhost:3847/docs/`
+
 ## Servers
 
-| Server | Language | Description |
-|--------|----------|-------------|
-| `work-efforts` | Node.js | Work effort and ticket management with Johnny Decimal system |
-| `simple-tools` | Node.js | Utility tools (random names, unique IDs, date formatting) |
-| `docs-maintainer` | Python | Documentation management with Johnny Decimal structure |
+| Server | Language | Version | Description |
+|--------|----------|---------|-------------|
+| `work-efforts` | Node.js | v0.3.0 | Work effort and ticket management with date-based IDs |
+| `simple-tools` | Node.js | v0.2.0 | Utility tools (random names, unique IDs, date formatting) |
+| `docs-maintainer` | Python | v0.1.0 | Documentation management with Johnny Decimal structure |
+| `dashboard` | Node.js | - | Mission Control REST API + WebSocket server |
 
 ## Installation
 
@@ -90,24 +95,48 @@ To modify a server:
 3. Commit and push changes
 4. Other machines can pull and deploy
 
-## Work Efforts Server
+## Quick Reference
 
-### Current Version: 0.2.0
+### work-efforts (v0.3.0)
+
+ID Format:
+- Work Effort: `WE-YYMMDD-xxxx` (e.g., WE-251227-a1b2)
+- Ticket: `TKT-xxxx-NNN` (e.g., TKT-a1b2-001)
 
 Tools:
-- `create_work_effort` - Create new work effort
+- `create_work_effort` - Create new work effort with tickets
+- `create_ticket` - Create ticket in work effort
 - `list_work_efforts` - List all work efforts
+- `list_tickets` - List tickets in a work effort
 - `update_work_effort` - Update status/progress
+- `update_ticket` - Update ticket status
 - `search_work_efforts` - Search by keyword
 
-### Planned Version: 0.3.0 (WE-YYMMDD-xxxx format)
+### simple-tools (v0.2.0)
 
-New ID format with date-based work efforts and ticket system:
-- `WE-251227-a1b2` - Work Effort (date + 4-char unique)
-- `TKT-a1b2-001` - Ticket (parent suffix + sequence)
+Tools:
+- `generate_random_name` - Generate name like "HappyPanda123"
+- `generate_unique_id` - Generate timestamped unique ID
+- `format_date` - Format dates (iso, human, filename, devlog)
 
-New tools:
-- `create_ticket` - Create ticket in work effort
-- `list_tickets` - List tickets in a work effort
-- `update_ticket` - Update ticket status
+### docs-maintainer (v0.1.0)
 
+Tools:
+- `initialize_docs` - Create _docs structure
+- `create_doc` - Create doc with Johnny Decimal numbering
+- `update_doc` - Update content and links
+- `rebuild_indices` - Regenerate all indexes
+- `link_work_effort` - Bidirectional doc-WE linking
+- `search_docs` - Search documentation
+- `check_health` - Documentation health score
+
+### dashboard (Mission Control)
+
+REST API at `http://localhost:3847` for monitoring work efforts across repositories.
+
+Key endpoints:
+- `GET /api/repos` - List monitored repos
+- `POST /api/repos` - Add repo
+- `GET /api/browse` - Browse directories
+
+WebSocket for real-time updates.

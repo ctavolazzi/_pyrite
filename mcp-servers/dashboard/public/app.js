@@ -73,11 +73,11 @@ class MissionControl {
     const action = type.split(':')[1];
 
     const titles = {
-      created: '📋 New Work Effort',
-      updated: '📝 Updated',
+      created: '◈ New Work Effort',
+      updated: '◇ Updated',
       started: '▶️ Started',
       completed: '✅ Completed',
-      paused: '⏸️ Paused',
+      paused: '‖ Paused',
       deleted: '🗑️ Deleted',
     };
 
@@ -110,7 +110,7 @@ class MissionControl {
 
     const titles = {
       created: '🎫 New Ticket',
-      updated: '📝 Ticket Updated',
+      updated: '▣ Ticket Updated',
       completed: '✅ Ticket Done',
       blocked: '🚫 Ticket Blocked',
     };
@@ -142,7 +142,7 @@ class MissionControl {
 
     this.smartNotify({
       type: action === 'removed' ? 'warning' : 'success',
-      title: action === 'added' ? '📁 Repo Added' : action === 'removed' ? '📁 Repo Removed' : '🔄 Synced',
+      title: action === 'added' ? '◫ Repo Added' : action === 'removed' ? '◫ Repo Removed' : '◰ Synced',
       message: messages[action] || data.name,
       data: { eventType: type, ...data },
     });
@@ -155,7 +155,7 @@ class MissionControl {
     if (action === 'connected') {
       this.toastManager.show({
         type: 'success',
-        title: '🔗 Connected',
+        title: '◈ Connected',
         message: 'Mission Control is online',
         duration: 3000,
       });
@@ -248,10 +248,11 @@ class MissionControl {
     this.elements.queueList = document.getElementById('queueList');
     this.elements.queueEmpty = document.getElementById('queueEmpty');
 
-    // Action buttons
-    this.elements.startBtn = document.getElementById('startBtn');
-    this.elements.pauseBtn = document.getElementById('pauseBtn');
-    this.elements.completeBtn = document.getElementById('completeBtn');
+    // Detail view elements (new design)
+    this.elements.detailTitle = document.getElementById('detailTitle');
+    this.elements.detailMeta = document.getElementById('detailMeta');
+    this.elements.metadataGrid = document.getElementById('metadataGrid');
+    this.elements.ticketsList = document.getElementById('ticketsList');
 
     // Toast & Modal
     this.elements.toastContainer = document.getElementById('toastContainer');
@@ -302,6 +303,13 @@ class MissionControl {
     this.elements.testResultsBody = document.getElementById('testResultsBody');
     this.elements.testResultsSummary = document.getElementById('testResultsSummary');
     this.elements.testResultsClose = document.getElementById('testResultsClose');
+
+    // Demo System
+    this.elements.demoBtn = document.getElementById('demoBtn');
+    this.elements.demoPanel = document.getElementById('demoPanel');
+    this.elements.demoPanelSteps = document.getElementById('demoPanelSteps');
+    this.elements.demoPanelFooter = document.getElementById('demoPanelFooter');
+    this.elements.demoPanelClose = document.getElementById('demoPanelClose');
   }
 
   bindEvents() {
@@ -325,11 +333,6 @@ class MissionControl {
 
     // Back button
     this.elements.backBtn?.addEventListener('click', () => this.showDashboard());
-
-    // Action buttons
-    this.elements.startBtn?.addEventListener('click', () => this.changeStatus('active'));
-    this.elements.pauseBtn?.addEventListener('click', () => this.changeStatus('paused'));
-    this.elements.completeBtn?.addEventListener('click', () => this.changeStatus('completed'));
 
     // Modal
     this.elements.modalClose?.addEventListener('click', () => this.closeModal());
@@ -401,9 +404,16 @@ class MissionControl {
     this.elements.testSystemBtn?.addEventListener('click', () => this.runSystemTest());
     this.elements.testResultsClose?.addEventListener('click', () => this.closeTestResults());
 
+    // Demo System
+    this.elements.demoBtn?.addEventListener('click', () => this.runLiveDemo());
+    this.elements.demoPanelClose?.addEventListener('click', () => this.closeDemoPanel());
+
     // Initialize repo browser state
     this.browserPath = '/Users/ctavolazzi/Code';
     this.selectedRepos = new Set();
+
+    // Mobile navigation
+    this.initMobileNav();
 
     // Check if hero should be hidden (user preference)
     if (localStorage.getItem('pyrite_hero_hidden') === 'true') {
@@ -473,8 +483,8 @@ class MissionControl {
     switch (message.type) {
       case 'hot_reload':
         // Hot reload: refresh page when code changes
-        console.log(`🔥 Hot reload triggered: ${message.file}`);
-        this.showToast('info', '🔥 Reloading...', `${message.file} changed`);
+        console.log(`[Hot Reload] ${message.file}`);
+        this.showToast('info', '◰ Reloading...', `${message.file} changed`);
         setTimeout(() => window.location.reload(), 500);
         return;
 
@@ -836,7 +846,7 @@ class MissionControl {
             <button class="queue-action-btn" data-action="complete" title="Mark Complete">✓</button>
           ` : ''}
           ${we.status === 'active' || we.status === 'in_progress' ? `
-            <button class="queue-action-btn" data-action="pause" title="Pause">⏸</button>
+            <button class="queue-action-btn" data-action="pause" title="Pause">‖</button>
           ` : ''}
           ${we.status === 'paused' || we.status === 'pending' ? `
             <button class="queue-action-btn" data-action="start" title="Start">▶</button>
@@ -991,10 +1001,14 @@ class MissionControl {
 
   showDetail(repo, we, ticketId = null) {
     this.selectedItem = { repo, we, ticketId };
-    this.renderDetail();
+    this.ticketFilter = 'all';
+    this.activeTab = 'tickets';
 
     this.elements.dashboardView?.classList.remove('active');
     this.elements.detailView?.classList.add('active');
+
+    this.renderDetail();
+    this.bindDetailEvents();
 
     this.updateBreadcrumb([
       { label: 'Command Center', action: () => this.showDashboard() },
@@ -1004,60 +1018,698 @@ class MissionControl {
   }
 
   renderDetail() {
-    if (!this.selectedItem) return;
+    if (!this.selectedItem || !this.selectedItem.we) {
+      this.showEmptyDetailState();
+      return;
+    }
 
     const { repo, we, ticketId } = this.selectedItem;
+    const tickets = we.tickets || [];
+    const completedCount = tickets.filter(t => t.status === 'completed').length;
+    const totalCount = tickets.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-    this.elements.detailContent.innerHTML = `
-      <h1 class="detail-title">${this.escapeHtml(we.title)}</h1>
-      <div class="detail-id">
+    // Update header
+    this.elements.detailTitle = document.getElementById('detailTitle');
+    this.elements.detailMeta = document.getElementById('detailMeta');
+
+    const title = we.title || we.id || 'Untitled Work Effort';
+    if (this.elements.detailTitle) {
+      this.elements.detailTitle.textContent = title;
+    }
+
+    if (this.elements.detailMeta) {
+      this.elements.detailMeta.innerHTML = `
         <span class="queue-badge ${this.escapeHtml(we.status)}">${this.escapeHtml(we.status)}</span>
-        ${this.escapeHtml(we.id)} • ${this.escapeHtml(repo)} • ${we.format.toUpperCase()}
-      </div>
+        <span>${this.escapeHtml(we.id)}</span>
+        <span>•</span>
+        <span>${this.escapeHtml(repo)}</span>
+        <span>•</span>
+        <span class="badge">${(we.format || 'unknown').toUpperCase()}</span>
+      `;
+    }
 
-      ${we.objective ? `
-        <div class="detail-section">
-          <h3 class="detail-section-title">Objective</h3>
-          <p class="detail-objective">${this.escapeHtml(we.objective)}</p>
-        </div>
-      ` : ''}
+    // Update mini progress
+    const progressMini = document.getElementById('detailProgressMini');
+    if (progressMini) {
+      progressMini.innerHTML = `
+        <span class="progress-text">${completedCount}/${totalCount}</span>
+        <div class="progress-bar-mini"><div class="progress-fill-mini" style="width: ${progressPercent}%"></div></div>
+      `;
+    }
 
-      ${we.tickets && we.tickets.length > 0 ? `
-        <div class="detail-section">
-          <h3 class="detail-section-title">Tickets (${we.tickets.length})</h3>
-          <div class="detail-tickets">
-            ${we.tickets.map(ticket => `
-              <div class="detail-ticket ${ticketId === ticket.id ? 'highlighted' : ''}">
-                <div class="queue-indicator ${this.escapeHtml(ticket.status)}"></div>
-                <div class="detail-ticket-info">
-                  <div class="detail-ticket-id">${this.escapeHtml(ticket.id)}</div>
-                  <div class="detail-ticket-title">${this.escapeHtml(ticket.title)}</div>
-                </div>
-                <span class="queue-badge ${this.escapeHtml(ticket.status)}">${this.escapeHtml(ticket.status)}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-    `;
+    // Update status controls
+    this.renderStatusControls(we.status);
 
-    // Update action button states
-    this.updateActionButtons(we.status);
+    // Render panels
+    this.renderMetadataPanel(we, repo);
+    this.renderProgressPanel(we);
+    this.renderTicketsTab(we, ticketId);
+    this.renderDescriptionTab(we);
+    this.renderActivityTab(we);
+    this.renderFilesTab(we);
+    this.renderTimeTracking(we);
+    this.renderTags(we);
   }
 
-  updateActionButtons(status) {
-    // Show/hide buttons based on current status
-    const isActive = status === 'active' || status === 'in_progress';
-    const isCompleted = status === 'completed';
+  renderStatusControls(currentStatus) {
+    const controls = document.getElementById('detailStatusControls');
+    if (!controls) return;
 
-    if (this.elements.startBtn) {
-      this.elements.startBtn.style.display = isActive || isCompleted ? 'none' : 'inline-flex';
+    controls.querySelectorAll('.status-btn').forEach(btn => {
+      btn.classList.remove('current');
+      if (btn.dataset.status === currentStatus) {
+        btn.classList.add('current');
+      }
+    });
+  }
+
+  renderMetadataPanel(we, repo) {
+    // Update individual metadata elements
+    const metaId = document.getElementById('metaId');
+    const metaRepo = document.getElementById('metaRepo');
+    const metaFormat = document.getElementById('metaFormat');
+    const metaBranch = document.getElementById('metaBranch');
+
+    if (metaId) metaId.textContent = we.id || '—';
+    if (metaRepo) metaRepo.textContent = repo || '—';
+    if (metaFormat) {
+      const format = (we.format || 'unknown').toUpperCase();
+      metaFormat.innerHTML = `<span class="badge">${format}</span>`;
     }
-    if (this.elements.pauseBtn) {
-      this.elements.pauseBtn.style.display = isActive ? 'inline-flex' : 'none';
+    if (metaBranch) metaBranch.textContent = we.branch || 'main';
+  }
+
+  renderProgressPanel(we) {
+    const tickets = we.tickets || [];
+    const completedCount = tickets.filter(t => t.status === 'completed').length;
+    const inProgressCount = tickets.filter(t => t.status === 'in_progress').length;
+    const pendingCount = tickets.filter(t => t.status === 'pending').length;
+    const blockedCount = tickets.filter(t => t.status === 'blocked').length;
+    const totalCount = tickets.length;
+    const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+    // Render progress ring using Charts
+    const ringContainer = document.getElementById('progressRingContainer');
+    if (ringContainer && window.Charts) {
+      const color = progressPercent === 100 ? '#10b981' :
+                    progressPercent > 50 ? '#ff9d3d' : '#e6a23c';
+      Charts.progressRing(ringContainer, progressPercent, {
+        size: 100,
+        thickness: 10,
+        color: color,
+        bgColor: 'var(--bg-primary)',
+        showPercent: true,
+        animate: true
+      });
     }
-    if (this.elements.completeBtn) {
-      this.elements.completeBtn.style.display = isCompleted ? 'none' : 'inline-flex';
+
+    // Update mini stats
+    const ticketsCompleted = document.getElementById('ticketsCompleted');
+    const ticketsInProgress = document.getElementById('ticketsInProgress');
+    const ticketsPending = document.getElementById('ticketsPending');
+
+    if (ticketsCompleted) ticketsCompleted.textContent = completedCount;
+    if (ticketsInProgress) ticketsInProgress.textContent = inProgressCount;
+    if (ticketsPending) ticketsPending.textContent = pendingCount + blockedCount;
+
+    // Render ticket distribution donut chart
+    const distributionContainer = document.getElementById('ticketDistributionChart');
+    if (distributionContainer && window.Charts) {
+      const statusData = {};
+      if (completedCount > 0) statusData.completed = completedCount;
+      if (inProgressCount > 0) statusData.in_progress = inProgressCount;
+      if (pendingCount > 0) statusData.pending = pendingCount;
+      if (blockedCount > 0) statusData.blocked = blockedCount;
+
+      if (Object.keys(statusData).length > 0) {
+        Charts.donut(distributionContainer, statusData, {
+          size: 120,
+          thickness: 24,
+          showLabels: true,
+          showCenter: true,
+          centerValue: totalCount,
+          centerText: 'Tickets'
+        });
+      } else {
+        distributionContainer.innerHTML = '<div class="chart-empty">No tickets yet</div>';
+      }
+    }
+
+    // Render velocity stats
+    this.renderVelocityStats(we);
+
+    // Render progress line chart
+    this.renderProgressLineChart(we);
+
+    // Render activity heatmap
+    this.renderActivityHeatmap(we);
+  }
+
+  renderVelocityStats(we) {
+    const velocityRate = document.getElementById('velocityRate');
+    const velocityEta = document.getElementById('velocityEta');
+    const sparklineContainer = document.getElementById('velocitySparkline');
+
+    const tickets = we.tickets || [];
+    const completed = tickets.filter(t => t.status === 'completed');
+    const remaining = tickets.filter(t => t.status !== 'completed').length;
+
+    // Calculate simple velocity (completed per day based on work effort age)
+    let velocity = null;
+    if (completed.length >= 1 && we.created) {
+      const created = new Date(we.created);
+      const now = new Date();
+      const days = Math.max(1, (now - created) / (1000 * 60 * 60 * 24));
+      velocity = (completed.length / days).toFixed(1);
+    }
+
+    if (velocityRate) {
+      velocityRate.textContent = velocity ? velocity : '—';
+    }
+
+    if (velocityEta) {
+      if (velocity && velocity > 0 && remaining > 0) {
+        const daysRemaining = Math.ceil(remaining / parseFloat(velocity));
+        const eta = new Date();
+        eta.setDate(eta.getDate() + daysRemaining);
+        velocityEta.textContent = this.formatDateShort(eta);
+      } else if (remaining === 0) {
+        velocityEta.textContent = 'Done!';
+      } else {
+        velocityEta.textContent = '—';
+      }
+    }
+
+    // Sparkline showing ticket completion trend
+    if (sparklineContainer && window.Charts && completed.length > 0) {
+      // Generate cumulative completion data points
+      const points = [];
+      let cumulative = 0;
+
+      // Sort completed tickets by some date (fallback to current if no date)
+      const sortedTickets = [...completed].sort((a, b) => {
+        const dateA = a.completedAt ? new Date(a.completedAt) : new Date();
+        const dateB = b.completedAt ? new Date(b.completedAt) : new Date();
+        return dateA - dateB;
+      });
+
+      sortedTickets.forEach((t, i) => {
+        cumulative++;
+        points.push(cumulative);
+      });
+
+      // Add current incomplete as potential endpoint
+      points.push(tickets.length);
+
+      if (points.length >= 2) {
+        Charts.sparkline(sparklineContainer, points, {
+          width: 80,
+          height: 25,
+          color: '#ff9d3d',
+          showEndDot: true
+        });
+      }
+    } else if (sparklineContainer) {
+      sparklineContainer.innerHTML = '<span class="chart-sparkline-empty">—</span>';
+    }
+  }
+
+  renderProgressLineChart(we) {
+    const container = document.getElementById('progressLineChart');
+    if (!container || !window.Charts) return;
+
+    const tickets = we.tickets || [];
+    if (tickets.length === 0) {
+      container.innerHTML = '<div class="chart-empty">No data</div>';
+      return;
+    }
+
+    // Generate mock progress data based on ticket count
+    // In a real app, this would come from actual historical data
+    const totalTickets = tickets.length;
+    const completed = tickets.filter(t => t.status === 'completed').length;
+
+    // Create data points representing progress over "time"
+    const points = [];
+    const steps = Math.min(6, totalTickets + 1);
+
+    for (let i = 0; i <= steps; i++) {
+      const progress = Math.min(completed, Math.round((completed / steps) * i));
+      points.push({
+        value: progress,
+        label: `Day ${i}`
+      });
+    }
+
+    Charts.line(container, points, {
+      width: 180,
+      height: 60,
+      showDots: true,
+      showArea: true,
+      showGrid: false,
+      color: '#ff9d3d',
+      animate: true
+    });
+  }
+
+  renderActivityHeatmap(we) {
+    const container = document.getElementById('activityHeatmap');
+    if (!container || !window.Charts) return;
+
+    // Generate mock activity data for the last 8 weeks
+    const data = [];
+    const now = new Date();
+
+    for (let i = 55; i >= 0; i--) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+
+      // Random activity count (in real app, this would be actual activity)
+      const count = Math.floor(Math.random() * 5);
+
+      data.push({
+        date: date.toISOString().split('T')[0],
+        count: count
+      });
+    }
+
+    Charts.heatmap(container, data, {
+      weeks: 8,
+      cellSize: 10,
+      gap: 2
+    });
+  }
+
+  formatDateShort(date) {
+    if (!date) return '—';
+    const d = new Date(date);
+    const month = d.toLocaleDateString('en-US', { month: 'short' });
+    const day = d.getDate();
+    return `${month} ${day}`;
+  }
+
+  renderTicketsTab(we, highlightTicketId) {
+    const list = document.getElementById('ticketsList');
+    if (!list) return;
+
+    const tickets = we.tickets || [];
+    const filtered = this.ticketFilter === 'all'
+      ? tickets
+      : tickets.filter(t => t.status === this.ticketFilter);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `
+        <div class="panel-empty" style="text-align: center; padding: var(--space-lg);">
+          ${tickets.length === 0 ? 'No tickets yet. Click "+ Add Ticket" to create one.' : 'No tickets match the selected filter.'}
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = filtered.map(ticket => `
+      <div class="ticket-card ${highlightTicketId === ticket.id ? 'expanded' : ''}" data-ticket-id="${this.escapeHtml(ticket.id)}">
+        <div class="ticket-card-header">
+          <div class="ticket-indicator ${this.escapeHtml(ticket.status)}"></div>
+          <div class="ticket-info">
+            <div class="ticket-id">${this.escapeHtml(ticket.id)}</div>
+            <div class="ticket-title">${this.escapeHtml(ticket.title)}</div>
+          </div>
+          <span class="ticket-badge ${this.escapeHtml(ticket.status)}">${this.escapeHtml(ticket.status)}</span>
+          <span class="ticket-expand">▶</span>
+        </div>
+        <div class="ticket-card-body">
+          <p class="ticket-description">${this.escapeHtml(ticket.description || ticket.objective || 'No description provided.')}</p>
+          <div class="ticket-actions">
+            ${ticket.status !== 'in_progress' && ticket.status !== 'completed' ? `
+              <button class="ticket-action-btn primary" data-action="start" data-ticket="${this.escapeHtml(ticket.id)}">▶ Start</button>
+            ` : ''}
+            ${ticket.status === 'in_progress' ? `
+              <button class="ticket-action-btn" data-action="pause" data-ticket="${this.escapeHtml(ticket.id)}">‖ Pause</button>
+            ` : ''}
+            ${ticket.status !== 'completed' ? `
+              <button class="ticket-action-btn primary" data-action="complete" data-ticket="${this.escapeHtml(ticket.id)}">✓ Complete</button>
+            ` : ''}
+            ${ticket.status !== 'blocked' && ticket.status !== 'completed' ? `
+              <button class="ticket-action-btn" data-action="block" data-ticket="${this.escapeHtml(ticket.id)}">⚠ Block</button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderDescriptionTab(we) {
+    const content = document.getElementById('descriptionContent');
+    if (!content) return;
+
+    content.innerHTML = `
+      <h2>Objective</h2>
+      <p>${this.escapeHtml(we.objective || 'No objective specified.')}</p>
+
+      ${we.description ? `
+        <h3>Description</h3>
+        <p>${this.escapeHtml(we.description)}</p>
+      ` : ''}
+
+      ${we.notes ? `
+        <h3>Notes</h3>
+        <p>${this.escapeHtml(we.notes)}</p>
+      ` : ''}
+
+      ${we.acceptance_criteria && we.acceptance_criteria.length > 0 ? `
+        <h3>Acceptance Criteria</h3>
+        <ul>
+          ${we.acceptance_criteria.map(c => `<li>${this.escapeHtml(c)}</li>`).join('')}
+        </ul>
+      ` : ''}
+    `;
+  }
+
+  renderActivityTab(we) {
+    const timeline = document.getElementById('activityTimeline');
+    if (!timeline) return;
+
+    // Generate activity from available data
+    const activities = [];
+
+    if (we.created) {
+      activities.push({
+        type: 'created',
+        time: we.created,
+        text: 'Work effort created'
+      });
+    }
+
+    // Add ticket activities
+    (we.tickets || []).forEach(ticket => {
+      if (ticket.created) {
+        activities.push({
+          type: 'ticket-added',
+          time: ticket.created,
+          text: `Ticket "${ticket.title}" added`
+        });
+      }
+    });
+
+    // Sort by time (most recent first)
+    activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    if (activities.length === 0) {
+      timeline.innerHTML = '<p class="panel-empty">No activity recorded yet.</p>';
+      return;
+    }
+
+    timeline.innerHTML = activities.slice(0, 20).map(activity => `
+      <div class="activity-item ${activity.type}">
+        <span class="activity-time">${this.formatRelativeTime(activity.time)}</span>
+        <p class="activity-text">${this.escapeHtml(activity.text)}</p>
+      </div>
+    `).join('');
+  }
+
+  renderFilesTab(we) {
+    const list = document.getElementById('filesList');
+    if (!list) return;
+
+    const files = we.files_changed || we.files || [];
+
+    if (files.length === 0) {
+      list.innerHTML = '<p class="panel-empty">No files tracked for this work effort.</p>';
+      return;
+    }
+
+    list.innerHTML = files.map(file => {
+      const fileName = typeof file === 'string' ? file : file.path;
+      const status = typeof file === 'object' ? file.status : 'modified';
+      return `
+        <div class="file-item">
+          <span class="file-icon">📄</span>
+          <span class="file-path">${this.escapeHtml(fileName)}</span>
+          <span class="file-status ${status}">${status}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  renderTimeTracking(we) {
+    const timeCreated = document.getElementById('timeCreated');
+    const timeUpdated = document.getElementById('timeUpdated');
+    const timeDuration = document.getElementById('timeDuration');
+
+    if (timeCreated) {
+      timeCreated.textContent = we.created ? this.formatRelativeTime(we.created) : '—';
+    }
+    if (timeUpdated) {
+      timeUpdated.textContent = (we.updated || we.lastModified) ? this.formatRelativeTime(we.updated || we.lastModified) : '—';
+    }
+    if (timeDuration) {
+      if (we.created) {
+        const created = new Date(we.created);
+        const now = new Date();
+        const diffMs = now - created;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        timeDuration.textContent = diffDays > 0 ? `${diffDays}d ${diffHours}h` : `${diffHours}h`;
+      } else {
+        timeDuration.textContent = '—';
+      }
+    }
+  }
+
+  renderTags(we) {
+    const tagsList = document.getElementById('tagsList');
+    if (!tagsList) return;
+
+    const tags = we.tags || we.labels || ['work-effort'];
+    tagsList.innerHTML = `
+      ${tags.map(tag => `<span class="tag">${this.escapeHtml(tag)}</span>`).join('')}
+      <button class="tag-add" title="Add Tag">+</button>
+    `;
+  }
+
+  bindDetailEvents() {
+    // Tab switching
+    document.querySelectorAll('.detail-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const pane = document.getElementById(`${tab.dataset.tab}Pane`);
+        if (pane) pane.classList.add('active');
+        this.activeTab = tab.dataset.tab;
+      });
+    });
+
+    // Ticket filter
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.ticketFilter = btn.dataset.filter;
+        if (this.selectedItem) {
+          this.renderTicketsTab(this.selectedItem.we, null);
+          this.bindTicketCardEvents();
+        }
+      });
+    });
+
+    // Status controls
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.changeStatus(btn.dataset.status);
+      });
+    });
+
+    // Quick action buttons
+    document.getElementById('quickStartBtn')?.addEventListener('click', () => this.changeStatus('active'));
+    document.getElementById('quickPauseBtn')?.addEventListener('click', () => this.changeStatus('paused'));
+    document.getElementById('quickCompleteBtn')?.addEventListener('click', () => this.changeStatus('completed'));
+
+    // Ticket card events
+    this.bindTicketCardEvents();
+  }
+
+  bindTicketCardEvents() {
+    document.querySelectorAll('.ticket-card-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const card = header.closest('.ticket-card');
+        card.classList.toggle('expanded');
+      });
+    });
+
+    document.querySelectorAll('.ticket-action-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        const ticketId = btn.dataset.ticket;
+        await this.handleTicketAction(action, ticketId);
+      });
+    });
+  }
+
+  async handleTicketAction(action, ticketId) {
+    if (!this.selectedItem) return;
+
+    const { repo, we } = this.selectedItem;
+    const ticket = we.tickets?.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    const statusMap = {
+      'start': 'in_progress',
+      'pause': 'pending',
+      'complete': 'completed',
+      'block': 'blocked'
+    };
+
+    const newStatus = statusMap[action];
+    if (!newStatus) return;
+
+    // For now, just update locally and show toast
+    // In a full implementation, this would call an API
+    this.showToast('info', 'Ticket Action', `${ticket.title} → ${newStatus}`);
+
+    // Update local state (temporary until WebSocket updates)
+    ticket.status = newStatus;
+    this.renderTicketsTab(we, ticketId);
+    this.renderProgressPanel(we);
+    this.bindTicketCardEvents();
+  }
+
+  formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  formatRelativeTime(dateString) {
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+
+      if (diffSec < 60) return 'Just now';
+      if (diffMin < 60) return `${diffMin}m ago`;
+      if (diffHour < 24) return `${diffHour}h ago`;
+      if (diffDay < 7) return `${diffDay}d ago`;
+      return this.formatDate(dateString);
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  // ============================================================================
+  // Mobile Navigation
+  // ============================================================================
+
+  initMobileNav() {
+    const toggle = document.getElementById('mobileNavToggle');
+    const overlay = document.getElementById('mobileOverlay');
+    const sidebar = document.querySelector('.sidebar');
+
+    if (toggle) {
+      toggle.addEventListener('click', () => this.toggleMobileNav());
+    }
+
+    if (overlay) {
+      overlay.addEventListener('click', () => this.closeMobileNav());
+    }
+
+    // Close mobile nav when clicking a tree item
+    if (sidebar) {
+      sidebar.addEventListener('click', (e) => {
+        if (e.target.closest('.tree-node')) {
+          // Small delay to allow the click to register
+          setTimeout(() => this.closeMobileNav(), 150);
+        }
+      });
+    }
+
+    // Handle resize - close mobile nav when switching to desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 640) {
+        this.closeMobileNav();
+      }
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeMobileNav();
+      }
+    });
+  }
+
+  toggleMobileNav() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    const toggle = document.getElementById('mobileNavToggle');
+
+    const isOpen = sidebar?.classList.contains('mobile-open');
+
+    if (isOpen) {
+      this.closeMobileNav();
+    } else {
+      sidebar?.classList.add('mobile-open');
+      overlay?.classList.add('active');
+      toggle.innerHTML = '✕';
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden'; // Prevent scroll
+    }
+  }
+
+  closeMobileNav() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    const toggle = document.getElementById('mobileNavToggle');
+
+    sidebar?.classList.remove('mobile-open');
+    overlay?.classList.remove('active');
+    if (toggle) {
+      toggle.innerHTML = '☰';
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    document.body.style.overflow = ''; // Restore scroll
+  }
+
+  showEmptyDetailState() {
+    const container = document.querySelector('.detail-body');
+    if (container) {
+      container.innerHTML = `
+        <div class="detail-empty-state">
+          <div class="empty-icon">◈</div>
+          <h2 class="empty-title">Select a Work Effort</h2>
+          <p class="empty-message">Choose a work effort from the sidebar to view details, manage tickets, and track progress.</p>
+          <div class="empty-hints">
+            <div class="hint">
+              <span class="hint-icon">🌲</span>
+              <span class="hint-text">Browse the tree on the left</span>
+            </div>
+            <div class="hint">
+              <span class="hint-icon">🔍</span>
+              <span class="hint-text">Use search to find specific items</span>
+            </div>
+            <div class="hint">
+              <span class="hint-icon">▶</span>
+              <span class="hint-text">Try the Live Demo to see it in action</span>
+            </div>
+          </div>
+          <button class="empty-action-btn" onclick="window.missionControl.showDashboard()">
+            ← Back to Dashboard
+          </button>
+        </div>
+      `;
     }
   }
 
@@ -1454,6 +2106,229 @@ class MissionControl {
   }
 
   // ============================================================================
+  // Live Demo
+  // ============================================================================
+
+  async runLiveDemo() {
+    // Show panel and disable button
+    this.elements.demoPanel?.classList.remove('hidden');
+    this.elements.demoBtn?.classList.add('running');
+
+    // Define demo steps
+    const steps = [
+      { id: 'init', title: 'Initializing Demo', detail: 'Setting up the demonstration...' },
+      { id: 'create-we', title: 'Creating Work Effort', detail: 'Creating a new demo work effort...' },
+      { id: 'detect-we', title: 'File System Detection', detail: 'Waiting for file watcher to detect changes...' },
+      { id: 'create-ticket-1', title: 'Creating Ticket #1', detail: 'Adding first demo ticket...' },
+      { id: 'create-ticket-2', title: 'Creating Ticket #2', detail: 'Adding second demo ticket...' },
+      { id: 'detect-tickets', title: 'Real-time Update', detail: 'Watch the dashboard update in real-time...' },
+      { id: 'update-ticket', title: 'Updating Ticket Status', detail: 'Marking ticket as in_progress...' },
+      { id: 'complete-ticket', title: 'Completing Ticket', detail: 'Marking ticket as completed...' },
+      { id: 'complete-we', title: 'Completing Work Effort', detail: 'Marking entire work effort as completed...' },
+      { id: 'done', title: 'Demo Complete!', detail: 'All systems working correctly!' }
+    ];
+
+    // Render initial state
+    this.renderDemoSteps(steps);
+    this.updateDemoStatus('Starting demo...');
+
+    let workEffort = null;
+    let ticket1 = null;
+    let ticket2 = null;
+
+    try {
+      // Step 1: Initialize
+      await this.runDemoStep('init', steps, async () => {
+        await this.delay(800);
+        return 'Ready to begin';
+      });
+
+      // Step 2: Create Work Effort
+      await this.runDemoStep('create-we', steps, async () => {
+        const res = await fetch('/api/demo/work-effort', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'Demo Work Effort',
+            objective: 'Demonstrate the full Mission Control event system'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        workEffort = data.workEffort;
+        return `Created ${workEffort.id}`;
+      });
+
+      // Step 3: Wait for detection
+      await this.runDemoStep('detect-we', steps, async () => {
+        await this.delay(1500); // Wait for file watcher
+        return 'Work effort detected!';
+      });
+
+      // Step 4: Create Ticket 1
+      await this.runDemoStep('create-ticket-1', steps, async () => {
+        const res = await fetch('/api/demo/ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workEffortPath: workEffort.path,
+            title: 'Setup demo environment',
+            description: 'Initialize and configure the demo workspace'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        ticket1 = data.ticket;
+        return `Created ${ticket1.id}`;
+      });
+
+      // Step 5: Create Ticket 2
+      await this.runDemoStep('create-ticket-2', steps, async () => {
+        const res = await fetch('/api/demo/ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            workEffortPath: workEffort.path,
+            title: 'Verify event system',
+            description: 'Test all event types and notifications'
+          })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        ticket2 = data.ticket;
+        return `Created ${ticket2.id}`;
+      });
+
+      // Step 6: Wait for real-time update
+      await this.runDemoStep('detect-tickets', steps, async () => {
+        await this.delay(1500);
+        return 'Dashboard updated!';
+      });
+
+      // Step 7: Update ticket to in_progress
+      await this.runDemoStep('update-ticket', steps, async () => {
+        const res = await fetch(`/api/demo/ticket/${encodeURIComponent(ticket1.path)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'in_progress' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        await this.delay(1000);
+        return 'Status → in_progress';
+      });
+
+      // Step 8: Complete ticket
+      await this.runDemoStep('complete-ticket', steps, async () => {
+        const res = await fetch(`/api/demo/ticket/${encodeURIComponent(ticket1.path)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        await this.delay(1000);
+        return 'Status → completed ✓';
+      });
+
+      // Step 9: Complete work effort
+      await this.runDemoStep('complete-we', steps, async () => {
+        const res = await fetch(`/api/demo/work-effort/${encodeURIComponent(workEffort.path)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'completed' })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error);
+        await this.delay(1000);
+        return 'Work effort completed!';
+      });
+
+      // Step 10: Done
+      await this.runDemoStep('done', steps, async () => {
+        return '🎉 All systems operational!';
+      });
+
+      // Success!
+      this.updateDemoStatus('Demo completed successfully!', 'success');
+      this.showToast('success', '🎉 Demo Complete!', 'All Mission Control systems verified');
+
+      if (this.animationController) {
+        this.animationController._celebrationEffect();
+      }
+
+    } catch (error) {
+      console.error('Demo error:', error);
+      this.updateDemoStatus(`Error: ${error.message}`, 'error');
+      this.showToast('error', 'Demo Failed', error.message);
+    }
+
+    // Re-enable button
+    this.elements.demoBtn?.classList.remove('running');
+  }
+
+  renderDemoSteps(steps) {
+    this.elements.demoPanelSteps.innerHTML = steps.map(step => `
+      <div class="demo-step pending" data-step="${step.id}">
+        <div class="demo-step-icon">○</div>
+        <div class="demo-step-content">
+          <div class="demo-step-title">${this.escapeHtml(step.title)}</div>
+          <div class="demo-step-detail">${this.escapeHtml(step.detail)}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async runDemoStep(stepId, steps, action) {
+    const stepEl = this.elements.demoPanelSteps.querySelector(`[data-step="${stepId}"]`);
+    if (!stepEl) return;
+
+    const STEP_PAUSE = 2670; // 2.67 seconds per step for user to absorb
+
+    // Set to running
+    stepEl.className = 'demo-step running';
+    stepEl.querySelector('.demo-step-icon').textContent = '◌';
+
+    // Scroll step into view
+    stepEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    try {
+      const result = await action();
+
+      // Set to complete
+      stepEl.className = 'demo-step complete';
+      stepEl.querySelector('.demo-step-icon').textContent = '✓';
+      stepEl.querySelector('.demo-step-detail').textContent = result;
+
+      // Pause so user can see the result
+      await this.delay(STEP_PAUSE);
+
+      return result;
+    } catch (error) {
+      stepEl.className = 'demo-step error';
+      stepEl.querySelector('.demo-step-icon').textContent = '✗';
+      stepEl.querySelector('.demo-step-detail').textContent = error.message;
+      await this.delay(STEP_PAUSE); // Still pause on error so user can see
+      throw error;
+    }
+  }
+
+  updateDemoStatus(message, type = '') {
+    const footer = this.elements.demoPanelFooter;
+    if (footer) {
+      footer.innerHTML = `<span class="demo-status ${type}">${this.escapeHtml(message)}</span>`;
+    }
+  }
+
+  closeDemoPanel() {
+    this.elements.demoPanel?.classList.add('hidden');
+  }
+
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // ============================================================================
   // Sidebar
   // ============================================================================
 
@@ -1841,7 +2716,7 @@ class MissionControl {
                  ${this.selectedRepos.has(item.path) ? 'checked' : ''}
                  ${item.isAdded ? 'checked disabled' : ''}>
           <span class="browser-item-icon ${item.hasWorkEfforts ? 'repo' : 'folder'}">
-            ${item.hasWorkEfforts ? '◈' : '📁'}
+            ${item.hasWorkEfforts ? '◈' : '◫'}
           </span>
           <div class="browser-item-content">
             <div class="browser-item-name">${this.escapeHtml(item.name)}</div>
