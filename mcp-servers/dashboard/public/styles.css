@@ -678,13 +678,18 @@ body {
 }
 
 .bell-icon {
-  font-size: 1rem;
-  filter: grayscale(1);
-  transition: filter var(--transition-fast);
+  width: 18px;
+  height: 18px;
+  stroke: var(--text-muted);
+  transition: stroke var(--transition-fast), transform var(--transition-fast);
+}
+
+.bell-btn:hover .bell-icon {
+  stroke: var(--text-primary);
 }
 
 .bell-btn.has-notifications .bell-icon {
-  filter: none;
+  stroke: var(--accent);
   animation: bellRing 0.5s ease;
 }
 
