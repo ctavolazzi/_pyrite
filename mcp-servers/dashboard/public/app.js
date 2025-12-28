@@ -471,6 +471,13 @@ class MissionControl {
 
   handleMessage(message) {
     switch (message.type) {
+      case 'hot_reload':
+        // Hot reload: refresh page when code changes
+        console.log(`🔥 Hot reload triggered: ${message.file}`);
+        this.showToast('info', '🔥 Reloading...', `${message.file} changed`);
+        setTimeout(() => window.location.reload(), 500);
+        return;
+
       case 'init':
         this.repos = message.repos;
         this.render();
@@ -1296,7 +1303,7 @@ class MissionControl {
     // Show test panel and disable button
     this.elements.testResults?.classList.remove('hidden');
     this.elements.testSystemBtn?.classList.add('running');
-    
+
     // Define tests
     const tests = [
       { name: 'WebSocket Connection', test: () => this.testWebSocket() },
@@ -1310,7 +1317,7 @@ class MissionControl {
 
     // Clear previous results
     this.elements.testResultsBody.innerHTML = '';
-    
+
     let passed = 0;
     let failed = 0;
 
@@ -1323,7 +1330,7 @@ class MissionControl {
       try {
         await new Promise(resolve => setTimeout(resolve, 300)); // Visual delay
         const result = await test();
-        
+
         if (result.pass) {
           this.updateTestItem(itemEl, 'pass', result.message || 'Passed');
           passed++;
@@ -1407,9 +1414,9 @@ class MissionControl {
   async testEventBus() {
     const hasEventBus = !!this.eventBus;
     const metrics = this.eventBus?.getMetrics?.();
-    return { 
-      pass: hasEventBus, 
-      message: metrics ? `${metrics.totalEmitted} events emitted` : 'Active' 
+    return {
+      pass: hasEventBus,
+      message: metrics ? `${metrics.totalEmitted} events emitted` : 'Active'
     };
   }
 
@@ -1429,9 +1436,9 @@ class MissionControl {
 
   async testNotificationCenter() {
     const hasNotifications = Array.isArray(this.notifications);
-    return { 
-      pass: hasNotifications, 
-      message: `${this.notifications?.length || 0} notifications` 
+    return {
+      pass: hasNotifications,
+      message: `${this.notifications?.length || 0} notifications`
     };
   }
 

@@ -5,6 +5,7 @@ import { createServer } from 'http';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import chokidar from 'chokidar';
 import { parseRepo, getRepoStats } from './lib/parser.js';
 import { DebouncedWatcher } from './lib/watcher.js';
 
@@ -458,6 +459,27 @@ async function start() {
   // Initialize all configured repos
   for (const repo of config.repos) {
     await initRepo(repo.name, repo.path);
+  }
+
+  // === Hot Reload for Development ===
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (isDev) {
+    const publicWatcher = chokidar.watch(path.join(__dirname, 'public'), {
+      ignoreInitial: true,
+      awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 100 }
+    });
+
+    let reloadDebounce = null;
+    publicWatcher.on('all', (event, filePath) => {
+      if (reloadDebounce) clearTimeout(reloadDebounce);
+      reloadDebounce = setTimeout(() => {
+        const fileName = path.basename(filePath);
+        console.log(`🔥 [Hot Reload] ${event}: ${fileName}`);
+        broadcast({ type: 'hot_reload', file: fileName });
+      }, 500); // 500ms debounce to batch rapid saves
+    });
+
+    console.log('🔥 Hot reload enabled for development');
   }
 
   // Try to find an available port
