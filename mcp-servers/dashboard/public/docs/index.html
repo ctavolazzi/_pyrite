@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - Pyrite Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    /* Docs page specific styles - extends shared styles.css */
+    body.docs-page {
+      overflow-y: auto;
+    }
+
+    .docs-page .docs-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    /* Page Header */
+    .docs-header {
+      text-align: center;
+      padding: var(--space-2xl) 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-xl);
+    }
+
+    .docs-header h1 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+      background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .docs-header p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    .docs-header-buttons {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      margin-top: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .docs-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+
+    .docs-btn-primary {
+      background: var(--accent);
+      color: var(--bg-deep);
+    }
+
+    .docs-btn-primary:hover {
+      background: var(--accent-bright);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .docs-btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+
+    .docs-btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Quick Start Section */
+    .quick-start {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .quick-start h2 {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: var(--space-md);
+    }
+
+    .quick-start p {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+      font-size: 0.9rem;
+    }
+
+    /* Code Blocks */
+    .code-block {
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      transition: all var(--transition-fast);
+    }
+
+    .copy-btn:hover {
+      background: var(--bg-card);
+      color: var(--accent);
+    }
+
+    .copy-btn.copied {
+      color: var(--status-completed);
+    }
+
+    pre {
+      padding: var(--space-md);
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-primary);
+    }
+
+    code {
+      font-family: var(--font-mono);
+    }
+
+    /* Server Cards */
+    .servers-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .server-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .server-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .server-header:hover {
+      background: var(--bg-elevated);
+    }
+
+    .server-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .server-title h3 {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .version-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .lang-badge {
+      background: var(--bg-deep);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+    }
+
+    .expand-icon {
+      color: var(--text-muted);
+      transition: transform var(--transition-fast);
+      font-size: 0.8rem;
+    }
+
+    .server-card.expanded .expand-icon {
+      transform: rotate(180deg);
+    }
+
+    .server-content {
+      display: none;
+      padding: var(--space-lg);
+    }
+
+    .server-card.expanded .server-content {
+      display: block;
+    }
+
+    .server-desc {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-lg);
+      font-size: 0.9rem;
+    }
+
+    /* Tools Section */
+    .tools-section h4 {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tool-item {
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: var(--space-sm);
+      overflow: hidden;
+    }
+
+    .tool-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .tool-header:hover {
+      background: var(--bg-secondary);
+    }
+
+    .tool-name {
+      font-family: var(--font-mono);
+      color: var(--status-completed);
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    .tool-details {
+      display: none;
+      padding: var(--space-md);
+      border-top: 1px solid var(--border);
+      background: var(--bg-secondary);
+    }
+
+    .tool-item.expanded .tool-details {
+      display: block;
+    }
+
+    .tool-desc {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+      font-size: 0.9rem;
+    }
+
+    /* Parameters Table */
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .params-table th {
+      text-align: left;
+      padding: var(--space-sm);
+      color: var(--text-muted);
+      font-weight: 500;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .params-table td {
+      padding: var(--space-sm);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .params-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .param-name {
+      font-family: var(--font-mono);
+      color: var(--accent);
+      font-size: 0.8rem;
+    }
+
+    .param-type {
+      color: var(--status-pending);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .param-required {
+      color: var(--status-blocked);
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* REST Endpoints */
+    .endpoint-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: var(--space-xs);
+    }
+
+    .method {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: var(--radius);
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .method-get { background: rgba(59, 158, 255, 0.15); color: var(--status-in-progress); }
+    .method-post { background: rgba(16, 185, 129, 0.15); color: var(--status-completed); }
+    .method-patch { background: rgba(230, 162, 60, 0.15); color: var(--status-pending); }
+    .method-delete { background: rgba(239, 68, 68, 0.15); color: var(--status-blocked); }
+
+    .endpoint-path {
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      flex: 1;
+    }
+
+    .endpoint-desc {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Footer */
+    .docs-footer {
+      text-align: center;
+      padding: var(--space-xl);
+      margin-top: var(--space-xl);
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .docs-footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .docs-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: var(--space-xl);
+      right: var(--space-xl);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      padding: var(--space-md) var(--space-lg);
+      border-radius: var(--radius);
+      border: 1px solid var(--accent);
+      box-shadow: var(--shadow-md), var(--shadow-glow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all var(--transition-normal);
+      z-index: 1000;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .docs-page .docs-content {
+        padding: var(--space-md);
+      }
+
+      .docs-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .endpoint-item {
+        flex-wrap: wrap;
+      }
+
+      .endpoint-desc {
+        width: 100%;
+        margin-top: var(--space-xs);
+      }
+    }
+  </style>
+</head>
+<body class="docs-page">
+  <!-- Site Navigation -->
+  <nav class="site-nav">
+    <a href="/" class="site-nav-brand">
+      <span class="site-nav-gem">◈</span>
+      <span class="site-nav-text">_pyrite</span>
+    </a>
+    <ul class="site-nav-links" id="siteNavLinks">
+      <li><a href="/" class="site-nav-link">Dashboard</a></li>
+      <li><a href="/docs/" class="site-nav-link site-nav-link-active">Docs</a></li>
+      <li class="site-nav-status">
+        <span class="site-nav-status-dot" id="apiStatusDot"></span>
+        <span>API</span>
+      </li>
+    </ul>
+    <button class="site-nav-toggle" id="siteNavToggle" aria-label="Toggle navigation">☰</button>
+  </nav>
+
+  <div class="docs-content">
+    <header class="docs-header">
+      <h1>◈ API Documentation</h1>
+      <p>MCP Servers & REST API for AI-assisted development</p>
+      <div class="docs-header-buttons">
+        <button class="docs-btn docs-btn-primary" onclick="copyAIDocs()">
+          📋 Copy AI Docs
+        </button>
+        <a href="ai-docs.txt" download class="docs-btn docs-btn-secondary">
+          ↓ Download
+        </a>
+      </div>
+    </header>
+
+    <!-- Quick Start -->
+    <section class="quick-start">
+      <h2>⚡ Quick Start</h2>
+      <p>Add to <code>~/.cursor/mcp.json</code> and restart Cursor:</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span>~/.cursor/mcp.json</span>
+          <button class="copy-btn" onclick="copyCode(this, 'config-code')">Copy</button>
+        </div>
+        <pre><code id="config-code">{
+  "mcpServers": {
+    "work-efforts": {
+      "command": "node",
+      "args": ["~/.mcp-servers/work-efforts/server.js"]
+    },
+    "simple-tools": {
+      "command": "node",
+      "args": ["~/.mcp-servers/simple-tools/server.js"]
+    },
+    "docs-maintainer": {
+      "command": "~/.mcp-servers/docs-maintainer/.venv/bin/python3",
+      "args": ["~/.mcp-servers/docs-maintainer/server.py"]
+    }
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- MCP Servers -->
+    <section class="servers-grid">
+
+      <!-- work-efforts -->
+      <div class="server-card expanded" id="work-efforts">
+        <div class="server-header" onclick="toggleServer('work-efforts')">
+          <div class="server-title">
+            <h3>work-efforts</h3>
+            <span class="version-badge">v0.3.0</span>
+            <span class="lang-badge">Node.js</span>
+          </div>
+          <span class="expand-icon">▼</span>
+        </div>
+        <div class="server-content">
+          <p class="server-desc">Work effort and ticket management with date-based IDs (WE-YYMMDD-xxxx format).</p>
+
+          <div class="tools-section">
+            <h4>Tools (7)</h4>
+
+            <div class="tool-item" id="tool-create_work_effort">
+              <div class="tool-header" onclick="toggleTool('tool-create_work_effort')">
+                <span class="tool-name">create_work_effort</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Create a new work effort with WE-YYMMDD-xxxx ID format. Creates folder, index.md, and tickets/ subfolder.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                  <tr><td><span class="param-name">title</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Work effort title</td></tr>
+                  <tr><td><span class="param-name">objective</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>What needs to be done and why</td></tr>
+                  <tr><td><span class="param-name">branch</span></td><td><span class="param-type">string</span></td><td>Git branch name (auto-generated if not provided)</td></tr>
+                  <tr><td><span class="param-name">repository</span></td><td><span class="param-type">string</span></td><td>Repository name for reference</td></tr>
+                  <tr><td><span class="param-name">tickets</span></td><td><span class="param-type">array</span></td><td>Initial tickets to create [{title, description?, acceptance_criteria?}]</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-create_ticket">
+              <div class="tool-header" onclick="toggleTool('tool-create_ticket')">
+                <span class="tool-name">create_ticket</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Create a new ticket (TKT-xxxx-NNN) in an existing work effort.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">work_effort_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to work effort directory</td></tr>
+                  <tr><td><span class="param-name">title</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Ticket title</td></tr>
+                  <tr><td><span class="param-name">description</span></td><td><span class="param-type">string</span></td><td>What needs to be done</td></tr>
+                  <tr><td><span class="param-name">acceptance_criteria</span></td><td><span class="param-type">array</span></td><td>List of acceptance criteria strings</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-list_work_efforts">
+              <div class="tool-header" onclick="toggleTool('tool-list_work_efforts')">
+                <span class="tool-name">list_work_efforts</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">List all work efforts in a repository.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                  <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>Filter: "active", "paused", "completed", "all" (default: all)</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-list_tickets">
+              <div class="tool-header" onclick="toggleTool('tool-list_tickets')">
+                <span class="tool-name">list_tickets</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">List all tickets in a work effort.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">work_effort_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to work effort directory</td></tr>
+                  <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>Filter: "pending", "in_progress", "completed", "blocked", "all" (default: all)</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-update_work_effort">
+              <div class="tool-header" onclick="toggleTool('tool-update_work_effort')">
+                <span class="tool-name">update_work_effort</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Update a work effort status or add progress notes.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">work_effort_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to work effort directory</td></tr>
+                  <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>New status: "active", "paused", "completed"</td></tr>
+                  <tr><td><span class="param-name">progress</span></td><td><span class="param-type">string</span></td><td>Progress note to add</td></tr>
+                  <tr><td><span class="param-name">commit</span></td><td><span class="param-type">string</span></td><td>Commit hash to add to commits list</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-update_ticket">
+              <div class="tool-header" onclick="toggleTool('tool-update_ticket')">
+                <span class="tool-name">update_ticket</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Update a ticket status, files changed, or notes.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">ticket_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to ticket file</td></tr>
+                  <tr><td><span class="param-name">status</span></td><td><span class="param-type">string</span></td><td>New status: "pending", "in_progress", "completed", "blocked"</td></tr>
+                  <tr><td><span class="param-name">files_changed</span></td><td><span class="param-type">array</span></td><td>List of file paths that were modified</td></tr>
+                  <tr><td><span class="param-name">notes</span></td><td><span class="param-type">string</span></td><td>Implementation notes to add</td></tr>
+                  <tr><td><span class="param-name">commit</span></td><td><span class="param-type">string</span></td><td>Commit hash to add</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-search_work_efforts">
+              <div class="tool-header" onclick="toggleTool('tool-search_work_efforts')">
+                <span class="tool-name">search_work_efforts</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Search work efforts and tickets by keyword.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                  <tr><td><span class="param-name">query</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Search keyword</td></tr>
+                  <tr><td><span class="param-name">include_tickets</span></td><td><span class="param-type">boolean</span></td><td>Also search within tickets (default: true)</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- simple-tools -->
+      <div class="server-card" id="simple-tools">
+        <div class="server-header" onclick="toggleServer('simple-tools')">
+          <div class="server-title">
+            <h3>simple-tools</h3>
+            <span class="version-badge">v0.2.0</span>
+            <span class="lang-badge">Node.js</span>
+          </div>
+          <span class="expand-icon">▼</span>
+        </div>
+        <div class="server-content">
+          <p class="server-desc">Utility tools for generating random names, unique IDs, and formatting dates.</p>
+
+          <div class="tools-section">
+            <h4>Tools (3)</h4>
+
+            <div class="tool-item" id="tool-generate_random_name">
+              <div class="tool-header" onclick="toggleTool('tool-generate_random_name')">
+                <span class="tool-name">generate_random_name</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Generate a random name like "HappyPanda123".</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">No parameters required.</p>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-generate_unique_id">
+              <div class="tool-header" onclick="toggleTool('tool-generate_unique_id')">
+                <span class="tool-name">generate_unique_id</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Generate a unique ID with timestamp (e.g., "1703721600000-abc123xyz").</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">No parameters required.</p>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-format_date">
+              <div class="tool-header" onclick="toggleTool('tool-format_date')">
+                <span class="tool-name">format_date</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Format dates consistently in various formats.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">date</span></td><td><span class="param-type">string</span></td><td>Date to format (or "now" for current date)</td></tr>
+                  <tr><td><span class="param-name">format</span></td><td><span class="param-type">string</span></td><td>"iso" | "human" | "filename" | "devlog" (default: iso)</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- docs-maintainer -->
+      <div class="server-card" id="docs-maintainer">
+        <div class="server-header" onclick="toggleServer('docs-maintainer')">
+          <div class="server-title">
+            <h3>docs-maintainer</h3>
+            <span class="version-badge">v0.1.0</span>
+            <span class="lang-badge">Python</span>
+          </div>
+          <span class="expand-icon">▼</span>
+        </div>
+        <div class="server-content">
+          <p class="server-desc">Documentation management with Johnny Decimal structure, auto-indexing, and health checks.</p>
+
+          <div class="tools-section">
+            <h4>Tools (7)</h4>
+
+            <div class="tool-item" id="tool-initialize_docs">
+              <div class="tool-header" onclick="toggleTool('tool-initialize_docs')">
+                <span class="tool-name">initialize_docs</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Create the _docs structure and master index.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-create_doc">
+              <div class="tool-header" onclick="toggleTool('tool-create_doc')">
+                <span class="tool-name">create_doc</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Create a new doc with Johnny Decimal numbering and update indexes.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                  <tr><td><span class="param-name">area</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Area prefix (e.g., "10-19" or "10-19_project_admin")</td></tr>
+                  <tr><td><span class="param-name">category</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Category prefix (e.g., "10" or "10_setup")</td></tr>
+                  <tr><td><span class="param-name">title</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Document title</td></tr>
+                  <tr><td><span class="param-name">content</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Document content (markdown)</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-update_doc">
+              <div class="tool-header" onclick="toggleTool('tool-update_doc')">
+                <span class="tool-name">update_doc</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Update a doc's content, links, and updated timestamp.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">file_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to document file</td></tr>
+                  <tr><td><span class="param-name">content</span></td><td><span class="param-type">string</span></td><td>New content (optional)</td></tr>
+                  <tr><td><span class="param-name">add_links</span></td><td><span class="param-type">array</span></td><td>Links to add to frontmatter (optional)</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-rebuild_indices">
+              <div class="tool-header" onclick="toggleTool('tool-rebuild_indices')">
+                <span class="tool-name">rebuild_indices</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Regenerate all index files, clean broken links, and report health.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-link_work_effort">
+              <div class="tool-header" onclick="toggleTool('tool-link_work_effort')">
+                <span class="tool-name">link_work_effort</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Link a doc to a work effort with bidirectional frontmatter updates.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">doc_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to document</td></tr>
+                  <tr><td><span class="param-name">work_effort_id</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Work effort ID or path</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-search_docs">
+              <div class="tool-header" onclick="toggleTool('tool-search_docs')">
+                <span class="tool-name">search_docs</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Search titles, content, and frontmatter in _docs.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                  <tr><td><span class="param-name">query</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Search keyword</td></tr>
+                  <tr><td><span class="param-name">search_content</span></td><td><span class="param-type">boolean</span></td><td>Search within content (default: true)</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <div class="tool-item" id="tool-check_health">
+              <div class="tool-header" onclick="toggleTool('tool-check_health')">
+                <span class="tool-name">check_health</span>
+                <span class="expand-icon">▼</span>
+              </div>
+              <div class="tool-details">
+                <p class="tool-desc">Return documentation health score and issue list.</p>
+                <table class="params-table">
+                  <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+                  <tr><td><span class="param-name">repo_path</span> <span class="param-required">required</span></td><td><span class="param-type">string</span></td><td>Full path to repository</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard REST API -->
+      <div class="server-card" id="dashboard">
+        <div class="server-header" onclick="toggleServer('dashboard')">
+          <div class="server-title">
+            <h3>dashboard (Mission Control)</h3>
+            <span class="version-badge">REST</span>
+            <span class="lang-badge">Express</span>
+          </div>
+          <span class="expand-icon">▼</span>
+        </div>
+        <div class="server-content">
+          <p class="server-desc">REST API + WebSocket server for the Mission Control dashboard. Real-time work effort monitoring across repositories.</p>
+
+          <div class="tools-section">
+            <h4>Endpoints</h4>
+
+            <div class="endpoint-item">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/api/health</span>
+              <span class="endpoint-desc">Server health check</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/api/repos</span>
+              <span class="endpoint-desc">List all monitored repos</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/api/repos/:name</span>
+              <span class="endpoint-desc">Get single repo state</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/repos</span>
+              <span class="endpoint-desc">Add new repository {name, path}</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-delete">DELETE</span>
+              <span class="endpoint-path">/api/repos/:name</span>
+              <span class="endpoint-desc">Remove repository</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-patch">PATCH</span>
+              <span class="endpoint-path">/api/repos/:name/work-efforts/:weId/status</span>
+              <span class="endpoint-desc">Update work effort status</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/api/browse?path=...</span>
+              <span class="endpoint-desc">Browse directories</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/repos/bulk</span>
+              <span class="endpoint-desc">Add multiple repos</span>
+            </div>
+
+            <h4 style="margin-top: var(--space-lg);">WebSocket Events</h4>
+            <p style="color: var(--text-secondary); margin-bottom: var(--space-md); font-size: 0.85rem;">Connect to <code>ws://localhost:3847</code> for real-time updates.</p>
+
+            <div class="endpoint-item">
+              <span class="method" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">WS</span>
+              <span class="endpoint-path">init</span>
+              <span class="endpoint-desc">Initial state on connection</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">WS</span>
+              <span class="endpoint-path">update</span>
+              <span class="endpoint-desc">Repo state changed</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">WS</span>
+              <span class="endpoint-path">repo_change</span>
+              <span class="endpoint-desc">Repo added/removed</span>
+            </div>
+
+            <div class="endpoint-item">
+              <span class="method" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">WS</span>
+              <span class="endpoint-path">hot_reload</span>
+              <span class="endpoint-desc">UI file changed (dev)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <footer class="docs-footer">
+      <p>◈ Pyrite Mission Control • No authentication required (local only)</p>
+      <p style="margin-top: var(--space-sm);">
+        <a href="ai-docs.txt" download>Download AI Docs</a> •
+        <a href="https://modelcontextprotocol.io" target="_blank">MCP Docs</a>
+      </p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <script>
+    // Toggle server card expansion
+    function toggleServer(id) {
+      document.getElementById(id).classList.toggle('expanded');
+    }
+
+    // Toggle tool details
+    function toggleTool(id) {
+      document.getElementById(id).classList.toggle('expanded');
+    }
+
+    // Copy code to clipboard
+    function copyCode(btn, codeId) {
+      const code = document.getElementById(codeId).textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // Show toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Copy AI docs to clipboard
+    function copyAIDocs() {
+      fetch('ai-docs.txt')
+        .then(r => r.text())
+        .then(text => {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast('AI docs copied to clipboard!');
+          });
+        })
+        .catch(() => {
+          showToast('Could not load AI docs');
+        });
+    }
+
+    // Mobile nav toggle
+    document.getElementById('siteNavToggle')?.addEventListener('click', function() {
+      document.getElementById('siteNavLinks')?.classList.toggle('open');
+    });
+
+    // Check API status for site nav indicator
+    fetch('/api/health')
+      .then(r => r.ok ? 'connected' : 'disconnected')
+      .catch(() => 'disconnected')
+      .then(status => {
+        const dot = document.getElementById('apiStatusDot');
+        if (dot && status === 'connected') {
+          dot.classList.add('connected');
+        }
+      });
+  </script>
+</body>
+</html>

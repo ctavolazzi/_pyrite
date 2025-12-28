@@ -13,7 +13,23 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="has-sidebar">
+  <!-- Site Navigation -->
+  <nav class="site-nav">
+    <a href="/" class="site-nav-brand">
+      <span class="site-nav-gem">◈</span>
+      <span class="site-nav-text">_pyrite</span>
+    </a>
+    <ul class="site-nav-links">
+      <li><a href="/" class="site-nav-link site-nav-link-active">Dashboard</a></li>
+      <li><a href="/docs/" class="site-nav-link">Docs</a></li>
+      <li class="site-nav-status">
+        <span class="site-nav-status-dot" id="apiStatusDot"></span>
+        <span>API</span>
+      </li>
+    </ul>
+  </nav>
+
   <!-- Mobile Navigation Toggle -->
   <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">☰</button>
   <div class="mobile-overlay" id="mobileOverlay"></div>
@@ -35,6 +51,12 @@
         <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
           <span class="toggle-icon">◂</span>
         </button>
+      </div>
+
+      <!-- Mobile Nav Links (shown on mobile inside sidebar) -->
+      <div class="sidebar-nav-links">
+        <a href="/" class="sidebar-nav-link active">Dashboard</a>
+        <a href="/docs/" class="sidebar-nav-link">Docs</a>
       </div>
 
       <!-- Tagline -->
@@ -216,7 +238,7 @@
             <span class="footer-version">v0.2.0</span>
           </div>
           <div class="footer-right">
-            <span class="footer-link" id="footerDocs">Docs</span>
+            <a href="docs/" class="footer-link" id="footerDocs">Docs</a>
             <span class="footer-sep">•</span>
             <span class="footer-link" id="footerGithub">GitHub</span>
             <span class="footer-sep">•</span>
@@ -612,5 +634,14 @@
   <script src="charts.js"></script>
   <script src="events.js"></script>
   <script src="app.js"></script>
+  <script>
+    // Check API status for site nav indicator
+    fetch('/api/health')
+      .then(r => r.ok ? 'online' : 'offline')
+      .catch(() => 'offline')
+      .then(status => {
+        document.getElementById('apiStatusDot')?.classList.add(status);
+      });
+  </script>
 </body>
 </html>
