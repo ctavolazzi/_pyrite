@@ -1,12 +1,15 @@
-# Claude Code Task - Active
-
-**Status:** AWAITING_PICKUP
-**Created:** 2025-12-31 13:15 PST
-**Created By:** Cursor (local session)
-
+---
+status: awaiting_pickup
+assigned_to: claude_code
+created: 2025-12-31T13:15:00-08:00
+created_by: cursor
+task_type: tool_development
+priority: normal
 ---
 
-## Your Task
+# Task: Obsidian Markdown Linter
+
+## Goal
 
 Build an **Obsidian-style markdown linter tool**.
 
@@ -37,7 +40,7 @@ Start your response with:
 ### Step 3: Propose Scope
 Before creating any work effort:
 - What's MVP? What's future?
-- Update `CROSS_CHAT_CONTEXT.md` with your proposal
+- Update `_coordination/CONTEXT.md` with your proposal
 - Commit and push
 - **STOP and wait for Cursor feedback**
 
@@ -52,7 +55,7 @@ Only after Cursor approves your scope:
 
 | File | Purpose |
 |------|---------|
-| `_work_efforts/CROSS_CHAT_CONTEXT.md` | Full coordination protocol |
+| `_coordination/CONTEXT.md` | Full coordination protocol |
 | `tools/github-health-check/check.py` | Pattern to follow |
 | `_spin_up/understanding_20251231_1305.md` | Session context |
 
@@ -61,7 +64,7 @@ Only after Cursor approves your scope:
 ## Coordination
 
 - **Cursor (local):** Monitoring, will review your scope proposal
-- **You (Claude Code):** Research, propose, implement after approval
+- **Claude Code:** Research, propose, implement after approval
 - **Handoff point:** Your scope proposal commit
 
 ---
@@ -78,4 +81,3 @@ Only after Cursor approves your scope:
 ---
 
 **When you find this file, you've found your task. Begin with Step 1.**
-
