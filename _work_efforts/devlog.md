@@ -1,5 +1,38 @@
 # Pyrite Devlog
 
+## 2025-12-31
+
+### 12:34 - GitHub Health Check Tool - Work Effort Created
+
+**Work Effort:** `WE-251231-25qq` - GitHub Health Check Tool - Foundation
+
+**Context:** This is the first serious tool for the _pyrite ecosystem. The larger vision:
+- _pyrite becomes a forkable cross-chat AI context management platform
+- GitHub repo serves as central data store across AI sessions
+- Users fork _pyrite to manage their own AI-assisted workflows
+
+**Tool Purpose:**
+- Session initialization / health check for GitHub API access
+- Validates authentication, permissions, rate limits before work begins
+- Foundation for multi-repo management coming later
+
+**Tickets:**
+1. TKT-25qq-001: Define tool architecture and file structure
+2. TKT-25qq-002: Implement core GitHub API health checks
+3. TKT-25qq-003: Add security layer for token handling
+4. TKT-25qq-004: Create CLI interface for manual runs
+5. TKT-25qq-005: Add MCP server integration for AI tools
+6. TKT-25qq-006: Write documentation for forkers
+
+**Cross-Chat Coordination:**
+- Cursor (local): Architecture decisions, review, testing
+- Claude Code (cloud): GitHub API implementation, PR creation
+- Prompt file: `_work_efforts/WE-251231-25qq_.../CLAUDE_CODE_PROMPT.md`
+
+**Status:** Starting - awaiting Claude Code to create feature branch and PR
+
+---
+
 ## 2025-12-20
 
 ### 19:45 - Project Initialized
