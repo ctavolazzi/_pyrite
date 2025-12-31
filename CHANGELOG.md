@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2025-12-31
+
+### Added
+- **GitHub Health Check Tool**: Session startup verification for GitHub integration
+  - 7 health checks (auth, rate limits, repo access, permissions, branches, PRs, issues)
+  - Zero external dependencies (stdlib only)
+  - CLI with `--token`, `--repo-path`, `--quiet` flags
+  - Claude Code session hook (`.claude/skills/SessionStart.md`)
+- **Cross-Chat Coordination System**: AI tool collaboration infrastructure
+  - `_coordination/CONTEXT.md` - state sharing between AI tools
+  - `_coordination/tasks/` - pending task queue with frontmatter status
+  - `_coordination/completed/` - archived handoffs
+- **Structure Check Tool**: Repository structure verification
+  - Composable individual checks (no spaghetti code)
+  - Configurable expected structure via Python dict
+  - Auto-fix for missing directories (`--fix`)
+  - Checks: coordination, work_efforts, spin_up, tools
+- **Spin-Up Infrastructure**: Session initialization system
+  - `_spin_up/SPIN_UP_PROCEDURE.md` - full diagnostic procedure
+  - Understanding snapshots for session continuity
+  - `.cursor/commands/spin-up.md` - quick orientation command
+
+### Changed
+- Reorganized coordination files from `_work_efforts/` to `_coordination/`
+- Updated spin-up command to include structure and task checks
+- Task files now use YAML frontmatter for status tracking
+
+### Documentation
+- Added tool READMEs (github-health-check, structure-check)
+- Added `.claude/README.md` for Claude Code configuration
+- Updated main README with new structure
+
 ## [0.3.0] - 2025-12-28
 
 ### Added
