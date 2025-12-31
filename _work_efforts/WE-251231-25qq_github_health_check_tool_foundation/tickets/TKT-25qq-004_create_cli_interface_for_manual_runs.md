@@ -2,7 +2,7 @@
 id: TKT-25qq-004
 parent: WE-251231-25qq
 title: "Create CLI interface for manual runs"
-status: pending
+status: completed
 created: 2025-12-31T20:34:35.148Z
 created_by: ctavolazzi
 assigned_to: null
@@ -25,7 +25,9 @@ assigned_to: null
 - (populated when complete)
 
 ## Implementation Notes
+- 12/31/2025: Completed via PR #9. CLI with --token, --repo-path, --quiet flags. Help text and argument parsing implemented.
 - (decisions, blockers, context)
 
 ## Commits
+- `372353e`
 - (populated as work progresses)

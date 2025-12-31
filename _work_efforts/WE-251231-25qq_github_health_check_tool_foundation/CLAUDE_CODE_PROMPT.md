@@ -42,22 +42,22 @@ class GitHubHealthCheck:
     Validates GitHub API access and permissions.
     Run at start of AI chat sessions.
     """
-    
+
     def check_authentication(self) -> CheckResult:
         """Verify token is valid, get authenticated user."""
-        
+
     def check_repo_access(self, owner: str, repo: str) -> CheckResult:
         """Verify read access to specified repo."""
-        
+
     def check_write_permissions(self, owner: str, repo: str) -> CheckResult:
         """Verify can create branches, push commits."""
-        
+
     def check_pr_permissions(self, owner: str, repo: str) -> CheckResult:
         """Verify can create/update PRs."""
-        
+
     def check_rate_limits(self) -> CheckResult:
         """Check remaining API calls."""
-        
+
     def run_all(self, owner: str, repo: str) -> HealthReport:
         """Run full health check suite."""
 ```

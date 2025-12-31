@@ -2,7 +2,7 @@
 id: TKT-25qq-003
 parent: WE-251231-25qq
 title: "Add security layer for token handling"
-status: pending
+status: completed
 created: 2025-12-31T20:34:35.147Z
 created_by: ctavolazzi
 assigned_to: null
@@ -25,7 +25,9 @@ assigned_to: null
 - (populated when complete)
 
 ## Implementation Notes
+- 12/31/2025: Completed via PR #9. Secure token handling: uses GITHUB_TOKEN/GH_TOKEN env vars, no token exposure in output, graceful error messages.
 - (decisions, blockers, context)
 
 ## Commits
+- `372353e`
 - (populated as work progresses)

@@ -2,7 +2,7 @@
 id: TKT-25qq-006
 parent: WE-251231-25qq
 title: "Write documentation for forkers"
-status: pending
+status: completed
 created: 2025-12-31T20:34:35.149Z
 created_by: ctavolazzi
 assigned_to: null
@@ -25,7 +25,9 @@ assigned_to: null
 - (populated when complete)
 
 ## Implementation Notes
+- 12/31/2025: Completed via PR #9. Comprehensive README with usage examples, authentication flow, exit codes, integration examples, and security notes.
 - (decisions, blockers, context)
 
 ## Commits
+- `372353e`
 - (populated as work progresses)
