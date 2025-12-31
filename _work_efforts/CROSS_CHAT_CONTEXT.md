@@ -1,6 +1,6 @@
 # Cross-Chat Context Document
 
-**Last Updated:** 2025-12-31 13:05 PST
+**Last Updated:** 2025-12-31 13:15 PST
 **Active Cursor Session:** Yes (local)
 **Purpose:** Provide context for new Claude Code sessions
 
@@ -50,21 +50,36 @@
 
 ---
 
-## NEXT WORK EFFORT TO CREATE
+## NEXT TASK (Semi-Ambiguous - You Must Clarify)
 
-**Title:** Formalize Work Effort System + Forker Onboarding
+**User Request:**
+> "I want Obsidian-style markdown formatting using the Obsidian docs. Build an Obsidian Markdown linter tool in addition to the git tools we have."
 
-**Objective:** Make _pyrite forkable and self-documenting by creating CLI tools for work effort management and comprehensive documentation for forkers.
+**This is a test of the _pyrite workflow system.**
 
-**Proposed Tickets:**
-1. Create `tools/work-efforts/create.py` - Generate new work efforts (WE-YYMMDD-xxxx)
-2. Create `tools/work-efforts/ticket.py` - Add/update tickets in work efforts
-3. Create `tools/work-efforts/status.py` - List and filter work efforts
-4. Write `docs/GETTING_STARTED_FORKERS.md` - Fork and setup guide
-5. Write `docs/WORK_EFFORT_GUIDE.md` - How to use the system
-6. Update `README.md` - Add "Fork and Use" section
+Your job is NOT to immediately start coding. Your job is to:
 
-**Claude Code:** Create this work effort when you start. Cursor will track locally.
+1. **FIRST: Clearly identify the goal** - What problem are we solving? Who is it for?
+2. **Research** - What does Obsidian markdown formatting entail? (wikilinks, callouts, frontmatter, etc.)
+3. **Scope** - What should the linter check? What's MVP vs future?
+4. **Create Work Effort** - Only after goal is clear
+5. **Propose tickets** - Get Cursor's feedback before implementing
+
+**Reference Material:**
+- Obsidian Help Docs: https://help.obsidian.md/
+- Existing _pyrite markdown: `_work_efforts/` folder has examples
+- Existing tool pattern: `tools/github-health-check/`
+
+**DO NOT:**
+- Jump straight to implementation
+- Assume you know what the user wants
+- Create tickets before identifying the goal
+
+**DO:**
+- Ask clarifying questions if needed
+- State your understanding of the goal explicitly
+- Explain your reasoning
+- Propose a scope before creating work effort
 
 ---
 
@@ -86,20 +101,27 @@
 
 ---
 
-## Next Steps (DECIDED)
+## Next Steps (WORKFLOW TEST)
 
 **Claude Code should:**
 1. Pull latest from main
 2. Read this file
-3. Create new work effort for "Formalize Work Effort System + Forker Onboarding"
-4. Start with TKT-001: `tools/work-efforts/create.py`
-5. Create PR when ready
+3. **STOP and think** - What is the actual goal?
+4. State understanding of the goal explicitly
+5. Research Obsidian markdown features if needed
+6. Propose scope and get feedback (commit to this file or ask)
+7. Only THEN create work effort and tickets
 
 **Cursor will:**
-1. Monitor for Claude Code commits
-2. Review PRs locally
-3. Update this context file as needed
-4. Track progress in local devlog
+1. Monitor for Claude Code's goal statement
+2. Provide feedback on scope
+3. Approve/adjust before implementation begins
+4. Track progress and review PRs
+
+**This tests:**
+- Can AI handle ambiguous requests?
+- Does the workflow force proper planning?
+- Can cross-chat coordination handle back-and-forth?
 
 ---
 
