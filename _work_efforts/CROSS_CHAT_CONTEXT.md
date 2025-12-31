@@ -1,6 +1,6 @@
 # Cross-Chat Context Document
 
-**Last Updated:** 2025-12-31 12:55 PST
+**Last Updated:** 2025-12-31 13:05 PST
 **Active Cursor Session:** Yes (local)
 **Purpose:** Provide context for new Claude Code sessions
 
@@ -10,11 +10,11 @@
 
 ### Repository
 - **Branch:** `main` (clean)
-- **Latest Commit:** `9bdcb8c` - WE-251231-25qq ticket updates
+- **Latest Commit:** `66d620d` - Cross-chat context document
 - **Remote:** Synced with `origin/main`
 
-### Active Work Effort
-**WE-251231-25qq** - GitHub Health Check Tool - Foundation
+### Completed Work Effort
+**WE-251231-25qq** - GitHub Health Check Tool - Foundation ✅ COMPLETE
 
 | Ticket | Status | Notes |
 |--------|--------|-------|
@@ -22,29 +22,49 @@
 | TKT-25qq-002 | ✅ Complete | 7 health checks implemented |
 | TKT-25qq-003 | ✅ Complete | Secure token handling |
 | TKT-25qq-004 | ✅ Complete | CLI interface |
-| TKT-25qq-005 | ⏳ In Progress | MCP integration (partial) |
+| TKT-25qq-005 | ✅ Complete | Claude skills hook (full MCP server deemed unnecessary) |
 | TKT-25qq-006 | ✅ Complete | Documentation |
-| TKT-25qq-007 | 📋 Pending | Future modular refactor |
+| TKT-25qq-007 | 📋 Deferred | Future modular refactor (low priority) |
 
 ### What Was Just Accomplished
 1. First cross-chat coordinated feature delivery
 2. GitHub health check tool merged (PR #9)
 3. Session start hook for Claude Code
 4. Work effort tracking demonstrated
+5. WE-251231-25qq marked COMPLETE
 
 ---
 
-## Cursor's Current Recommendation
+## DECISION MADE: Option B - Formalize Work Efforts + Forker Docs
 
-**Option 3+4: Formalize Work Efforts + Forker Onboarding**
+**Cursor decided.** Reasoning:
 
-Reasoning:
-1. **Dogfoods the system** - Building tools to manage work efforts using work efforts
-2. **Enables adoption** - People can fork and use _pyrite immediately
-3. **Validates the concept** - Real users will find gaps we haven't seen
-4. **Self-documenting** - The tools explain how the system works
+1. **Meta-validation** - Building work effort tools using work efforts proves the system
+2. **Enables feedback** - Can't iterate without users; can't get users without docs
+3. **Lower risk** - CLI tools + docs are well-understood problems
+4. **Quick wins** - Visible progress in 1-2 sessions
 
-However, I'm open to **Option 1 (Complete MCP integration)** if we want to fully close out WE-251231-25qq first.
+**NOT Option A** because: Claude skills hook IS sufficient AI integration. Full MCP server is over-engineering.
+
+**NOT Option C** because: Infrastructure before validation is premature.
+
+---
+
+## NEXT WORK EFFORT TO CREATE
+
+**Title:** Formalize Work Effort System + Forker Onboarding
+
+**Objective:** Make _pyrite forkable and self-documenting by creating CLI tools for work effort management and comprehensive documentation for forkers.
+
+**Proposed Tickets:**
+1. Create `tools/work-efforts/create.py` - Generate new work efforts (WE-YYMMDD-xxxx)
+2. Create `tools/work-efforts/ticket.py` - Add/update tickets in work efforts
+3. Create `tools/work-efforts/status.py` - List and filter work efforts
+4. Write `docs/GETTING_STARTED_FORKERS.md` - Fork and setup guide
+5. Write `docs/WORK_EFFORT_GUIDE.md` - How to use the system
+6. Update `README.md` - Add "Fork and Use" section
+
+**Claude Code:** Create this work effort when you start. Cursor will track locally.
 
 ---
 
@@ -66,25 +86,20 @@ However, I'm open to **Option 1 (Complete MCP integration)** if we want to fully
 
 ---
 
-## Next Steps (Awaiting Decision)
+## Next Steps (DECIDED)
 
-Choose one:
+**Claude Code should:**
+1. Pull latest from main
+2. Read this file
+3. Create new work effort for "Formalize Work Effort System + Forker Onboarding"
+4. Start with TKT-001: `tools/work-efforts/create.py`
+5. Create PR when ready
 
-**A) Complete Current WE (Option 1)**
-- Finish TKT-25qq-005: Full MCP server integration
-- Close out WE-251231-25qq completely
-- Then start new work effort
-
-**B) Start New WE: Formalize Work Efforts (Option 3+4)**
-- Create WE for work effort tooling
-- Build `tools/work-efforts/` with create, ticket, status commands
-- Write forker documentation
-- Enable _pyrite to be forked and used
-
-**C) Start New WE: Multi-Repo Management (Option 2)**
-- Build `tools/repo-manager/`
-- Enable tracking multiple repositories
-- Major vision piece
+**Cursor will:**
+1. Monitor for Claude Code commits
+2. Review PRs locally
+3. Update this context file as needed
+4. Track progress in local devlog
 
 ---
 
