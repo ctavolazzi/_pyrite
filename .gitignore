@@ -21,6 +21,8 @@ Thumbs.db
 # IDE
 .idea/
 *.swp
+.obsidian/workspace.json
+.obsidian/workspaces.json
 
 # Build
 dist/
