@@ -10,7 +10,7 @@
   'use strict';
 
   // Configuration
-  const VERSION = 'v0.2.0';
+  const VERSION = 'v0.6.2';
   const GITHUB_URL = 'https://github.com/ctavolazzi/pyrite';
 
   // Render footer HTML

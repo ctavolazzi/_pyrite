@@ -1,6 +1,6 @@
 {
   "name": "mission-control-dashboard",
-  "version": "1.0.0",
+  "version": "0.6.2",
   "description": "Real-time dashboard for monitoring work efforts across multiple repositories",
   "type": "module",
   "main": "server.js",

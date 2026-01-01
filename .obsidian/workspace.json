@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
+                "file": "_work_efforts/WE-260101-nglm_demo_work_effort/tickets/TKT-nglm-001_setup_demo_environment.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "TKT-sdc6-006_sidebar_tree_interaction_polish"
+              "title": "TKT-nglm-001_setup_demo_environment"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
+                "file": "_work_efforts/WE-260101-nglm_demo_work_effort/tickets/TKT-nglm-001_setup_demo_environment.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for TKT-sdc6-006_sidebar_tree_interaction_polish"
+              "title": "Backlinks for TKT-nglm-001_setup_demo_environment"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
+                "file": "_work_efforts/WE-260101-nglm_demo_work_effort/tickets/TKT-nglm-001_setup_demo_environment.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from TKT-sdc6-006_sidebar_tree_interaction_polish"
+              "title": "Outgoing links from TKT-nglm-001_setup_demo_environment"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
+                "file": "_work_efforts/WE-260101-nglm_demo_work_effort/tickets/TKT-nglm-001_setup_demo_environment.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of TKT-sdc6-006_sidebar_tree_interaction_polish"
+              "title": "Outline of TKT-nglm-001_setup_demo_environment"
             }
           }
         ]
@@ -171,6 +171,7 @@
   },
   "active": "5add458fadfcc797",
   "lastOpenFiles": [
+    "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
     "_work_efforts/WE-260101-nglm_demo_work_effort/tickets/TKT-nglm-002_verify_event_system.md",
     "_work_efforts/WE-260101-nglm_demo_work_effort/tickets/TKT-nglm-001_setup_demo_environment.md",
     "_work_efforts/WE-260101-nglm_demo_work_effort/tickets",
@@ -184,7 +185,6 @@
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-009_remove_legacy_styles_css_dependency.md",
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-008_accessibility_audit_and_fixes.md",
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-007_full_breakpoint_regression_test.md",
-    "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-005_javascript_view_switching_integration.md",
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-004_migrate_overlay_components_modals_toasts_dropdowns.md",
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-003_migrate_queue_item_cards_and_status_badges.md",

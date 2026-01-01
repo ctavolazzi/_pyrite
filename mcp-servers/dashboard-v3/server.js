@@ -7,7 +7,7 @@
  * (Johnny Decimal + MCP v0.3.0).
  *
  * @author _pyrite
- * @version 0.2.0
+ * @version 0.6.2
  */
 
 import express from 'express';

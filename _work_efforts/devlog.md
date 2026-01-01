@@ -933,3 +933,28 @@ Refactored sidebar tree to use VS Code file explorer style:
 **Remaining Work:**
 - `layout.css` still has structural `!important` rules (needed until legacy styles.css removed)
 - Will be cleaned up in TKT-sdc6-009 (remove legacy styles.css dependency)
+
+[2026-01-01 03:41:39] ## v0.6.2 Release
+
+### Bug Fixes
+- **Footer visibility**: Moved footer outside scrollable container, made it sticky at viewport bottom
+- **Sidebar/footer overlap**: Reduced sidebar height by 44px on tablet/desktop to account for footer
+- **View mutual exclusivity**: Fixed CSS load order so legacy styles don't override V3 styles
+
+### UI Improvements
+- **VS Code-style tree navigation**: Refactored sidebar to use compact 26px rows, status dots instead of badges, chevron expand/collapse arrows, and indent guides
+- **Hero banner redesign**: Replaced ASCII art with clean styled text title "◈ _pyrite"
+- **Responsive refinements**: Improved stats card grid with explicit column counts per breakpoint, constrained hero banner height
+
+### Version Alignment
+- Aligned all version numbers to 0.6.2 (JSDoc comments, UI badges, package.json)
+- Updated work effort progress notes for WE-251231-un7r and WE-251231-sdc6
+
+### Files Changed
+- `public/styles/layout.css` - Sidebar height adjustment
+- `public/styles/components/sidebar.css` - VS Code-style tree
+- `public/styles/main.css` - Hero and footer styling
+- `public/index.html` - Hero banner, version badges
+- `public/components/footer.js` - Version constant
+- `public/app.js`, `server.js`, `events.js`, `lib/parser.js` - JSDoc versions
+- `package.json` - Package version
