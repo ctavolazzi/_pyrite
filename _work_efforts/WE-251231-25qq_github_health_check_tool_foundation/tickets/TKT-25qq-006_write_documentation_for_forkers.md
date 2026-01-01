@@ -12,7 +12,7 @@ assigned_to: null
 
 ## Metadata
 - **Created**: Wednesday, December 31, 2025 at 12:34:35 PM PST
-- **Parent Work Effort**: WE-251231-25qq
+- **Parent Work Effort**: [[WE-251231-25qq]]
 - **Author**: ctavolazzi
 
 ## Description

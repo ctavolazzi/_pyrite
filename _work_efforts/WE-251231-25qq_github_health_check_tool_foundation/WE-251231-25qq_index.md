@@ -9,32 +9,34 @@ branch: feature/WE-251231-25qq-github_health_check_tool_foundation
 repository: ctavolazzi/_pyrite
 ---
 
-# WE-251231-25qq: GitHub Health Check Tool - Foundation
+# [[WE-251231-25qq]]: GitHub Health Check Tool - Foundation
 
 ## Metadata
 - **Created**: Wednesday, December 31, 2025 at 12:34:34 PM PST
 - **Author**: ctavolazzi
 - **Repository**: ctavolazzi/_pyrite
-- **Branch**: feature/WE-251231-25qq-github_health_check_tool_foundation
+- **Branch**: feature/[[WE-251231-25qq]]-github_health_check_tool_foundation
 
 ## Objective
-Create the first foundational tool for the _pyrite ecosystem: a GitHub health check/verification tool that validates GitHub API access, permissions, and readiness at the start of AI chat sessions. This is the first building block toward _pyrite becoming a cross-chat AI context management platform.
+Create the first foundational tool for the \`_pyrite\` ecosystem: a GitHub health check/verification tool that validates GitHub API access, permissions, and readiness at the start of AI chat sessions. This is the first building block toward \`_pyrite\` becoming a cross-chat AI context management platform.
 
 ## Tickets
 
 | ID | Title | Status |
 |----|-------|--------|
-| TKT-25qq-001 | Define tool architecture and file structure | pending |
-| TKT-25qq-002 | Implement core GitHub API health checks | pending |
-| TKT-25qq-003 | Add security layer for token handling | pending |
-| TKT-25qq-004 | Create CLI interface for manual runs | pending |
-| TKT-25qq-005 | Add MCP server integration for AI tools | pending |
-| TKT-25qq-006 | Write documentation for forkers | pending |
+| [[TKT-25qq-001_define_tool_architecture_and_file_structure]] | Define tool architecture and file structure | pending |
+| [[TKT-25qq-002_implement_core_github_api_health_checks]] | Implement core GitHub API health checks | pending |
+| [[TKT-25qq-003_add_security_layer_for_token_handling]] | Add security layer for token handling | pending |
+| [[TKT-25qq-004_create_cli_interface_for_manual_runs]] | Create CLI interface for manual runs | pending |
+| [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools]] | Add MCP server integration for AI tools | pending |
+| [[TKT-25qq-006_write_documentation_for_forkers]] | Write documentation for forkers | pending |
 
 ## Progress
+
+### Initial Completion
 - 12/31/2025: PR #9 merged - GitHub health check tool now in main. 5/6 tickets complete. Remaining: MCP server integration (partial via Claude skills).
 
-## Progress
+### Final Status
 - 12/31/2025: All critical tickets complete. TKT-007 (modular refactor) deferred as low-priority future enhancement. First cross-chat coordinated feature delivery successful.
 
 ## Commits

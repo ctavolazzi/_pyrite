@@ -1,4 +1,26 @@
-# Obsidian Markdown Linter
+# Obsidian Markdown Tools
+
+A suite of tools for maintaining Obsidian-flavored markdown files:
+- **Linter** - Detects issues (read-only)
+- **Link Fixer** - Auto-fixes unlinked references
+- **Comprehensive Fixer** - Auto-fixes all fixable issues
+
+## Quick Start
+
+```bash
+# 1. Check for issues
+python3 tools/obsidian-linter/check.py --scope _work_efforts
+
+# 2. Preview fixes
+python3 tools/obsidian-linter/fix-all.py --scope _work_efforts --dry-run
+
+# 3. Apply fixes
+python3 tools/obsidian-linter/fix-all.py --scope _work_efforts
+```
+
+---
+
+## Linter (check.py)
 
 Validates Obsidian-flavored markdown files for syntax, consistency, and common issues.
 
@@ -13,9 +35,18 @@ Checks markdown files for Obsidian-specific features and best practices includin
 - ✅ **Formatting** - Trailing whitespace, heading consistency, final newlines
 - ✅ **Structure** - Heading level hierarchy, multiple H1s
 
+## Tools
+
+This directory contains four complementary tools:
+
+1. **`check.py`** - Linter that detects issues (read-only)
+2. **`fix-links.py`** - Auto-fixes unlinked ticket/work effort references
+3. **`fix-all.py`** - Comprehensive auto-fixer for all fixable issues
+4. **`validate.py`** - Validator for accuracy, collisions, aliases, and potential errors
+
 ## Usage
 
-### Basic Usage
+### 1. Check for Issues (check.py)
 
 ```bash
 # Lint entire repository
@@ -24,15 +55,50 @@ python3 tools/obsidian-linter/check.py
 # Lint specific directory
 python3 tools/obsidian-linter/check.py --scope _work_efforts
 
-# Preview fixes without applying
-python3 tools/obsidian-linter/check.py --dry-run
-
-# Automatically fix safe issues
-python3 tools/obsidian-linter/check.py --fix
-
 # Strict mode (additional warnings)
 python3 tools/obsidian-linter/check.py --strict
 ```
+
+### 2. Fix Unlinked References (fix-links.py)
+
+```bash
+# Preview fixes (dry run)
+python3 tools/obsidian-linter/fix-links.py --scope _work_efforts --dry-run
+
+# Apply fixes
+python3 tools/obsidian-linter/fix-links.py --scope _work_efforts
+```
+
+### 3. Fix All Issues (fix-all.py)
+
+```bash
+# Preview fixes (dry run)
+python3 tools/obsidian-linter/fix-all.py --scope _work_efforts --dry-run
+
+# Apply all fixes (formatting + links)
+python3 tools/obsidian-linter/fix-all.py --scope _work_efforts
+
+# Fix entire repository
+python3 tools/obsidian-linter/fix-all.py
+```
+
+### 4. Validate for Accuracy (validate.py)
+
+```bash
+# Validate for collisions, broken links, naming issues
+python3 tools/obsidian-linter/validate.py --scope _work_efforts
+
+# Validate entire repository
+python3 tools/obsidian-linter/validate.py
+```
+
+**What it checks:**
+- ✅ **Duplicate IDs** - Ensures no ID collisions in frontmatter
+- ✅ **Broken wikilinks** - Detects links to non-existent files
+- ✅ **File naming consistency** - Validates folder/file name alignment
+- ✅ **Orphaned files** - Finds files not linked from anywhere
+- ✅ **Case sensitivity** - Detects potential case-sensitivity issues
+- ✅ **Missing index files** - Checks for work effort folders without index files
 
 ### Command Line Options
 
@@ -49,12 +115,30 @@ options:
 
 ## What Gets Fixed Automatically
 
-When using `--fix` or `--dry-run`, the linter can automatically fix:
+### fix-all.py (Comprehensive Fixer)
+
+Fixes all automatically fixable issues:
+
+- **Trailing whitespace** - Removed from end of lines
+- **Missing final newline** - Added to end of file
+- **Unlinked ticket references** - Converts `TKT-xxxx-NNN` → `[[TKT-xxxx-NNN]]`
+- **Unlinked work effort references** - Converts `WE-YYMMDD-xxxx` → `[[WE-YYMMDD-xxxx]]`
+
+### fix-links.py (Link Fixer Only)
+
+Fixes only unlinked references:
+
+- **Unlinked ticket references** - Converts `TKT-xxxx-NNN` → `[[TKT-xxxx-NNN]]`
+- **Unlinked work effort references** - Converts `WE-YYMMDD-xxxx` → `[[WE-YYMMDD-xxxx]]`
+
+### check.py (Linter Only)
+
+The linter can fix formatting issues when using `--fix`:
 
 - **Trailing whitespace** - Removed from end of lines
 - **Missing final newline** - Added to end of file
 
-These are "safe" fixes that won't change content meaning.
+**Note:** Use `fix-all.py` for comprehensive fixing. The linter's `--fix` flag only handles formatting.
 
 ## Check Categories
 
@@ -131,13 +215,33 @@ Files with issues: 1
 
 ## Integration
 
-### Manual Check
+### Recommended Workflow
 
-Add to your workflow before commits:
+1. **Check for issues:**
+   ```bash
+   python3 tools/obsidian-linter/check.py --scope _work_efforts
+   ```
 
-```bash
-python3 tools/obsidian-linter/check.py --scope _work_efforts --fix
-```
+2. **Validate for accuracy:**
+   ```bash
+   python3 tools/obsidian-linter/validate.py --scope _work_efforts
+   ```
+
+3. **Preview fixes:**
+   ```bash
+   python3 tools/obsidian-linter/fix-all.py --scope _work_efforts --dry-run
+   ```
+
+4. **Apply fixes:**
+   ```bash
+   python3 tools/obsidian-linter/fix-all.py --scope _work_efforts
+   ```
+
+5. **Verify fixes:**
+   ```bash
+   python3 tools/obsidian-linter/check.py --scope _work_efforts
+   python3 tools/obsidian-linter/validate.py --scope _work_efforts
+   ```
 
 ### Pre-Commit Hook (Future)
 
@@ -161,6 +265,8 @@ python3 tools/obsidian-linter/check.py --scope _work_efforts
 - **Relative path wikilinks** - May not resolve all relative path patterns
 - **Obsidian-specific features** - Focuses on core features (frontmatter, wikilinks, basic formatting)
 - **Not checked**: Callouts, embeds, tags, LaTeX, footnotes (future enhancements)
+
+**See `FEATURES.md` for complete coverage matrix of what's checked vs. not checked.**
 
 ## Examples
 

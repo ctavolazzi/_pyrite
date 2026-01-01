@@ -4,7 +4,7 @@
 
 ### 12:34 - GitHub Health Check Tool - Work Effort Created
 
-**Work Effort:** `WE-251231-25qq` - GitHub Health Check Tool - Foundation
+**Work Effort:** `[[WE-251231-25qq]]` - GitHub Health Check Tool - Foundation
 
 **Context:** This is the first serious tool for the _pyrite ecosystem. The larger vision:
 - _pyrite becomes a forkable cross-chat AI context management platform
@@ -17,12 +17,12 @@
 - Foundation for multi-repo management coming later
 
 **Tickets:**
-1. TKT-25qq-001: Define tool architecture and file structure
-2. TKT-25qq-002: Implement core GitHub API health checks
-3. TKT-25qq-003: Add security layer for token handling
-4. TKT-25qq-004: Create CLI interface for manual runs
-5. TKT-25qq-005: Add MCP server integration for AI tools
-6. TKT-25qq-006: Write documentation for forkers
+1. [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure
+2. [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks
+3. [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]]: Add security layer for token handling
+4. [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]]: Create CLI interface for manual runs
+5. [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]]: Add MCP server integration for AI tools
+6. [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]]: Write documentation for forkers
 
 **Cross-Chat Coordination:**
 - Cursor (local): Architecture decisions, review, testing
@@ -44,13 +44,13 @@
 - Updated main README.md
 
 **Tickets Completed:**
-- ✅ TKT-25qq-001: Define tool architecture and file structure
-- ✅ TKT-25qq-002: Implement core GitHub API health checks
-- ✅ TKT-25qq-003: Add security layer for token handling
-- ✅ TKT-25qq-004: Create CLI interface for manual runs
-- ⏳ TKT-25qq-005: MCP server integration (partial - Claude skills done)
-- ✅ TKT-25qq-006: Write documentation for forkers
-- 📋 TKT-25qq-007: Refactor to modular structure (future, low priority)
+- ✅ [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure
+- ✅ [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks
+- ✅ [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]]: Add security layer for token handling
+- ✅ [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]]: Create CLI interface for manual runs
+- ⏳ [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]]: MCP server integration (partial - Claude skills done)
+- ✅ [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]]: Write documentation for forkers
+- 📋 [[TKT-25qq-007_refactor_to_modular_structure_future_enhancement|TKT-25qq-007]]: Refactor to modular structure (future, low priority)
 
 **Cross-Chat Coordination Success:**
 - Cursor created work effort and architectural plan
@@ -61,7 +61,7 @@
 **Testing Note:** Local SSL certificate issue on macOS (Python urllib). Tool correctly reports the error. `gh auth status` confirms authentication works.
 
 **Next Steps:**
-1. Complete TKT-25qq-005 (full MCP server integration)
+1. Complete [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]] (full MCP server integration)
 2. Test in fresh Claude Code session
 3. Document the forker setup workflow
 
@@ -345,7 +345,7 @@
 **Task:** Demonstrate real-time WebSocket updates in dashboard
 
 **Actions:**
-1. ✅ Created work effort WE-251227-1gku via MCP tools
+1. ✅ Created work effort [[WE-251227-1gku]] via MCP tools
 2. ✅ Fixed folder placement (moved to correct `_work_efforts/`)
 3. ✅ Dashboard updated in real-time (4→5 WEs, 0→4 TKTs)
 4. ✅ Updated ticket statuses (3 completed, 1 in_progress)
@@ -364,7 +364,7 @@
 - Expandable ticket views ✅
 - Status badges with color coding ✅
 
-**Work Effort:** WE-251227-1gku - Mission Control Dashboard
+**Work Effort:** [[WE-251227-1gku]] - Mission Control Dashboard
 **Status:** ✅ Complete
 
 ### 13:30 - Mission Control V2 Command Center
@@ -396,7 +396,7 @@
 - `.playwright-mcp/search-results.png` - Search with highlighting
 - `.playwright-mcp/mission-control-final.png` - All completed
 
-**Work Effort:** WE-251227-hldk - Mission Control V2 Command Center
+**Work Effort:** [[WE-251227-hldk]] - Mission Control V2 Command Center
 **Status:** ✅ All 7 tickets complete
 
 ### 14:15 - Notification Center with Activity Tracking
@@ -434,7 +434,7 @@ shouldUseNotificationCenter() {
 - `.playwright-mcp/notification-with-badge.png` - Badge with count
 - `.playwright-mcp/notification-center-working.png` - Multiple notifications
 
-**Work Effort:** WE-251227-g6nh - Notification Center Feature
+**Work Effort:** [[WE-251227-g6nh]] - Notification Center Feature
 **Status:** ✅ All 3 tickets complete
 
 ### 15:00 - Repository Browser & Multi-Repo Support
@@ -465,7 +465,7 @@ shouldUseNotificationCenter() {
 
 **Task:** Build robust event management system with animations and type-based toast durations
 
-**Work Effort:** WE-251227-8w5z - Bulletproof Event System & Toast Notifications
+**Work Effort:** [[WE-251227-8w5z]] - Bulletproof Event System & Toast Notifications
 
 **Architecture:**
 ```
@@ -535,7 +535,7 @@ smartNotify() [routes based on activity]
 **Status:** ✅ All 6 tickets complete
 
 **Using the System to Build the System:** ✅ Yes!
-- Created work effort WE-251227-8w5z
+- Created work effort [[WE-251227-8w5z]]
 - 6 tickets tracked and completed
 - Fixed MCP server bug (line 418 still had `_work_efforts_`)
 
@@ -691,12 +691,12 @@ mcp-servers/dashboard/
 - `mcp-servers/dashboard/public/docs/index.html`
 - `mcp-servers/dashboard/public/styles.css`
 
-**Work Effort:** WE-251227-fwmv - Mission Control Responsive & Interactive Features
-**Ticket:** TKT-fwmv-001 - Responsive CSS framework and breakpoints
+**Work Effort:** [[WE-251227-fwmv]] - Mission Control Responsive & Interactive Features
+**Ticket:** [[TKT-fwmv-001_responsive_css_framework_and_breakpoints|TKT-fwmv-001]] - Responsive CSS framework and breakpoints
 
 **Status:** ✅ Complete
 
-## 2025-12-28
+## 2025-12-28 (continued)
 
 ### 01:14 - Structured Logging & CLI Graphics
 

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_work_efforts/CROSS_CHAT_CONTEXT.md",
+                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CROSS_CHAT_CONTEXT"
+              "title": "WE-251231-25qq_index"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "_work_efforts/CROSS_CHAT_CONTEXT.md",
+                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for CROSS_CHAT_CONTEXT"
+              "title": "Backlinks for WE-251231-25qq_index"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "_work_efforts/CROSS_CHAT_CONTEXT.md",
+                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from CROSS_CHAT_CONTEXT"
+              "title": "Outgoing links from WE-251231-25qq_index"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "_work_efforts/CROSS_CHAT_CONTEXT.md",
+                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of CROSS_CHAT_CONTEXT"
+              "title": "Outline of WE-251231-25qq_index"
             }
           }
         ]
@@ -170,5 +170,29 @@
     }
   },
   "active": "5add458fadfcc797",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "tools/obsidian-linter/FRONTMATTER.md",
+    "tools/obsidian-linter/FEATURES.md",
+    "_coordination/tasks/TASK_obsidian_linter_phase2.md",
+    "tools/obsidian-linter/validate.py",
+    "tools/obsidian-linter/fix-all.py",
+    "tools/obsidian-linter/fix-links.py",
+    "_coordination/completed/TASK_obsidian_linter.md",
+    "tools/obsidian-linter/check.py",
+    "tools/obsidian-linter/README.md",
+    "tools/obsidian-linter",
+    "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/CLAUDE_CODE_PROMPT.md",
+    "tools/structure-check/README.md",
+    "tools/structure-check/check.py",
+    "tools/structure-check",
+    "_coordination/tasks/TASK_obsidian_linter.md",
+    "_work_efforts/CROSS_CHAT_CONTEXT.md",
+    "_coordination/CONTEXT.md",
+    "_coordination/tasks",
+    "_coordination/completed",
+    "_coordination",
+    "_work_efforts/CLAUDE_CODE_TASK.md",
+    "_spin_up/understanding_20251231_1305.md",
+    "_spin_up/SPIN_UP_PROCEDURE.md"
+  ]
 }

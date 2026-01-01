@@ -56,6 +56,9 @@ class ObsidianLinter:
     WIKILINK_PATTERN = re.compile(r'\[\[([^\]]+?)\]\]')
     HEADING_PATTERN = re.compile(r'^(#{1,6})\s+(.+)$', re.MULTILINE)
     TRAILING_WHITESPACE_PATTERN = re.compile(r' +$', re.MULTILINE)
+    # Patterns for ticket/work effort IDs that should be linked
+    TICKET_ID_PATTERN = re.compile(r'\bTKT-([a-z0-9]{4})-(\d{3})\b')
+    WORK_EFFORT_ID_PATTERN = re.compile(r'\bWE-(\d{6})-([a-z0-9]{4})\b')
 
     # Required frontmatter fields (warnings only)
     STANDARD_FRONTMATTER_FIELDS = {'id', 'title', 'status', 'created'}
@@ -166,6 +169,129 @@ class ObsidianLinter:
                 message=f"Missing standard fields: {', '.join(sorted(missing_fields))}"
             ))
 
+        # Validate ID format
+        if 'id' in fields:
+            id_value = fields['id']
+            file_stem = file_path.stem
+            
+            # Check if ID matches file naming pattern
+            if file_stem.startswith('WE-') or file_stem.endswith('_index'):
+                # Work effort ID: WE-YYMMDD-xxxx
+                if not re.match(r'^WE-\d{6}-[a-z0-9]{4}$', id_value):
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="error",
+                        category="frontmatter",
+                        message=f"Invalid work effort ID format: {id_value} (expected WE-YYMMDD-xxxx)"
+                    ))
+            elif file_stem.startswith('TKT-'):
+                # Ticket ID: TKT-xxxx-NNN
+                if not re.match(r'^TKT-[a-z0-9]{4}-\d{3}$', id_value):
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="error",
+                        category="frontmatter",
+                        message=f"Invalid ticket ID format: {id_value} (expected TKT-xxxx-NNN)"
+                    ))
+
+        # Validate status values
+        if 'status' in fields:
+            status = fields['status'].lower()
+            file_stem = file_path.stem
+            
+            if file_stem.startswith('WE-') or file_stem.endswith('_index'):
+                valid_statuses = {'active', 'paused', 'completed'}
+                if status not in valid_statuses:
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="warning",
+                        category="frontmatter",
+                        message=f"Invalid work effort status: {status} (expected: {', '.join(sorted(valid_statuses))})"
+                    ))
+            elif file_stem.startswith('TKT-'):
+                valid_statuses = {'pending', 'in_progress', 'completed', 'blocked'}
+                if status not in valid_statuses:
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="warning",
+                        category="frontmatter",
+                        message=f"Invalid ticket status: {status} (expected: {', '.join(sorted(valid_statuses))})"
+                    ))
+
+        # Validate date formats
+        if 'created' in fields:
+            created = fields['created']
+            # Check ISO 8601 format (basic validation)
+            if not re.match(r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$', created):
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=1,
+                    severity="warning",
+                    category="frontmatter",
+                    message=f"Invalid date format: {created} (expected ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ)"
+                ))
+
+        # Validate ticket parent relationship
+        if file_stem.startswith('TKT-') and 'parent' in fields:
+            parent_id = fields['parent']
+            # Check if parent ID format is valid
+            if not re.match(r'^WE-\d{6}-[a-z0-9]{4}$', parent_id):
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=1,
+                    severity="error",
+                    category="frontmatter",
+                    message=f"Invalid parent ID format: {parent_id} (expected WE-YYMMDD-xxxx)"
+                ))
+            else:
+                # Check if parent work effort exists
+                parent_found = False
+                for file_key, indexed_path in self.markdown_files.items():
+                    if parent_id in file_key or indexed_path.stem.startswith(parent_id):
+                        parent_found = True
+                        break
+                
+                if not parent_found:
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="warning",
+                        category="frontmatter",
+                        message=f"Parent work effort not found: {parent_id}"
+                    ))
+
+        # Validate ID matches filename pattern
+        if 'id' in fields:
+            id_value = fields['id']
+            if file_stem.startswith('WE-') or file_stem.endswith('_index'):
+                # Check if ID matches folder/file name
+                expected_prefix = id_value.replace('WE-', 'WE-')
+                if not file_stem.startswith(expected_prefix) and not str(file_path.parent).endswith(id_value):
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="info",
+                        category="frontmatter",
+                        message=f"ID '{id_value}' may not match file/folder naming pattern"
+                    ))
+            elif file_stem.startswith('TKT-'):
+                # Check if ticket ID matches parent work effort suffix
+                ticket_suffix = id_value.split('-')[1]  # TKT-xxxx-NNN -> xxxx
+                if 'parent' in fields:
+                    parent_suffix = fields['parent'].split('-')[-1]  # WE-YYMMDD-xxxx -> xxxx
+                    if ticket_suffix != parent_suffix:
+                        issues.append(LintIssue(
+                            file_path=rel_path,
+                            line_num=1,
+                            severity="warning",
+                            category="frontmatter",
+                            message=f"Ticket ID suffix '{ticket_suffix}' doesn't match parent work effort suffix '{parent_suffix}'"
+                        ))
+
         return issues
 
     def _parse_simple_yaml(self, yaml_text: str) -> Dict[str, str]:
@@ -222,6 +348,124 @@ class ObsidianLinter:
                     severity="warning",
                     category="wikilink",
                     message=f"Broken wikilink: [[{link_text}]] - target not found"
+                ))
+
+        return issues
+
+    def _check_unlinked_references(self, file_path: Path, content: str) -> List[LintIssue]:
+        """
+        Check for ticket/work effort IDs that should be wikilinks but aren't.
+        Finds patterns like TKT-xxxx-NNN or WE-YYMMDD-xxxx that exist as files
+        but aren't linked in the text.
+        """
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find all existing wikilinks to exclude them from checking
+        wikilink_ranges = []
+        for match in self.WIKILINK_PATTERN.finditer(content):
+            wikilink_ranges.append((match.start(), match.end()))
+
+        # Find frontmatter range to exclude IDs in frontmatter
+        frontmatter_end = 0
+        frontmatter_match = self.FRONTMATTER_PATTERN.match(content)
+        if frontmatter_match:
+            frontmatter_end = frontmatter_match.end()
+
+        def is_inside_wikilink(pos: int) -> bool:
+            """Check if position is inside any wikilink."""
+            return any(start <= pos < end for start, end in wikilink_ranges)
+
+        def is_in_frontmatter(pos: int) -> bool:
+            """Check if position is in frontmatter."""
+            return pos < frontmatter_end
+
+        # Get the file's own ID to skip self-references
+        file_stem = file_path.stem
+        own_ticket_id = None
+        own_we_id = None
+
+        # Check if this file is a ticket or work effort index
+        if file_stem.startswith("TKT-"):
+            own_ticket_id = file_stem.split("_")[0]  # Get TKT-xxxx-NNN part
+        elif file_stem.endswith("_index") or "WE-" in file_stem:
+            # Try to extract WE ID from filename or folder
+            we_match = self.WORK_EFFORT_ID_PATTERN.search(str(file_path))
+            if we_match:
+                own_we_id = we_match.group(0)
+
+        # Check for ticket IDs (TKT-xxxx-NNN)
+        for match in self.TICKET_ID_PATTERN.finditer(content):
+            if is_inside_wikilink(match.start()):
+                continue  # Already linked
+            if is_in_frontmatter(match.start()):
+                continue  # Skip frontmatter (ID field, parent field, etc.)
+
+            ticket_id = match.group(0)  # Full match like "TKT-25qq-001"
+
+            # Skip if this is the file's own ticket ID
+            if own_ticket_id and ticket_id == own_ticket_id:
+                continue
+
+            # Look for ticket file - files are named like TKT-xxxx-NNN_title.md
+            # Check if any markdown file starts with this ticket ID
+            found = False
+            for file_key, file_path in self.markdown_files.items():
+                # Check if file stem starts with ticket ID
+                if file_path.stem.startswith(ticket_id):
+                    found = True
+                    break
+                # Also check if the key itself matches
+                if file_key.startswith(ticket_id):
+                    found = True
+                    break
+
+            if found:
+                line_num = content[:match.start()].count('\n') + 1
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="info",
+                    category="wikilink",
+                    message=f"Unlinked ticket reference: {ticket_id} (should be [[{ticket_id}]] or [[{ticket_id}|...]])"
+                ))
+
+        # Check for work effort IDs (WE-YYMMDD-xxxx)
+        for match in self.WORK_EFFORT_ID_PATTERN.finditer(content):
+            if is_inside_wikilink(match.start()):
+                continue  # Already linked
+            if is_in_frontmatter(match.start()):
+                continue  # Skip frontmatter (ID field, parent field, etc.)
+
+            we_id = match.group(0)  # Full match like "WE-251231-25qq"
+
+            # Skip if this is the file's own work effort ID
+            if own_we_id and we_id == own_we_id:
+                continue
+
+            # Check if work effort file exists
+            # Try multiple possible names
+            possible_paths = [
+                we_id,  # Just the ID
+                f"{we_id}_index",  # With _index suffix
+                f"{we_id}/{we_id}_index",  # In folder
+                f"{we_id}/{we_id}_index.md",  # With extension
+            ]
+
+            found = False
+            for path_key in possible_paths:
+                if path_key in self.markdown_files:
+                    found = True
+                    break
+
+            if found:
+                line_num = content[:match.start()].count('\n') + 1
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="info",
+                    category="wikilink",
+                    message=f"Unlinked work effort reference: {we_id} (should be [[{we_id}]] or [[{we_id}_index|...]])"
                 ))
 
         return issues
@@ -328,6 +572,7 @@ class ObsidianLinter:
         # Run all checks
         issues.extend(self._check_frontmatter(file_path, content))
         issues.extend(self._check_wikilinks(file_path, content))
+        issues.extend(self._check_unlinked_references(file_path, content))
 
         formatting_issues, fixed_content = self._check_formatting(
             file_path, content, original_content
