@@ -894,3 +894,42 @@ All feature branches deleted. Only main remains.
 - 14 Work Efforts tracked
 - 63 Total Tickets
 - 3 Active work efforts
+
+[2026-01-01 03:10:34] ## Git Commit & Push Complete
+
+**Commit:** 80ef5f0
+**Branch:** main
+**Files:** 83 files changed, 22,891 insertions
+
+### Changes Committed
+- Mission Control V3 foundation (mcp-servers/dashboard-v3/)
+- Work efforts WE-251231-un7r and WE-251231-sdc6
+- Modular CSS architecture
+- Responsive JavaScript system
+- Updated ASCII banner to "_pyrite"
+- Fixed sidebar text truncation
+- Fixed footer visibility
+
+### Preparing for v0.6.2 Release
+Ready for version bump once UI is stable.
+
+[2026-01-01 03:16:50] ## VS Code-Style Sidebar Tree
+
+Refactored sidebar tree to use VS Code file explorer style:
+
+**Visual Changes:**
+- Compact 26px row height (vs 44px touch target)
+- Status dots (8px circles) instead of verbose text badges
+- Single chevron arrows (▶/▼) for expand/collapse
+- Subtle vertical indent guides
+- 13px font size for compact display
+
+**Technical Improvements:**
+- Removed all `!important` from sidebar CSS
+- Uses proper specificity (`.sidebar .tree-nav .tree-status.active`) to override legacy styles
+- Clean CSS cascade without hacks
+- Progressive indentation: 20px, 36px, 52px for nesting levels
+
+**Remaining Work:**
+- `layout.css` still has structural `!important` rules (needed until legacy styles.css removed)
+- Will be cleaned up in TKT-sdc6-009 (remove legacy styles.css dependency)
