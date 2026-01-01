@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2025-12-31
+
+### Added
+- **ID Generator Tool** (`tools/id-generator/generate.py`)
+  - Generate work effort IDs (`WE-YYMMDD-xxxx`)
+  - Generate ticket IDs (`TKT-xxxx-NNN`) with parent linking
+  - Generate checkpoint IDs (`CKPT-YYMMDD-HHMM`)
+  - Validate and parse any ID format
+  - Batch generation for complex workflows
+  - Switch statement pattern for extensibility
+
+### Documentation
+- Updated `AGENTS.md` with accurate directory structure and tools
+- Updated `_coordination/CONTEXT.md` to reflect v0.6.0 state
+- Clarified work tracking system (MCP Work Efforts vs Johnny Decimal)
+
+### Session
+- **Checkpoint**: `CKPT-251231-1800` - Full session journal saved
+
 ## [0.6.0] - 2025-12-31
 
 ### Added

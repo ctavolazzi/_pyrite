@@ -135,7 +135,7 @@ def generate_id(id_type: str, **kwargs) -> str:
         'ticket': _generate_ticket_id,
         'checkpoint': _generate_checkpoint_id,
     }
-    
+
     generator = generators.get(id_type.lower())
     return generator(**kwargs)
 ```

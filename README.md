@@ -213,4 +213,4 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-*Created: 2025-12-20* | *Updated: 2025-12-31* | *Version: 0.6.0*
+*Created: 2025-12-20* | *Updated: 2025-12-31* | *Version: 0.6.1*
