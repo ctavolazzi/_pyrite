@@ -239,14 +239,14 @@
    ============================================================================ */
 /* ============================================================================
    VS Code-Style Tree Navigation
-   
+
    Clean, minimal tree structure inspired by VS Code's file explorer:
    - Compact 26px rows
-   - Subtle indent guides  
+   - Subtle indent guides
    - Chevron arrows for expand/collapse
    - Dot indicators for status (not verbose badges)
    - 13px font size
-   
+
    Uses high specificity selectors (.sidebar .tree-nav ...) to override
    legacy styles without !important
    ============================================================================ */
@@ -401,7 +401,7 @@
 
 /* ============================================================================
    Status Indicator - Minimal Dot
-   
+
    Higher specificity (.sidebar .tree-nav .tree-status.STATUS) overrides
    legacy (.tree-status.STATUS) without needing !important
    ============================================================================ */
