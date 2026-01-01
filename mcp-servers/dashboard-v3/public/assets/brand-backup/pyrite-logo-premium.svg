@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Premium amber gradient -->
+    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffc466"/>
+      <stop offset="25%" style="stop-color:#ffb347"/>
+      <stop offset="50%" style="stop-color:#ff9d3d"/>
+      <stop offset="75%" style="stop-color:#ff8c1a"/>
+      <stop offset="100%" style="stop-color:#e67300"/>
+    </linearGradient>
+    
+    <!-- Top highlight gradient -->
+    <linearGradient id="topHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fff5e6"/>
+      <stop offset="30%" style="stop-color:#ffd699"/>
+      <stop offset="100%" style="stop-color:#ffb347;stop-opacity:0"/>
+    </linearGradient>
+    
+    <!-- Side reflection gradient -->
+    <linearGradient id="sideReflect" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fff;stop-opacity:0.3"/>
+      <stop offset="50%" style="stop-color:#fff;stop-opacity:0"/>
+      <stop offset="100%" style="stop-color:#000;stop-opacity:0.2"/>
+    </linearGradient>
+    
+    <!-- Inner glow -->
+    <radialGradient id="innerGlow" cx="35%" cy="35%" r="60%">
+      <stop offset="0%" style="stop-color:#fff;stop-opacity:0.4"/>
+      <stop offset="40%" style="stop-color:#ffd699;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ff9d3d;stop-opacity:0"/>
+    </radialGradient>
+    
+    <!-- Background radial -->
+    <radialGradient id="bgRadial" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1714"/>
+      <stop offset="50%" style="stop-color:#12100e"/>
+      <stop offset="100%" style="stop-color:#0a0806"/>
+    </radialGradient>
+    
+    <!-- Outer glow aura -->
+    <radialGradient id="auraGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff9d3d;stop-opacity:0.5"/>
+      <stop offset="40%" style="stop-color:#ff9d3d;stop-opacity:0.2"/>
+      <stop offset="70%" style="stop-color:#ff9d3d;stop-opacity:0.05"/>
+      <stop offset="100%" style="stop-color:#ff9d3d;stop-opacity:0"/>
+    </radialGradient>
+    
+    <!-- Filters -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="sparkleGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="innerShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feOffset dx="0" dy="4"/>
+      <feGaussianBlur stdDeviation="8" result="shadow"/>
+      <feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Dark background -->
+  <rect width="1024" height="1024" fill="url(#bgRadial)"/>
+  
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <path d="M0 256h1024M0 512h1024M0 768h1024M256 0v1024M512 0v1024M768 0v1024" 
+          stroke="#ff9d3d" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- Outer aura glow -->
+  <circle cx="512" cy="512" r="450" fill="url(#auraGlow)"/>
+  
+  <!-- Outer diamond frame - dark with subtle stroke -->
+  <path d="M512 60 L964 512 L512 964 L60 512 Z" 
+        fill="#0d0b09" 
+        stroke="#4a3f35" 
+        stroke-width="2"/>
+  
+  <!-- Diamond shadow layer -->
+  <path d="M512 100 L924 512 L512 924 L100 512 Z" 
+        fill="#0a0806" 
+        opacity="0.8"
+        transform="translate(8, 8)"/>
+  
+  <!-- Main gem body -->
+  <path d="M512 100 L924 512 L512 924 L100 512 Z" 
+        fill="url(#gemGrad)" 
+        filter="url(#softGlow)"/>
+  
+  <!-- Center dark facet -->
+  <path d="M512 220 L804 512 L512 804 L220 512 Z" 
+        fill="#0a0806" 
+        opacity="0.45"/>
+  
+  <!-- Inner gem layer -->
+  <path d="M512 280 L744 512 L512 744 L280 512 Z" 
+        fill="url(#gemGrad)" 
+        opacity="0.85"/>
+  
+  <!-- Inner glow overlay -->
+  <path d="M512 280 L744 512 L512 744 L280 512 Z" 
+        fill="url(#innerGlow)"/>
+  
+  <!-- Core facet -->
+  <path d="M512 360 L664 512 L512 664 L360 512 Z" 
+        fill="url(#topHighlight)" 
+        opacity="0.5"/>
+  
+  <!-- Top-left edge highlight -->
+  <path d="M512 100 L100 512 L512 280 Z" 
+        fill="url(#topHighlight)" 
+        opacity="0.25"/>
+  
+  <!-- Side reflection -->
+  <path d="M512 100 L924 512 L744 512 L512 220 Z" 
+        fill="url(#sideReflect)"/>
+  
+  <!-- Primary sparkle -->
+  <g filter="url(#sparkleGlow)">
+    <circle cx="280" cy="280" r="20" fill="#fff"/>
+    <circle cx="280" cy="280" r="8" fill="#fff"/>
+  </g>
+  
+  <!-- Secondary sparkles -->
+  <circle cx="320" cy="240" r="6" fill="#fff" opacity="0.8" filter="url(#sparkleGlow)"/>
+  <circle cx="240" cy="320" r="5" fill="#fff" opacity="0.6" filter="url(#sparkleGlow)"/>
+  <circle cx="360" cy="200" r="3" fill="#fff" opacity="0.4"/>
+  
+  <!-- Accent sparkles around the gem -->
+  <circle cx="744" cy="280" r="4" fill="#fff" opacity="0.3"/>
+  <circle cx="280" cy="744" r="3" fill="#fff" opacity="0.2"/>
+  <circle cx="744" cy="744" r="2" fill="#fff" opacity="0.15"/>
+  
+  <!-- Floating particles -->
+  <circle cx="180" cy="400" r="2" fill="#ff9d3d" opacity="0.4"/>
+  <circle cx="844" cy="600" r="2" fill="#ff9d3d" opacity="0.3"/>
+  <circle cx="400" cy="180" r="1.5" fill="#ffb347" opacity="0.5"/>
+  <circle cx="624" cy="844" r="1.5" fill="#ffb347" opacity="0.35"/>
+</svg>
+

@@ -1,0 +1,317 @@
+/* ============================================================================
+   MISSION CONTROL V3 - Site Navigation Component
+
+   Responsive top navigation bar with hamburger menu on mobile.
+   ============================================================================ */
+
+/* ============================================================================
+   Site Nav Container
+   ============================================================================ */
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  height: var(--topbar-height);
+  padding-inline: var(--space-md);
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 640px) {
+  .site-nav {
+    padding-inline: var(--space-lg);
+  }
+}
+
+/* ============================================================================
+   Brand / Logo
+   ============================================================================ */
+.site-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.site-nav-brand:hover {
+  color: var(--accent);
+}
+
+.site-nav-logo {
+  font-size: var(--text-lg);
+  color: var(--accent);
+}
+
+.site-nav-name {
+  font-size: var(--text-md);
+}
+
+/* Hide name on very small screens */
+@media (max-width: 359px) {
+  .site-nav-name {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   Nav Links
+   ============================================================================ */
+.site-nav-links {
+  display: none;
+  gap: var(--space-xs);
+}
+
+@media (min-width: 640px) {
+  .site-nav-links {
+    display: flex;
+  }
+}
+
+.site-nav-link {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.site-nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.site-nav-link.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+/* ============================================================================
+   Mobile Menu Button
+   ============================================================================ */
+.mobile-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
+  background: transparent;
+  border-radius: var(--radius-md);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.mobile-menu-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mobile-menu-btn:active {
+  background: var(--bg-active);
+}
+
+/* Hide on tablet and up */
+@media (min-width: 640px) {
+  .mobile-menu-btn {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   Mobile Navigation Panel
+   ============================================================================ */
+.mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  transform: translateX(-100%);
+  transition: transform var(--transition-normal);
+  opacity: 0;
+  visibility: hidden;
+}
+
+.mobile-nav[data-state="open"] {
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (min-width: 640px) {
+  .mobile-nav {
+    display: none;
+  }
+}
+
+.mobile-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mobile-nav-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  font-size: var(--text-xl);
+  color: var(--text-secondary);
+  background: transparent;
+  border-radius: var(--radius-md);
+}
+
+.mobile-nav-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mobile-nav-body {
+  flex: 1;
+  padding: var(--space-md);
+  overflow-y: auto;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  font-size: var(--text-md);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.mobile-nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mobile-nav-link.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.mobile-nav-link-icon {
+  font-size: var(--text-lg);
+}
+
+/* ============================================================================
+   Topbar Layout (within main content)
+   ============================================================================ */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+@media (min-width: 640px) {
+  .topbar-right {
+    gap: var(--space-md);
+  }
+}
+
+/* ============================================================================
+   Breadcrumb
+   ============================================================================ */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  overflow: hidden;
+}
+
+.breadcrumb-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumb-item.active {
+  color: var(--text-primary);
+  font-weight: var(--fw-medium);
+}
+
+.breadcrumb-separator {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+/* Hide breadcrumb on mobile, show current page only */
+@media (max-width: 479px) {
+  .breadcrumb-item:not(.active),
+  .breadcrumb-separator {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   View Toggle
+   ============================================================================ */
+.view-toggle {
+  display: flex;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  background: transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.view-btn:hover {
+  color: var(--text-secondary);
+}
+
+.view-btn.active {
+  color: var(--text-primary);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Hide view toggle on mobile */
+@media (max-width: 479px) {
+  .view-toggle {
+    display: none;
+  }
+}
+

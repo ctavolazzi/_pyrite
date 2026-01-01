@@ -1,0 +1,189 @@
+PYRITE MCP SERVERS - AI REFERENCE
+==================================
+Local MCP servers for AI-assisted development. No authentication required.
+
+QUICK START
+-----------
+Add to ~/.cursor/mcp.json:
+
+{
+  "mcpServers": {
+    "work-efforts": {
+      "command": "node",
+      "args": ["~/.mcp-servers/work-efforts/server.js"]
+    },
+    "simple-tools": {
+      "command": "node",
+      "args": ["~/.mcp-servers/simple-tools/server.js"]
+    },
+    "docs-maintainer": {
+      "command": "~/.mcp-servers/docs-maintainer/.venv/bin/python3",
+      "args": ["~/.mcp-servers/docs-maintainer/server.py"]
+    }
+  }
+}
+
+================================================================================
+WORK-EFFORTS (v0.3.0) - Node.js
+================================================================================
+Work effort and ticket management with date-based IDs.
+
+ID Formats:
+- Work Effort: WE-YYMMDD-xxxx (e.g., WE-251227-a1b2)
+- Ticket: TKT-xxxx-NNN (e.g., TKT-a1b2-001)
+
+TOOLS:
+
+create_work_effort
+  Create a new work effort with folder, index.md, and tickets/ subfolder.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+    - title (string, REQUIRED): Work effort title
+    - objective (string, REQUIRED): What needs to be done and why
+    - branch (string): Git branch name (auto-generated if not provided)
+    - repository (string): Repository name for reference
+    - tickets (array): Initial tickets [{title, description?, acceptance_criteria?}]
+
+create_ticket
+  Create a new ticket in an existing work effort.
+  Parameters:
+    - work_effort_path (string, REQUIRED): Full path to work effort directory
+    - title (string, REQUIRED): Ticket title
+    - description (string): What needs to be done
+    - acceptance_criteria (array): List of acceptance criteria strings
+
+list_work_efforts
+  List all work efforts in a repository.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+    - status (string): Filter by "active" | "paused" | "completed" | "all"
+
+list_tickets
+  List all tickets in a work effort.
+  Parameters:
+    - work_effort_path (string, REQUIRED): Full path to work effort directory
+    - status (string): Filter by "pending" | "in_progress" | "completed" | "blocked" | "all"
+
+update_work_effort
+  Update work effort status or add progress notes.
+  Parameters:
+    - work_effort_path (string, REQUIRED): Full path to work effort directory
+    - status (string): "active" | "paused" | "completed"
+    - progress (string): Progress note to add
+    - commit (string): Commit hash to add
+
+update_ticket
+  Update ticket status, files changed, or notes.
+  Parameters:
+    - ticket_path (string, REQUIRED): Full path to ticket file
+    - status (string): "pending" | "in_progress" | "completed" | "blocked"
+    - files_changed (array): List of modified file paths
+    - notes (string): Implementation notes
+    - commit (string): Commit hash
+
+search_work_efforts
+  Search work efforts and tickets by keyword.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+    - query (string, REQUIRED): Search keyword
+    - include_tickets (boolean): Also search tickets (default: true)
+
+================================================================================
+SIMPLE-TOOLS (v0.2.0) - Node.js
+================================================================================
+Utility tools for generating names, IDs, and formatting dates.
+
+TOOLS:
+
+generate_random_name
+  Generate a random name like "HappyPanda123".
+  No parameters.
+
+generate_unique_id
+  Generate a unique ID with timestamp.
+  No parameters.
+
+format_date
+  Format dates consistently.
+  Parameters:
+    - date (string): Date to format or "now"
+    - format (string): "iso" | "human" | "filename" | "devlog"
+
+================================================================================
+DOCS-MAINTAINER (v0.1.0) - Python
+================================================================================
+Documentation management with Johnny Decimal structure.
+
+TOOLS:
+
+initialize_docs
+  Create _docs structure and master index.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+
+create_doc
+  Create a new doc with Johnny Decimal numbering.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+    - area (string, REQUIRED): Area prefix (e.g., "10-19")
+    - category (string, REQUIRED): Category prefix (e.g., "10")
+    - title (string, REQUIRED): Document title
+    - content (string, REQUIRED): Document content (markdown)
+
+update_doc
+  Update doc content, links, and timestamp.
+  Parameters:
+    - file_path (string, REQUIRED): Full path to document
+    - content (string): New content
+    - add_links (array): Links to add
+
+rebuild_indices
+  Regenerate all index files and clean broken links.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+
+link_work_effort
+  Link a doc to a work effort bidirectionally.
+  Parameters:
+    - doc_path (string, REQUIRED): Full path to document
+    - work_effort_id (string, REQUIRED): Work effort ID or path
+
+search_docs
+  Search titles, content, and frontmatter.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+    - query (string, REQUIRED): Search keyword
+    - search_content (boolean): Search content (default: true)
+
+check_health
+  Return documentation health score and issues.
+  Parameters:
+    - repo_path (string, REQUIRED): Full path to repository
+
+================================================================================
+DASHBOARD REST API (Mission Control)
+================================================================================
+Express server with WebSocket for real-time monitoring.
+Default: http://localhost:3847
+
+ENDPOINTS:
+
+GET  /api/health                              - Server health check
+GET  /api/repos                               - List all monitored repos
+GET  /api/repos/:name                         - Get single repo state
+POST /api/repos                               - Add repo {name, path}
+DELETE /api/repos/:name                       - Remove repo
+PATCH /api/repos/:name/work-efforts/:weId/status - Update WE status
+GET  /api/browse?path=...                     - Browse directories
+POST /api/repos/bulk                          - Add multiple repos {paths}
+
+WEBSOCKET (ws://localhost:3847):
+- init: Initial state on connection
+- update: Repo state changed
+- repo_change: Repo added/removed
+- hot_reload: UI file changed (dev)
+
+================================================================================
+END OF REFERENCE
+================================================================================
+

@@ -1,0 +1,316 @@
+/* ============================================================================
+   MISSION CONTROL V3 - Modern CSS Reset
+
+   Based on Josh Comeau's CSS Reset + Andy Bell's Modern Reset
+   Optimized for responsive design
+   ============================================================================ */
+
+/* ============================================================================
+   Box Sizing
+   ============================================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================================
+   Remove default margins and paddings
+   ============================================================================ */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================================
+   Improve text rendering
+   ============================================================================ */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* Prevent font size inflation on mobile */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+  /* Smooth scrolling (respects reduced motion) */
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================================
+   Body defaults
+   ============================================================================ */
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  line-height: var(--lh-normal, 1.5);
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: var(--text-base, 1rem);
+  color: var(--text-primary, #f5f0e6);
+  background-color: var(--bg-primary, #12100e);
+
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+   Typography
+   ============================================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-weight: var(--fw-semibold, 600);
+  line-height: var(--lh-tight, 1.2);
+  text-wrap: balance; /* Modern text wrapping */
+}
+
+p {
+  text-wrap: pretty; /* Better paragraph wrapping */
+}
+
+/* Prevent text selection on interactive elements */
+button,
+[role="button"] {
+  user-select: none;
+}
+
+/* ============================================================================
+   Links
+   ============================================================================ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--accent, #ff9d3d);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* ============================================================================
+   Lists
+   ============================================================================ */
+ul, ol {
+  list-style: none;
+}
+
+/* Only add list styles when we explicitly want them */
+.prose ul,
+.prose ol {
+  list-style: revert;
+  padding-left: 1.5em;
+}
+
+/* ============================================================================
+   Images and Media
+   ============================================================================ */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================================================
+   Forms
+   ============================================================================ */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Remove default button styles */
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  /* Touch-friendly minimum size */
+  min-height: var(--touch-target-min, 44px);
+  min-width: var(--touch-target-min, 44px);
+}
+
+/* Smaller buttons need explicit override */
+button.btn-sm {
+  min-height: unset;
+  min-width: unset;
+}
+
+/* Remove spinner from number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Text inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+textarea {
+  background: var(--bg-elevated, #221f1b);
+  border: 1px solid var(--border-default, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-md, 8px);
+  padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
+  width: 100%;
+
+  /* Touch-friendly height */
+  min-height: var(--touch-target-min, 44px);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent, #ff9d3d);
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(255, 157, 61, 0.2));
+}
+
+/* Placeholder styling */
+::placeholder {
+  color: var(--text-muted, #8b8578);
+  opacity: 1;
+}
+
+/* ============================================================================
+   Tables
+   ============================================================================ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+
+/* ============================================================================
+   Scrollbars (Webkit)
+   ============================================================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary, #1a1714);
+  border-radius: var(--radius-full, 9999px);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover, #332e29);
+  border-radius: var(--radius-full, 9999px);
+  border: 2px solid var(--bg-secondary, #1a1714);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted, #8b8578);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-hover, #332e29) var(--bg-secondary, #1a1714);
+}
+
+/* ============================================================================
+   Selection
+   ============================================================================ */
+::selection {
+  background: var(--accent, #ff9d3d);
+  color: var(--bg-deep, #0a0806);
+}
+
+/* ============================================================================
+   Focus Visible (keyboard navigation only)
+   ============================================================================ */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent, #ff9d3d);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Skip Link (Accessibility)
+   ============================================================================ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-md, 1rem);
+  z-index: var(--z-max, 9999);
+  padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
+  background: var(--accent, #ff9d3d);
+  color: var(--bg-deep, #0a0806);
+  font-weight: var(--fw-semibold, 600);
+  border-radius: var(--radius-md, 8px);
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--space-md, 1rem);
+}
+
+/* ============================================================================
+   Screen Reader Only
+   ============================================================================ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================================
+   Hidden utility
+   ============================================================================ */
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+/* ============================================================================
+   Visually hidden but accessible
+   ============================================================================ */
+.visually-hidden:not(:focus):not(:active) {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+

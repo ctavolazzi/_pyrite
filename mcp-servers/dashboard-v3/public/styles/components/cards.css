@@ -1,0 +1,523 @@
+/* ============================================================================
+   MISSION CONTROL V3 - Card Components
+
+   Stats cards, queue cards, and general card patterns.
+   All cards are touch-friendly with minimum 44px interaction areas.
+   ============================================================================ */
+
+/* ============================================================================
+   Base Card
+   ============================================================================ */
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.card:hover {
+  border-color: var(--border-default);
+}
+
+.card.clickable {
+  cursor: pointer;
+}
+
+.card.clickable:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card.clickable:active {
+  transform: translateY(0);
+}
+
+/* ============================================================================
+   Stats Card
+   ============================================================================ */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  min-height: var(--touch-target-comfortable);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.stat-card:hover {
+  border-color: var(--border-default);
+}
+
+/* Stat card icon */
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: var(--text-xl);
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+/* Pulsing icon for active/important stats */
+.stat-icon.pulsing {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--accent-glow);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+/* Stat content */
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Highlighted stat card */
+.stat-card.highlight {
+  border-color: var(--accent);
+  background: linear-gradient(
+    135deg,
+    var(--bg-card) 0%,
+    color-mix(in srgb, var(--accent) 5%, var(--bg-card)) 100%
+  );
+}
+
+.stat-card.highlight .stat-icon {
+  background: var(--accent);
+  color: var(--bg-deep);
+}
+
+/* ============================================================================
+   Stats Section Grid
+
+   Responsive grid that never overflows. Uses auto-fit with constrained widths.
+   ============================================================================ */
+.stats-section {
+  display: grid;
+  gap: var(--space-sm);
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* Prevent any overflow */
+
+  /* Mobile: 2 columns with min width */
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Larger phones: Still 2 columns but with gap */
+@media (min-width: 400px) {
+  .stats-section {
+    gap: var(--space-md);
+  }
+}
+
+/* Tablet: 3 columns */
+@media (min-width: 640px) {
+  .stats-section {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Small desktop: 4 columns */
+@media (min-width: 900px) {
+  .stats-section {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Large desktop: 6 columns for all cards including actions */
+@media (min-width: 1200px) {
+  .stats-section {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Very large screens: Auto-fit with min/max */
+@media (min-width: 1440px) {
+  .stats-section {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    max-width: 1200px; /* Cap the width */
+  }
+}
+
+/* ============================================================================
+   Action Card (Test/Demo Buttons)
+   ============================================================================ */
+.stat-card.action-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  height: 100%;
+  min-height: 60px;
+  padding: var(--space-md);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.action-btn:hover {
+  background: var(--bg-hover);
+}
+
+.action-btn:active {
+  background: var(--bg-active);
+}
+
+.action-icon {
+  font-size: var(--text-lg);
+  color: var(--accent);
+}
+
+/* Test button specific */
+.test-btn {
+  composes: action-btn;
+}
+
+.test-btn:hover {
+  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--accent-glow) 100%);
+}
+
+/* Demo button specific */
+.demo-btn {
+  composes: action-btn;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--status-completed-bg) 100%);
+}
+
+.demo-btn .action-icon {
+  color: var(--status-completed);
+}
+
+/* ============================================================================
+   Queue Card (Work Effort in Queue)
+   ============================================================================ */
+.queue-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    transform var(--transition-fast);
+
+  /* Touch-friendly */
+  min-height: var(--touch-target-comfortable);
+}
+
+.queue-card:hover {
+  border-color: var(--border-default);
+  background: var(--bg-hover);
+}
+
+.queue-card:active {
+  transform: scale(0.99);
+}
+
+.queue-card.active {
+  border-color: var(--status-active);
+  border-left-width: 3px;
+}
+
+.queue-card.completed {
+  opacity: 0.7;
+}
+
+.queue-card.completed:hover {
+  opacity: 1;
+}
+
+/* Queue card content */
+.queue-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.queue-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.queue-card-title {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-card-progress {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* Queue card status badge */
+.queue-card-status {
+  font-size: var(--text-xs);
+  font-weight: var(--fw-medium);
+  padding: var(--space-2xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.queue-card-status.active {
+  color: var(--status-active);
+  background: var(--status-active-bg);
+}
+
+.queue-card-status.completed {
+  color: var(--status-completed);
+  background: var(--status-completed-bg);
+}
+
+.queue-card-status.pending {
+  color: var(--status-pending);
+  background: var(--status-pending-bg);
+}
+
+.queue-card-status.paused {
+  color: var(--status-paused);
+  background: var(--status-paused-bg);
+}
+
+/* Queue card actions */
+.queue-card-actions {
+  display: flex;
+  gap: var(--space-xs);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.queue-card:hover .queue-card-actions {
+  opacity: 1;
+}
+
+/* Always show on touch devices */
+@media (hover: none) {
+  .queue-card-actions {
+    opacity: 1;
+  }
+}
+
+.queue-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.queue-action-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-active);
+}
+
+.queue-action-btn.success:hover {
+  color: var(--status-completed);
+  background: var(--status-completed-bg);
+}
+
+/* ============================================================================
+   Queue Section
+   ============================================================================ */
+.queue-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.queue-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.queue-filters {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  padding-bottom: var(--space-2xs);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.queue-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-btn {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+
+  /* Touch-friendly */
+  min-height: 36px;
+}
+
+.filter-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+.filter-btn.active {
+  color: var(--accent);
+  background: var(--accent-glow);
+}
+
+.queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.queue-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: var(--text-3xl);
+  color: var(--text-dim);
+}
+
+/* ============================================================================
+   Panel Section Card (Detail View)
+   ============================================================================ */
+.panel-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+}
+
+.panel-title {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+/* Stat highlight panel */
+.panel-section.stat-highlight {
+  background: linear-gradient(
+    135deg,
+    var(--bg-card) 0%,
+    color-mix(in srgb, var(--accent) 5%, var(--bg-card)) 100%
+  );
+  border-color: var(--border-default);
+}
+
+/* ============================================================================
+   Mini Stats (used in detail panels)
+   ============================================================================ */
+.stat-row {
+  display: flex;
+  justify-content: space-around;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.mini-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  text-align: center;
+}
+
+.mini-stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+.mini-stat-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+

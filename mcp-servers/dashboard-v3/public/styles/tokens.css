@@ -1,0 +1,265 @@
+/* ============================================================================
+   MISSION CONTROL V3 - Design Tokens
+
+   Mobile-first design system with fluid spacing and responsive breakpoints.
+   Min viewport: 320px, Max viewport: 1440px
+   ============================================================================ */
+
+:root {
+  /* =========================================================================
+     COLORS - Preserved from V2, organized semantically
+     ========================================================================= */
+
+  /* Background Scale (dark to light) */
+  --bg-deep: #0a0806;
+  --bg-primary: #12100e;
+  --bg-secondary: #1a1714;
+  --bg-elevated: #221f1b;
+  --bg-card: #2a2622;
+  --bg-hover: #332e29;
+  --bg-active: #3d3833;
+
+  /* Accent Colors */
+  --accent: #ff9d3d;
+  --accent-bright: #ffb86c;
+  --accent-muted: #cc7d30;
+  --accent-glow: rgba(255, 157, 61, 0.2);
+
+  /* Text Colors */
+  --text-primary: #f5f0e6;
+  --text-secondary: #c9bfab;
+  --text-muted: #8b8578;
+  --text-dim: #5a554d;
+
+  /* Status Colors */
+  --status-active: #ff9d3d;
+  --status-active-bg: rgba(255, 157, 61, 0.1);
+  --status-completed: #10b981;
+  --status-completed-bg: rgba(16, 185, 129, 0.1);
+  --status-pending: #6b7280;
+  --status-pending-bg: rgba(107, 114, 128, 0.1);
+  --status-blocked: #ef4444;
+  --status-blocked-bg: rgba(239, 68, 68, 0.1);
+  --status-paused: #f59e0b;
+  --status-paused-bg: rgba(245, 158, 11, 0.1);
+
+  /* Semantic Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Border Colors */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-accent: var(--accent);
+
+  /* =========================================================================
+     TYPOGRAPHY
+     ========================================================================= */
+
+  /* Font Families */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-display);
+
+  /* Font Weights */
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Line Heights */
+  --lh-tight: 1.2;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.75;
+
+  /* Letter Spacing */
+  --ls-tight: -0.025em;
+  --ls-normal: 0;
+  --ls-wide: 0.025em;
+  --ls-wider: 0.05em;
+
+  /* =========================================================================
+     FLUID SPACING - Mobile-first with clamp()
+
+     Formula: clamp(min, preferred, max)
+     Preferred uses viewport width for smooth scaling
+     ========================================================================= */
+
+  --space-3xs: clamp(0.125rem, 0.1rem + 0.125vw, 0.1875rem);   /* 2-3px */
+  --space-2xs: clamp(0.1875rem, 0.15rem + 0.1875vw, 0.3125rem); /* 3-5px */
+  --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.4375rem);       /* 4-7px */
+  --space-sm: clamp(0.375rem, 0.3rem + 0.375vw, 0.625rem);      /* 6-10px */
+  --space-md: clamp(0.5rem, 0.4rem + 0.5vw, 0.875rem);          /* 8-14px */
+  --space-lg: clamp(0.75rem, 0.6rem + 0.75vw, 1.25rem);         /* 12-20px */
+  --space-xl: clamp(1rem, 0.8rem + 1vw, 1.75rem);               /* 16-28px */
+  --space-2xl: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);           /* 24-40px */
+  --space-3xl: clamp(2rem, 1.6rem + 2vw, 3.5rem);               /* 32-56px */
+  --space-4xl: clamp(3rem, 2.4rem + 3vw, 5rem);                 /* 48-80px */
+
+  /* =========================================================================
+     FLUID TYPOGRAPHY - Uses clamp() for smooth scaling
+
+     Base: 16px, scales from 14px (320px) to 18px (1440px)
+     ========================================================================= */
+
+  --text-xs: clamp(0.6875rem, 0.65rem + 0.15vw, 0.75rem);       /* 11-12px */
+  --text-sm: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);          /* 12-14px */
+  --text-base: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);          /* 14-16px */
+  --text-md: clamp(1rem, 0.9rem + 0.45vw, 1.125rem);            /* 16-18px */
+  --text-lg: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);            /* 18-20px */
+  --text-xl: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem);            /* 20-24px */
+  --text-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);                /* 24-32px */
+  --text-3xl: clamp(1.875rem, 1.6rem + 1.4vw, 2.5rem);          /* 30-40px */
+  --text-4xl: clamp(2.25rem, 1.9rem + 1.75vw, 3rem);            /* 36-48px */
+
+  /* =========================================================================
+     LAYOUT - Responsive dimensions
+     ========================================================================= */
+
+  /* Sidebar */
+  --sidebar-width: clamp(280px, 24vw, 380px);
+  --sidebar-width-collapsed: 64px;
+  --sidebar-width-mobile: 90vw;
+  --sidebar-max-mobile: 320px;
+
+  /* Top Bar */
+  --topbar-height: clamp(48px, 5vw, 64px);
+
+  /* Content */
+  --content-max-width: 1400px;
+  --content-padding: var(--space-lg);
+
+  /* Touch Targets (WCAG 2.1 minimum 44px) */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+
+  /* =========================================================================
+     BREAKPOINTS - Mobile-first (min-width)
+
+     Use CSS custom properties for documentation,
+     actual breakpoints are in media queries
+     ========================================================================= */
+
+  /* Reference values (can't use in media queries) */
+  --bp-sm: 480px;   /* Large phones */
+  --bp-md: 640px;   /* Small tablets */
+  --bp-lg: 1024px;  /* Tablets/small laptops */
+  --bp-xl: 1280px;  /* Desktops */
+  --bp-2xl: 1440px; /* Large screens */
+
+  /* Container query sizes */
+  --cq-sm: 20rem;   /* 320px */
+  --cq-md: 30rem;   /* 480px */
+  --cq-lg: 45rem;   /* 720px */
+
+  /* =========================================================================
+     MOTION & ANIMATION
+     ========================================================================= */
+
+  /* Durations */
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  /* Easings */
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in: cubic-bezier(0.32, 0, 0.67, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.5, 1.5, 0.5, 1);
+
+  /* Combined transitions */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+  }
+
+  /* =========================================================================
+     SHADOWS & EFFECTS
+     ========================================================================= */
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3), 0 10px 10px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 20px var(--accent-glow);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  /* Backdrop blur */
+  --blur-sm: 4px;
+  --blur-md: 8px;
+  --blur-lg: 16px;
+
+  /* =========================================================================
+     Z-INDEX SCALE
+     ========================================================================= */
+
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-drawer: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+  --z-max: 9999;
+
+  /* =========================================================================
+     BORDER RADIUS
+     ========================================================================= */
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+}
+
+/* ============================================================================
+   DARK THEME (default)
+   ============================================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* ============================================================================
+   LIGHT THEME (future support)
+   ============================================================================ */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-deep: #ffffff;
+  --bg-primary: #f9f9f9;
+  --bg-secondary: #f3f3f3;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #f0f0f0;
+  --bg-active: #e8e8e8;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #4a4a4a;
+  --text-muted: #757575;
+  --text-dim: #a0a0a0;
+
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.15);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.06);
+}
+
