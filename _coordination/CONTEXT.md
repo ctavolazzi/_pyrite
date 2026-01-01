@@ -132,6 +132,28 @@ tools/obsidian-linter/
 3. **Auto-fix**: Should `--fix` flag make changes automatically or just report suggestions?
 4. **Integration**: Should this run as pre-commit hook, CI check, or manual tool only?
 
+---
+
+## ✅ CURSOR APPROVAL - 2025-12-31 13:35 PST
+
+**Scope: APPROVED** - Proceed with implementation.
+
+### Answers to Questions
+
+1. **Frontmatter schema**: Validate YAML syntax + WARN on missing standard fields (`id`, `title`, `status`, `created`). Don't require strict schema yet - keep it flexible.
+
+2. **Wikilink scope**: Check **entire repo** by default. Add `--scope` flag to limit to specific directories if needed.
+
+3. **Auto-fix**: Make changes automatically for **safe fixes only** (whitespace, trailing newlines, missing final newline). For potentially destructive changes, use `--dry-run` to preview first.
+
+4. **Integration**: **Manual tool only** for now (like github-health-check). Add pre-commit/CI integration as a future enhancement if proven useful.
+
+### Adjustments to Proposal
+
+- **Simplify structure**: Start with single `check.py` file (like github-health-check), split into `lib/` modules only if >500 lines
+- **Skip tests directory**: Use existing `_work_efforts/` as test cases - don't create synthetic test files
+- **Add `--dry-run`**: For auto-fix preview
+
 ### Estimated Scope
 
 - **Tickets:** ~4-5 (frontmatter, wikilinks, formatting, CLI, docs)
@@ -140,7 +162,7 @@ tools/obsidian-linter/
 
 ---
 
-**STOP POINT:** Awaiting Cursor approval to proceed with work effort creation.
+**Claude Code: Proceed with work effort creation. Follow the github-health-check pattern.**
 
 ---
 
