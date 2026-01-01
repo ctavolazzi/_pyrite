@@ -1556,26 +1556,82 @@ class MissionControl {
 
   renderTimeTracking(we) {
     const timeCreated = document.getElementById('timeCreated');
+    const timeCreatedDetail = document.getElementById('timeCreatedDetail');
     const timeUpdated = document.getElementById('timeUpdated');
+    const timeUpdatedDetail = document.getElementById('timeUpdatedDetail');
     const timeDuration = document.getElementById('timeDuration');
+    const timeDurationDetail = document.getElementById('timeDurationDetail');
 
-    if (timeCreated) {
-      timeCreated.textContent = we.created ? this.formatRelativeTime(we.created) : '—';
-    }
-    if (timeUpdated) {
-      timeUpdated.textContent = (we.updated || we.lastModified) ? this.formatRelativeTime(we.updated || we.lastModified) : '—';
-    }
-    if (timeDuration) {
-      if (we.created) {
-        const created = new Date(we.created);
-        const now = new Date();
-        const diffMs = now - created;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        timeDuration.textContent = diffDays > 0 ? `${diffDays}d ${diffHours}h` : `${diffHours}h`;
-      } else {
-        timeDuration.textContent = '—';
+    // Render created time
+    if (timeCreated && we.created) {
+      timeCreated.textContent = this.formatRelativeTime(we.created);
+      if (timeCreatedDetail) {
+        const createdDate = new Date(we.created);
+        timeCreatedDetail.textContent = createdDate.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
       }
+    } else if (timeCreated) {
+      timeCreated.textContent = '—';
+      if (timeCreatedDetail) timeCreatedDetail.textContent = '';
+    }
+
+    // Render updated time
+    const lastModified = we.updated || we.lastModified;
+    if (timeUpdated && lastModified) {
+      timeUpdated.textContent = this.formatRelativeTime(lastModified);
+      if (timeUpdatedDetail) {
+        const updatedDate = new Date(lastModified);
+        timeUpdatedDetail.textContent = updatedDate.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } else if (timeUpdated) {
+      timeUpdated.textContent = '—';
+      if (timeUpdatedDetail) timeUpdatedDetail.textContent = '';
+    }
+
+    // Render duration
+    if (timeDuration && we.created) {
+      const created = new Date(we.created);
+      const now = new Date();
+      const diffMs = now - created;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+      // Main duration display
+      if (diffDays > 0) {
+        timeDuration.textContent = `${diffDays}d ${diffHours}h`;
+      } else if (diffHours > 0) {
+        timeDuration.textContent = `${diffHours}h ${diffMinutes}m`;
+      } else {
+        timeDuration.textContent = `${diffMinutes}m`;
+      }
+
+      // Detail display with full breakdown
+      if (timeDurationDetail) {
+        const parts = [];
+        if (diffDays > 0) parts.push(`${diffDays} day${diffDays !== 1 ? 's' : ''}`);
+        if (diffHours > 0) parts.push(`${diffHours} hour${diffHours !== 1 ? 's' : ''}`);
+        if (parts.length === 0 || (parts.length === 1 && diffMinutes > 0)) {
+          parts.push(`${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`);
+        }
+        timeDurationDetail.textContent = 'Active for ' + parts.join(', ');
+      }
+    } else if (timeDuration) {
+      timeDuration.textContent = '—';
+      if (timeDurationDetail) timeDurationDetail.textContent = '';
     }
   }
 
@@ -1591,23 +1647,40 @@ class MissionControl {
   }
 
   bindDetailEvents() {
-    // Tab switching
+    // Tab switching with proper ARIA attributes
     document.querySelectorAll('.detail-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        // Remove active state from all tabs and panels
+        document.querySelectorAll('.detail-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.tab-pane').forEach(p => {
+          p.classList.remove('active');
+          p.setAttribute('hidden', '');
+        });
+
+        // Set active state for clicked tab and corresponding panel
         tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
         const pane = document.getElementById(`${tab.dataset.tab}Pane`);
-        if (pane) pane.classList.add('active');
+        if (pane) {
+          pane.classList.add('active');
+          pane.removeAttribute('hidden');
+        }
         this.activeTab = tab.dataset.tab;
       });
     });
 
-    // Ticket filter
+    // Ticket filter with aria-pressed
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
         this.ticketFilter = btn.dataset.filter;
         if (this.selectedItem) {
           this.renderTicketsTab(this.selectedItem.we, null);
@@ -1627,6 +1700,31 @@ class MissionControl {
     document.getElementById('quickStartBtn')?.addEventListener('click', () => this.changeStatus('active'));
     document.getElementById('quickPauseBtn')?.addEventListener('click', () => this.changeStatus('paused'));
     document.getElementById('quickCompleteBtn')?.addEventListener('click', () => this.changeStatus('completed'));
+
+    // Copy ID button
+    const copyIdBtn = document.getElementById('copyIdBtn');
+    const metaId = document.getElementById('metaId');
+    if (copyIdBtn && metaId) {
+      // Show copy button when there's an ID
+      if (metaId.textContent && metaId.textContent !== '—') {
+        copyIdBtn.style.display = 'inline-flex';
+      }
+
+      copyIdBtn.addEventListener('click', async () => {
+        const idText = metaId.textContent;
+        try {
+          await navigator.clipboard.writeText(idText);
+          this.showToast(`Copied ${idText} to clipboard`, 'success');
+          // Visual feedback
+          copyIdBtn.textContent = '✓';
+          setTimeout(() => {
+            copyIdBtn.innerHTML = '<span aria-hidden="true">📋</span>';
+          }, 1000);
+        } catch (err) {
+          this.showToast('Failed to copy ID', 'error');
+        }
+      });
+    }
 
     // Ticket card events
     this.bindTicketCardEvents();
