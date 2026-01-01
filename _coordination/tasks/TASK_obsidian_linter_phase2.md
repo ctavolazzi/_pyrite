@@ -1,104 +1,91 @@
 ---
-status: awaiting_pickup
+status: partial_complete
 assigned_to: claude_code
 created: 2025-12-31T17:30:00-08:00
 created_by: cursor
 task_type: tool_development
 priority: normal
+last_updated: 2025-12-31T18:15:00-08:00
 ---
 
 # Task: Obsidian Linter Phase 2 - Advanced Features
 
-## Goal
+## Status
 
-Extend the existing Obsidian linter tools to support **advanced Obsidian markdown features**: callouts, tags, embeds, dates, code blocks, and other Obsidian-specific syntax.
+**Phase 2A: COMPLETE** ✅ (PR #14 merged)
+- Task list validation (`- [ ]`, `- [x]`)
+- Auto-fix `[X]` → `[x]`
+- Add missing spaces after checkboxes
+- Skip task lists in code blocks
 
----
-
-## Before You Start
-
-```bash
-git pull origin main
-python3 tools/github-health-check/check.py
-python3 tools/obsidian-linter/check.py --scope _work_efforts
-```
+**Phase 2B: NOT STARTED**
+- Callouts, tags, embeds, code blocks, etc.
 
 ---
 
-## Context
+## What's Done
 
-**Phase 1 Complete:** ✅ Basic linter, link fixer, comprehensive fixer, and validator are all working.
-
-**Current Tools:**
-- `check.py` - Basic linter (frontmatter, wikilinks, formatting)
-- `fix-links.py` - Auto-fixes unlinked ticket/work effort references
-- `fix-all.py` - Comprehensive auto-fixer (formatting + links)
-- `validate.py` - Validator (collisions, broken links, orphaned files)
-
-**What's Missing:**
-From the original research (see `_coordination/CONTEXT.md`), these Obsidian features were identified but not implemented:
-- **Callouts**: `> [!type]` admonitions (note, warning, tip, etc.)
-- **Tags**: `#tag` syntax
-- **Embeds**: `![[file]]` syntax
-- **Dates**: Date linking and formatting
-- **Code blocks**: Syntax highlighting validation
-- **Task lists**: `- [ ]` and `- [x]` syntax
-- **LaTeX**: Math expressions
-- **Footnotes**: `[^1]` syntax
-- **Comments**: `%%comment%%` syntax
-- **Highlights**: `==text==` syntax
+| Feature | Status | PR |
+|---------|--------|-----|
+| Task list validation | ✅ Complete | #14 |
+| Task list auto-fix | ✅ Complete | #14 |
+| Callouts | ❌ Not started | - |
+| Tags | ❌ Not started | - |
+| Embeds | ❌ Not started | - |
+| Code blocks | ❌ Not started | - |
+| LaTeX | ❌ Not started | - |
+| Footnotes | ❌ Not started | - |
+| Comments | ❌ Not started | - |
+| Highlights | ❌ Not started | - |
 
 ---
 
-## Instructions
+## What's Left (Phase 2B+)
 
-**This is Phase 2. Build on what exists. Do NOT jump to implementation.**
+### Features Not Yet Implemented
 
-### Step 1: State Your Understanding
-Start your response with:
-> "My understanding of the goal is to extend the existing Obsidian linter tools to support advanced Obsidian markdown features that were identified in Phase 1 but not yet implemented..."
+From the original research, these features were identified but not implemented:
 
-### Step 2: Research & Assess
-1. **Review existing tools:**
-   - Read `tools/obsidian-linter/check.py`
-   - Read `tools/obsidian-linter/fix-all.py`
-   - Read `tools/obsidian-linter/validate.py`
-   - Understand the patterns and architecture
+| Feature | Syntax | Priority | Reason |
+|---------|--------|----------|--------|
+| Callouts | `> [!type]` | 🟡 Medium | Not currently used in _pyrite |
+| Tags | `#tag` | 🟢 Low | Not currently used |
+| Embeds | `![[file]]` | 🟢 Low | Not currently used |
+| Code blocks | ` ``` ` | 🟡 Medium | Used but no validation |
+| LaTeX | `$...$` | ⚪ Skip | Not used |
+| Footnotes | `[^1]` | ⚪ Skip | Not used |
+| Comments | `%%...%%` | ⚪ Skip | Not used |
+| Highlights | `==text==` | ⚪ Skip | Not used |
 
-2. **Research Obsidian features:**
-   - Browse: https://help.obsidian.md/
-   - Focus on: callouts, tags, embeds, dates, code blocks
-   - Check: What validation/checking makes sense for each?
+### Recommendation
 
-3. **Assess current usage:**
-   - Search `_work_efforts/` for callouts, tags, embeds
-   - Search `_docs/` for these features
-   - Determine: Which features are actually used? Which should we prioritize?
+**No immediate action needed.** The high-priority feature (task lists) is complete. The remaining features are:
+- Not currently used in _pyrite
+- Low validation value
+- Can be added later if needed
 
-### Step 3: Propose Scope
-Before creating any work effort:
+---
 
-1. **Prioritize features:**
-   - Which are most commonly used in _pyrite?
-   - Which have the most validation value?
-   - Which are easiest to implement?
+## Instructions (If Resuming)
 
-2. **Design approach:**
-   - Extend existing `check.py` or create new modules?
-   - Add to `fix-all.py` or create separate fixers?
-   - How to handle edge cases?
+If you want to add more Phase 2 features:
 
-3. **Update `_coordination/CONTEXT.md`** with your proposal:
-   - Feature list with priorities
-   - Implementation approach
-   - Testing strategy
-   - **STOP and wait for Cursor feedback**
+1. **Check current usage:**
+   ```bash
+   grep -r ">\s*\[!" _work_efforts/     # Callouts
+   grep -r "#[a-z]" _work_efforts/       # Tags
+   grep -r "!\[\[" _work_efforts/        # Embeds
+   ```
 
-### Step 4: Create Work Effort (After Approval)
-Only after Cursor approves your scope:
-- Use `mcp_work-efforts_create_work_effort`
-- Follow pattern from existing tools
-- Create tickets for each feature/phase
+2. **If features are found:**
+   - Update this task file
+   - Propose scope in `CONTEXT.md`
+   - Wait for Cursor approval
+   - Implement following existing patterns
+
+3. **If features are NOT found:**
+   - Close this task as complete
+   - Features can be added when actually needed
 
 ---
 
@@ -106,46 +93,14 @@ Only after Cursor approves your scope:
 
 | File | Purpose |
 |------|---------|
-| `_coordination/CONTEXT.md` | Full coordination protocol + Phase 1 history |
-| `tools/obsidian-linter/check.py` | Existing linter to extend |
-| `tools/obsidian-linter/fix-all.py` | Existing fixer to extend |
-| `tools/obsidian-linter/validate.py` | Existing validator to extend |
-| `tools/github-health-check/` | Pattern to follow |
-| `_work_efforts/` | Real-world test cases |
+| `_coordination/CONTEXT.md` | Coordination state |
+| `tools/obsidian-linter/check.py` | Linter (includes task list validation) |
+| `tools/obsidian-linter/fix-all.py` | Fixer (includes task list fixing) |
+| `tools/obsidian-linter/FEATURES.md` | Coverage matrix |
 
 ---
 
-## Coordination
+## Completion Log
 
-- **Cursor (local):** Monitoring, will review your scope proposal
-- **Claude Code:** Research, propose, implement after approval
-- **Handoff point:** Your scope proposal commit
-
----
-
-## Success Criteria
-
-1. ✅ Goal clearly identified before any code
-2. ✅ Obsidian advanced features researched and documented
-3. ✅ Scope proposed with priorities and approach
-4. ✅ Scope approved by Cursor
-5. ✅ Work effort created with tickets
-6. ✅ Tools extended following existing patterns
-7. ✅ All new features tested on real `_work_efforts/` files
-8. ✅ Documentation updated
-9. ✅ PR created and reviewed
-
----
-
-## Key Considerations
-
-1. **Maintain zero dependencies** - Pure Python stdlib only
-2. **Follow existing patterns** - Don't reinvent the wheel
-3. **Backward compatible** - Don't break existing functionality
-4. **Real-world testing** - Use actual `_work_efforts/` files
-5. **Incremental** - Can we ship features one at a time?
-
----
-
-**When you find this file, you've found your task. Begin with Step 1.**
-
+- **2025-12-31 18:15 PST:** Phase 2A (task lists) merged via PR #14
+- **2025-12-31 17:30 PST:** Task created by Cursor

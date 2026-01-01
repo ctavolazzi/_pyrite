@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Pyrite is a cross-repository workspace for AI-assisted development. It integrates work across multiple repos in `/Users/ctavolazzi/Code/`.
+Pyrite is an **AI-powered repository management toolkit** — configurable tools for managing, tracking, maintaining, and developing any codebase with AI assistance.
 
 **Name:** "Fool's gold" — experimental, promising, not everything will pan out.
 
@@ -10,19 +10,29 @@ Pyrite is a cross-repository workspace for AI-assisted development. It integrate
 
 ```
 _pyrite/
-├── _work_efforts/     # Johnny Decimal task tracking
-├── experiments/       # Prototypes and exploratory code
-├── integrations/      # Cross-repo integration work
-├── docs/              # Plans, decisions, architecture
-└── README.md          # Project overview
+├── tools/                 # Standalone utilities
+│   ├── obsidian-linter/   # Markdown validation & fixing (v0.6.0)
+│   ├── github-health-check/
+│   └── structure-check/
+├── _work_efforts/         # Work tracking (MCP v0.3.0)
+│   ├── WE-*/              # Work effort folders
+│   ├── checkpoints/       # Session journals
+│   └── devlog.md          # Activity log
+├── .claude/               # Claude Code config
+├── .cursor/               # Cursor IDE config
+├── experiments/           # Prototypes
+├── integrations/          # Cross-repo work
+└── docs/                  # Plans, decisions
 ```
 
 ## Work Conventions
 
-### Work Efforts
-- Use Johnny Decimal numbering (00-09 meta, 10-19 dev, etc.)
+### Work Efforts (MCP v0.3.0)
+- **Work Effort ID**: `WE-YYMMDD-xxxx` (e.g., `WE-251231-a1b2`)
+- **Ticket ID**: `TKT-xxxx-NNN` (e.g., `TKT-a1b2-001`)
+- **Checkpoint ID**: `CKPT-YYMMDD-HHMM` (e.g., `CKPT-251231-1800`)
 - Update devlog with progress
-- Create work effort files for non-trivial tasks
+- Create work effort for non-trivial tasks (2+ tickets)
 
 ### Code
 - Keep experiments isolated in `experiments/`
@@ -63,11 +73,25 @@ STEP 8: PERSIST   → Store learnings in memory MCP
 
 ### MCP Servers
 
-See `docs/mcp/MCP-SERVERS.md` for full reference. Key servers:
+Key servers:
 - `sequential-thinking` - Problem breakdown
 - `work-efforts` - Task tracking (v0.3.0: WE-YYMMDD-xxxx format)
 - `memory` - Knowledge persistence
 - `docs-maintainer` - Documentation management
+- `dev-log` - Devlog entries
+
+### Tools
+
+```bash
+# Obsidian Linter (v0.6.0) - check, validate, fix markdown
+python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
+
+# GitHub Health Check - verify GitHub integration
+python3 tools/github-health-check/check.py
+
+# Structure Check - verify repo structure
+python3 tools/structure-check/check.py --fix
+```
 
 ## Safety Rules
 
@@ -78,7 +102,8 @@ See `docs/mcp/MCP-SERVERS.md` for full reference. Key servers:
 ## Getting Started
 
 ```bash
-cd /Users/ctavolazzi/Code/_pyrite
-cat _work_efforts/devlog.md  # See recent work
-ls _work_efforts/10-19_development/10_active/  # Active tasks
+cd /Users/ctavolazzi/Code/active/_pyrite
+cat _work_efforts/devlog.md              # See recent work
+ls _work_efforts/WE-*/                   # Active work efforts
+ls _work_efforts/checkpoints/            # Session journals
 ```
