@@ -91,6 +91,14 @@
   container-name: sidebar;
 }
 
+/* On tablet/desktop, account for the fixed footer height */
+@media (min-width: 640px) {
+  .sidebar {
+    height: calc(100vh - 44px); /* Subtract footer height */
+    height: calc(100dvh - 44px);
+  }
+}
+
 .sidebar[data-state="open"] {
   transform: translateX(0);
 }
