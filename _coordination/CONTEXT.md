@@ -217,6 +217,213 @@ tools/obsidian-linter/
 
 ---
 
+## Obsidian Linter Phase 2 - Scope Proposal
+
+**Proposed by:** Claude Code
+**Date:** 2026-01-01 01:30 UTC
+**Status:** ✅ APPROVED - Proceeding with Phase 2A implementation
+**Task:** `_coordination/tasks/TASK_obsidian_linter_phase2.md`
+
+### Research Summary
+
+**Current Tool Suite (Phase 1 Extended):**
+- ✅ `check.py` (629 lines) - Linter with frontmatter, wikilinks, formatting
+- ✅ `fix-links.py` (259 lines) - Auto-fix unlinked ticket/work effort references
+- ✅ `fix-all.py` (331 lines) - Comprehensive auto-fixer
+- ✅ `validate.py` (454 lines) - Collision detection, broken links, orphans
+
+**Feature Usage Analysis:**
+
+Scanned entire `_pyrite` repository for Obsidian advanced features:
+
+| Feature | Occurrences | Status | Priority |
+|---------|------------|--------|----------|
+| Task lists (`- [ ]`, `- [x]`) | 178 in 44 files | **HEAVILY USED** | 🔴 HIGH |
+| Code blocks (` ``` `) | Extensive | Used in docs | 🟡 MEDIUM |
+| Wikilinks | Extensive | ✅ Implemented | - |
+| Frontmatter | Extensive | ✅ Implemented | - |
+| Callouts (`> [!type]`) | 0 | Not used yet | 🟡 MEDIUM |
+| Tags (`#tag`) | 0 | Not used | 🟢 LOW |
+| Embeds (`![[file]]`) | 0 | Not used | ⚪ SKIP |
+| LaTeX (`$$`) | 0 | Not used | ⚪ SKIP |
+| Footnotes (`[^1]`) | 0 | Not used | ⚪ SKIP |
+| Comments (`%%...%%`) | 0 | Not used | ⚪ SKIP |
+| Highlights (`==text==`) | 0 | Not used | ⚪ SKIP |
+
+**Key Findings:**
+- Task lists are the most-used advanced feature (178 occurrences)
+- No current validation exists for task list syntax
+- Code blocks lack syntax highlighting validation
+- Callouts not used yet, but would improve documentation quality
+
+### Proposed MVP Scope (Phase 2)
+
+**Goal:** Add validation and fixing for features **actually used** in _pyrite.
+
+**Phase 2A: Task List Validation & Fixing** 🔴 HIGH PRIORITY
+
+1. **Task List Detection:**
+   - Recognize `- [ ]` (uncompleted) and `- [x]` (completed) syntax
+   - Detect malformed task lists (e.g., `- []`, `- [X]`, missing space)
+   - Validate indentation consistency for nested tasks
+
+2. **Auto-Fix Capabilities:**
+   - Fix malformed checkboxes: `- []` → `- [ ]`
+   - Normalize checkbox markers: `- [X]` → `- [x]`
+   - Fix missing space after checkbox: `- [ ]text` → `- [ ] text`
+
+3. **Validation Checks:**
+   - Warn on inconsistent checkbox styles
+   - Detect orphaned checkboxes (not in a list)
+   - Track task completion statistics (optional `--stats` flag)
+
+**Phase 2B: Code Block Validation** 🟡 MEDIUM PRIORITY
+
+1. **Code Block Detection:**
+   - Detect fenced code blocks with ` ``` `
+   - Extract language specifiers (e.g., ` ```python `)
+   - Detect inline code with backticks
+
+2. **Validation Checks:**
+   - Warn on unclosed code blocks (opening ` ``` ` without closing)
+   - Validate language specifiers (warn on typos: `pytohn` → `python`)
+   - Detect nested code blocks (not supported in markdown)
+
+3. **Auto-Fix Capabilities:**
+   - Fix common language typos (configurable list)
+   - Add missing closing ` ``` ` (with confirmation in dry-run)
+
+**Phase 2C: Callout Support** 🟡 MEDIUM PRIORITY (OPTIONAL)
+
+1. **Callout Detection:**
+   - Recognize `> [!type]` syntax
+   - Validate against standard types: note, warning, tip, info, etc.
+   - Detect folding markers (`+`, `-`)
+
+2. **Validation Checks:**
+   - Warn on unrecognized callout types (typos)
+   - Suggest standard types for common typos
+   - Validate callout structure (must be in blockquote)
+
+3. **Future Enhancement:**
+   - Don't auto-fix (too risky for content changes)
+   - Provide suggestions only
+
+### Implementation Approach
+
+**Architecture:**
+
+1. **Extend `check.py`:**
+   - Add `TaskListChecker` class
+   - Add `CodeBlockChecker` class
+   - Add `CalloutChecker` class (optional)
+   - Follow existing pattern: regex → detection → LintIssue generation
+
+2. **Extend `fix-all.py`:**
+   - Add `_fix_task_lists(content)` method
+   - Add `_fix_code_blocks(content)` method
+   - Integrate with existing fix pipeline
+
+3. **Update `validate.py`:**
+   - Add task list statistics
+   - Add code block inventory (by language)
+
+4. **Maintain Zero Dependencies:**
+   - Pure Python stdlib only
+   - No external markdown parsers
+
+**File Structure Changes:**
+```
+tools/obsidian-linter/
+├── check.py           # Extend: +TaskListChecker, +CodeBlockChecker
+├── fix-all.py         # Extend: +_fix_task_lists, +_fix_code_blocks
+├── fix-links.py       # No changes
+├── validate.py        # Extend: +task_stats, +code_block_inventory
+└── README.md          # Update: document new features
+```
+
+**Incremental Shipping:**
+- Can ship Phase 2A (task lists) independently
+- Phase 2B (code blocks) can follow
+- Phase 2C (callouts) is optional for later
+
+### Testing Strategy
+
+1. **Real-World Testing:**
+   - Run on all 46 files in `_work_efforts/`
+   - Test on `roadmap/` documentation
+   - Verify 178 task list occurrences are correctly detected
+
+2. **Edge Cases:**
+   - Malformed task lists: `- []`, `- [X]`, `- [ ]text`
+   - Nested task lists (indentation)
+   - Task lists in code blocks (should be ignored)
+   - Unclosed code blocks
+   - Language typos: `pytohn`, `javasript`, `tpyescript`
+
+3. **Regression Testing:**
+   - Ensure existing features still work
+   - No false positives on current files
+   - Auto-fix doesn't break existing content
+
+### Success Criteria
+
+1. ✅ All 178 task list occurrences correctly detected
+2. ✅ Malformed task lists auto-fixed (dry-run tested first)
+3. ✅ Code block validation catches unclosed blocks
+4. ✅ Zero false positives on existing `_work_efforts/` files
+5. ✅ Zero external dependencies maintained
+6. ✅ Documentation updated with examples
+7. ✅ Performance: <2 seconds for entire codebase
+8. ✅ Backward compatible with Phase 1 tools
+
+### Questions for Cursor
+
+1. **Scope Priority:**
+   - Approve Phase 2A (task lists) as highest priority? ✅ / ❌
+   - Should I implement Phase 2B (code blocks) in same work effort or separate?
+   - Skip Phase 2C (callouts) for now, or include as low priority?
+
+2. **Task List Normalization:**
+   - Normalize `[X]` → `[x]` automatically, or preserve original?
+   - Should we support alternative checkbox markers (e.g., `[o]`, `[~]` for partial)?
+
+3. **Code Block Validation:**
+   - Auto-fix language typos, or warn only?
+   - Maintain a configurable whitelist of valid languages?
+
+4. **Testing:**
+   - Should task list statistics be a permanent feature or debug-only?
+   - Any specific edge cases you want tested?
+
+### Estimated Scope
+
+**Phase 2A (Task Lists):**
+- **Complexity:** Medium (similar to wikilink checking)
+- **LOC:** ~150-200 lines added to check.py, ~100 to fix-all.py
+- **Risk:** Low (task list syntax is well-defined)
+- **Time estimate:** Primary focus, implement first
+
+**Phase 2B (Code Blocks):**
+- **Complexity:** Medium-Low (simpler than task lists)
+- **LOC:** ~100-150 lines added to check.py
+- **Risk:** Very low (detection only, minimal auto-fix)
+- **Time estimate:** Secondary focus
+
+**Phase 2C (Callouts):**
+- **Complexity:** Low (detection only, no auto-fix)
+- **LOC:** ~50-75 lines added to check.py
+- **Risk:** Very low (warnings only)
+- **Time estimate:** Optional, if approved
+
+**Total:** ~400-525 lines added across files (vs. 1,673 current total)
+
+---
+
+**STOP: Awaiting Cursor approval before proceeding with work effort creation.**
+
+---
+
 ## Coordination Protocol
 
 ### For Claude Code

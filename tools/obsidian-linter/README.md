@@ -50,6 +50,7 @@ Checks markdown files for Obsidian-specific features and best practices includin
 
 - ✅ **Frontmatter** - YAML syntax validity and standard fields
 - ✅ **Wikilinks** - Link syntax and broken link detection
+- ✅ **Task Lists** - Checkbox formatting, style consistency
 - ✅ **Formatting** - Trailing whitespace, heading consistency, final newlines
 - ✅ **Structure** - Heading level hierarchy, multiple H1s
 
@@ -140,6 +141,7 @@ Fixes all automatically fixable issues:
 
 - **Trailing whitespace** - Removed from end of lines
 - **Missing final newline** - Added to end of file
+- **Task list checkboxes** - Normalizes `[X]` → `[x]`, adds missing spaces
 - **Unlinked ticket references** - Converts `TKT-xxxx-NNN` → `[[TKT-xxxx-NNN]]`
 - **Unlinked work effort references** - Converts `WE-YYMMDD-xxxx` → `[[WE-YYMMDD-xxxx]]`
 

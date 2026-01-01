@@ -23,6 +23,8 @@ class ObsidianFixer:
     TRAILING_WHITESPACE_PATTERN = re.compile(r' +$', re.MULTILINE)
     TICKET_ID_PATTERN = re.compile(r'\bTKT-([a-z0-9]{4})-(\d{3})\b')
     WORK_EFFORT_ID_PATTERN = re.compile(r'\bWE-(\d{6})-([a-z0-9]{4})\b')
+    TASK_LIST_PATTERN = re.compile(r'^(\s*)- \[([ xX])\](.*)$', re.MULTILINE)
+    CODE_FENCE_PATTERN = re.compile(r'^```', re.MULTILINE)
 
     def __init__(self, root_path: str = ".", scope: Optional[str] = None, dry_run: bool = False):
         """
@@ -191,6 +193,62 @@ class ObsidianFixer:
 
         return fixed, links_added
 
+    def _fix_task_lists(self, content: str) -> Tuple[str, int]:
+        """
+        Fix task list formatting issues.
+        Returns (fixed_content, number_of_fixes).
+        """
+        fixed = content
+        fixes = 0
+
+        # Find code fence ranges to skip task lists in code blocks
+        code_fence_positions = [m.start() for m in self.CODE_FENCE_PATTERN.finditer(content)]
+        code_ranges = []
+        for i in range(0, len(code_fence_positions) - 1, 2):
+            code_ranges.append((code_fence_positions[i], code_fence_positions[i + 1]))
+
+        def is_in_code_block(pos: int) -> bool:
+            """Check if position is inside a code block."""
+            return any(start <= pos <= end for start, end in code_ranges)
+
+        # Collect replacements for task lists
+        replacements = []
+
+        # Fix uppercase X to lowercase x
+        for match in self.TASK_LIST_PATTERN.finditer(content):
+            if is_in_code_block(match.start()):
+                continue
+
+            indent = match.group(1)
+            checkbox = match.group(2)
+            text_after = match.group(3)
+
+            replacement = None
+
+            # Normalize uppercase X to lowercase x
+            if checkbox == 'X':
+                # Also ensure space after checkbox
+                if text_after and not text_after.startswith(' '):
+                    replacement = f"{indent}- [x] {text_after}"
+                else:
+                    replacement = f"{indent}- [x]{text_after}"
+                fixes += 1
+
+            # Fix missing space after checkbox (if not already handled above)
+            elif text_after and not text_after.startswith(' '):
+                replacement = f"{indent}- [{checkbox}] {text_after}"
+                fixes += 1
+
+            if replacement:
+                replacements.append((match.start(), match.end(), replacement))
+
+        # Apply replacements in reverse order to preserve positions
+        if replacements:
+            for start, end, replacement in sorted(replacements, reverse=True):
+                fixed = fixed[:start] + replacement + fixed[end:]
+
+        return fixed, fixes
+
     def _fix_file(self, file_path: Path) -> Tuple[bool, Dict[str, int]]:
         """
         Fix all issues in a single file.
@@ -206,12 +264,17 @@ class ObsidianFixer:
         original_content = content
         fix_stats = {
             'formatting': 0,
-            'links': 0
+            'links': 0,
+            'task_lists': 0
         }
 
         # Fix formatting
         content, formatting_fixes = self._fix_formatting(content)
         fix_stats['formatting'] = formatting_fixes
+
+        # Fix task lists
+        content, task_list_fixes = self._fix_task_lists(content)
+        fix_stats['task_lists'] = task_list_fixes
 
         # Fix unlinked references
         content, links_added = self._fix_unlinked_references(file_path, content)
@@ -247,13 +310,15 @@ class ObsidianFixer:
             self.stats['files_processed'] += 1
             was_modified, fix_stats = self._fix_file(file_path)
 
-            if was_modified or fix_stats['formatting'] > 0 or fix_stats['links'] > 0:
+            if was_modified or fix_stats['formatting'] > 0 or fix_stats['links'] > 0 or fix_stats.get('task_lists', 0) > 0:
                 rel_path = str(file_path.relative_to(self.root_path))
                 action = "Would fix" if self.dry_run else "Fixed"
 
                 changes = []
                 if fix_stats['formatting'] > 0:
                     changes.append(f"{fix_stats['formatting']} formatting")
+                if fix_stats.get('task_lists', 0) > 0:
+                    changes.append(f"{fix_stats['task_lists']} task lists")
                 if fix_stats['links'] > 0:
                     changes.append(f"{fix_stats['links']} links")
 
@@ -263,8 +328,11 @@ class ObsidianFixer:
                 if was_modified:
                     self.stats['files_fixed'] += 1
                 self.stats['formatting_fixes'] += fix_stats['formatting']
+                if 'task_lists' not in self.stats:
+                    self.stats['task_lists'] = 0
+                self.stats['task_lists'] += fix_stats.get('task_lists', 0)
                 self.stats['links_added'] += fix_stats['links']
-                self.stats['total_changes'] += fix_stats['formatting'] + fix_stats['links']
+                self.stats['total_changes'] += fix_stats['formatting'] + fix_stats.get('task_lists', 0) + fix_stats['links']
 
         print("\n" + "=" * 60)
         print("Summary")
@@ -272,6 +340,7 @@ class ObsidianFixer:
         print(f"Files processed: {self.stats['files_processed']}")
         print(f"Files {'would be ' if self.dry_run else ''}fixed: {self.stats['files_fixed']}")
         print(f"Formatting fixes: {self.stats['formatting_fixes']}")
+        print(f"Task list fixes: {self.stats.get('task_lists', 0)}")
         print(f"Links added: {self.stats['links_added']}")
         print(f"Total changes: {self.stats['total_changes']}")
         print("=" * 60)

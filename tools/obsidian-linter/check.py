@@ -59,6 +59,9 @@ class ObsidianLinter:
     # Patterns for ticket/work effort IDs that should be linked
     TICKET_ID_PATTERN = re.compile(r'\bTKT-([a-z0-9]{4})-(\d{3})\b')
     WORK_EFFORT_ID_PATTERN = re.compile(r'\bWE-(\d{6})-([a-z0-9]{4})\b')
+    # Task list patterns
+    TASK_LIST_PATTERN = re.compile(r'^(\s*)- \[([ xX])\](.*)$', re.MULTILINE)
+    CODE_FENCE_PATTERN = re.compile(r'^```', re.MULTILINE)
 
     # Required frontmatter fields (warnings only)
     STANDARD_FRONTMATTER_FIELDS = {'id', 'title', 'status', 'created'}
@@ -470,6 +473,73 @@ class ObsidianLinter:
 
         return issues
 
+    def _check_task_lists(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check task list syntax and consistency."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find code fence ranges to skip task lists in code blocks
+        code_fence_positions = [m.start() for m in self.CODE_FENCE_PATTERN.finditer(content)]
+        code_ranges = []
+        for i in range(0, len(code_fence_positions) - 1, 2):
+            code_ranges.append((code_fence_positions[i], code_fence_positions[i + 1]))
+
+        def is_in_code_block(pos: int) -> bool:
+            """Check if position is inside a code block."""
+            return any(start <= pos <= end for start, end in code_ranges)
+
+        # Track checkbox styles for consistency checking
+        checkbox_styles = set()
+
+        # Find all task lists
+        for match in self.TASK_LIST_PATTERN.finditer(content):
+            # Skip if in code block
+            if is_in_code_block(match.start()):
+                continue
+
+            indent = match.group(1)
+            checkbox = match.group(2)
+            text_after = match.group(3)
+            line_num = content[:match.start()].count('\n') + 1
+
+            # Track checkbox style (x vs X)
+            if checkbox in ('x', 'X'):
+                checkbox_styles.add(checkbox)
+
+            # Check for uppercase X (should be lowercase)
+            if checkbox == 'X':
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="info",
+                    category="task_list",
+                    message="Task list uses uppercase [X], lowercase [x] is recommended",
+                    fix_available=True
+                ))
+
+            # Check for missing space after checkbox
+            if text_after and not text_after.startswith(' '):
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="info",
+                    category="task_list",
+                    message="Task list missing space after checkbox",
+                    fix_available=True
+                ))
+
+        # Warn on mixed checkbox styles if both X and x are used
+        if len(checkbox_styles) > 1:
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=None,
+                severity="info",
+                category="task_list",
+                message=f"Inconsistent checkbox styles: both {' and '.join(checkbox_styles)} used"
+            ))
+
+        return issues
+
     def _check_formatting(self, file_path: Path, content: str,
                          original_content: str) -> Tuple[List[LintIssue], Optional[str]]:
         """
@@ -573,6 +643,7 @@ class ObsidianLinter:
         issues.extend(self._check_frontmatter(file_path, content))
         issues.extend(self._check_wikilinks(file_path, content))
         issues.extend(self._check_unlinked_references(file_path, content))
+        issues.extend(self._check_task_lists(file_path, content))
 
         formatting_issues, fixed_content = self._check_formatting(
             file_path, content, original_content
