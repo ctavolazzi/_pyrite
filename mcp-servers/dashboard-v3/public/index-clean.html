@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>_pyrite</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --bg-card: #141414;
+      --bg-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-dim: #808080;
+      --accent: #d4a04a;
+      --accent-dim: #8b6914;
+      --success: #4ade80;
+      --pending: #fbbf24;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .status-indicator {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-dim);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .status-dot.disconnected {
+      background: #ef4444;
+    }
+
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .section-count {
+      font-size: 0.875rem;
+      color: var(--text-dim);
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .card:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent-dim);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .card-meta {
+      font-size: 0.8125rem;
+      color: var(--text-dim);
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+
+    .card-progress {
+      text-align: right;
+      font-size: 0.875rem;
+      color: var(--text-dim);
+    }
+
+    .progress-fraction {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    .status-active {
+      background: rgba(74, 222, 128, 0.15);
+      color: var(--success);
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--pending);
+    }
+
+    .status-completed {
+      background: rgba(212, 160, 74, 0.15);
+      color: var(--accent);
+    }
+
+    .status-paused {
+      background: rgba(128, 128, 128, 0.15);
+      color: var(--text-dim);
+    }
+
+    /* Expanded card / detail view */
+    .card.expanded {
+      border-color: var(--accent);
+    }
+
+    .card-detail {
+      display: none;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .card.expanded .card-detail {
+      display: block;
+    }
+
+    .ticket-list {
+      list-style: none;
+    }
+
+    .ticket {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ticket:last-child {
+      border-bottom: none;
+    }
+
+    .ticket-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--success);
+      flex-shrink: 0;
+    }
+
+    .ticket-checkbox.done {
+      background: var(--success);
+      border-color: var(--success);
+      color: var(--bg);
+    }
+
+    .ticket-checkbox.in-progress {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .ticket-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ticket-title {
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    .ticket.done .ticket-title {
+      color: var(--text-dim);
+      text-decoration: line-through;
+    }
+
+    .ticket-id {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-dim);
+    }
+
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.5;
+    }
+
+    .toggle-completed {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.875rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+
+    .toggle-completed:hover {
+      background: var(--bg-hover);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-dim);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .loading-text {
+      animation: pulse 1.5s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="logo">◇</span>
+      <h1>_pyrite</h1>
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Connecting...</span>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="loading">
+        <span class="loading-text">Loading work efforts...</span>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // State
+    let workEfforts = [];
+    let expandedId = null;
+    let showCompleted = false;
+    let ws = null;
+
+    // DOM
+    const main = document.getElementById('main');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    // WebSocket connection
+    function connect() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}`);
+
+      ws.onopen = () => {
+        statusDot.classList.remove('disconnected');
+        statusText.textContent = 'Connected';
+      };
+
+      ws.onclose = () => {
+        statusDot.classList.add('disconnected');
+        statusText.textContent = 'Disconnected';
+        setTimeout(connect, 3000);
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        handleMessage(msg);
+      };
+    }
+
+    function handleMessage(msg) {
+      if (msg.type === 'init' || msg.type === 'update') {
+        // Collect work efforts from all repos
+        if (msg.repos) {
+          workEfforts = [];
+          for (const [repo, data] of Object.entries(msg.repos)) {
+            for (const we of data.workEfforts || []) {
+              workEfforts.push({ ...we, repo });
+            }
+          }
+        } else if (msg.workEfforts) {
+          // Single repo update
+          const repo = msg.repo;
+          workEfforts = workEfforts.filter(w => w.repo !== repo);
+          for (const we of msg.workEfforts || []) {
+            workEfforts.push({ ...we, repo });
+          }
+        }
+        render();
+      }
+    }
+
+    function render() {
+      // Sort: active first, then pending, then paused, then completed
+      const statusOrder = { active: 0, in_progress: 0, pending: 1, paused: 2, completed: 3 };
+      const sorted = [...workEfforts].sort((a, b) => {
+        const orderA = statusOrder[a.status?.toLowerCase()] ?? 2;
+        const orderB = statusOrder[b.status?.toLowerCase()] ?? 2;
+        if (orderA !== orderB) return orderA - orderB;
+        // Then by date (newest first)
+        return new Date(b.created || 0) - new Date(a.created || 0);
+      });
+
+      const active = sorted.filter(w => w.status?.toLowerCase() !== 'completed');
+      const completed = sorted.filter(w => w.status?.toLowerCase() === 'completed');
+
+      let html = '';
+
+      // Active section
+      html += `
+        <section class="section">
+          <div class="section-header">
+            <span class="section-title">Active</span>
+            <span class="section-count">${active.length}</span>
+          </div>
+          ${active.length === 0 ? `
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <div>No active work efforts</div>
+            </div>
+          ` : active.map(we => renderCard(we)).join('')}
+        </section>
+      `;
+
+      // Completed section
+      if (completed.length > 0) {
+        html += `
+          <section class="section">
+            <div class="section-header">
+              <span class="section-title">Completed</span>
+              <button class="toggle-completed" onclick="toggleCompleted()">
+                ${showCompleted ? 'Hide' : 'Show'} (${completed.length})
+              </button>
+            </div>
+            <div class="${showCompleted ? '' : 'hidden'}">
+              ${completed.map(we => renderCard(we)).join('')}
+            </div>
+          </section>
+        `;
+      }
+
+      main.innerHTML = html;
+    }
+
+    function renderCard(we) {
+      const isExpanded = expandedId === we.id;
+      const tickets = we.tickets || [];
+      const done = tickets.filter(t => t.status?.toLowerCase() === 'completed').length;
+      const total = tickets.length;
+      const status = we.status?.toLowerCase() || 'pending';
+
+      return `
+        <div class="card ${isExpanded ? 'expanded' : ''}" onclick="toggleCard('${we.id}')">
+          <div class="card-header">
+            <div>
+              <div class="card-title">${escapeHtml(we.title)}</div>
+              <div class="card-meta">${we.id} • ${we.repo}</div>
+              <span class="status-badge status-${status}">${status}</span>
+            </div>
+            <div class="card-progress">
+              <div class="progress-fraction">${done}/${total}</div>
+              <div>tickets</div>
+            </div>
+          </div>
+          <div class="card-detail">
+            ${tickets.length === 0 ? `
+              <div style="color: var(--text-dim); font-size: 0.875rem;">No tickets</div>
+            ` : `
+              <ul class="ticket-list">
+                ${tickets.map(t => renderTicket(t)).join('')}
+              </ul>
+            `}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderTicket(ticket) {
+      const status = ticket.status?.toLowerCase() || 'pending';
+      const isDone = status === 'completed';
+      const isInProgress = status === 'in_progress' || status === 'active';
+
+      return `
+        <li class="ticket ${isDone ? 'done' : ''}">
+          <div class="ticket-checkbox ${isDone ? 'done' : ''} ${isInProgress ? 'in-progress' : ''}">
+            ${isDone ? '✓' : isInProgress ? '▶' : ''}
+          </div>
+          <div class="ticket-content">
+            <div class="ticket-title">${escapeHtml(ticket.title)}</div>
+            <div class="ticket-id">${ticket.id}</div>
+          </div>
+        </li>
+      `;
+    }
+
+    function toggleCard(id) {
+      expandedId = expandedId === id ? null : id;
+      render();
+    }
+
+    function toggleCompleted() {
+      showCompleted = !showCompleted;
+      render();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+    }
+
+    // Start
+    connect();
+  </script>
+</body>
+</html>
+
