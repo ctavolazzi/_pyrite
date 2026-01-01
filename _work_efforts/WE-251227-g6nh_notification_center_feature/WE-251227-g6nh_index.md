@@ -24,9 +24,9 @@ Test the notification center with activity tracking
 
 | ID | Title | Status |
 |----|-------|--------|
-| [[TKT-g6nh-001]] | Activity tracking works | completed |
-| [[TKT-g6nh-002]] | Bell badge counts unread | completed |
-| [[TKT-g6nh-003]] | Panel shows notifications | completed |
+| [[TKT-g6nh-001_activity_tracking_works|TKT-g6nh-001]] | Activity tracking works | completed |
+| [[TKT-g6nh-002_bell_badge_counts_unread|TKT-g6nh-002]] | Bell badge counts unread | completed |
+| [[TKT-g6nh-003_panel_shows_notifications|TKT-g6nh-003]] | Panel shows notifications | completed |
 
 ## Commits
 - 12/27/2025: Notification center with activity tracking complete. Bell badge, panel, dismiss functionality all working.

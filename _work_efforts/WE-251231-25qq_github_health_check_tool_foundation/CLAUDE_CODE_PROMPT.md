@@ -8,7 +8,7 @@ Work Effort `[[WE-251231-25qq]]` has been created locally in Cursor. We're coord
 
 ## Your Task
 
-Create a feature branch and implement **[[TKT-25qq-001]]: Define tool architecture and file structure** and **[[TKT-25qq-002]]: Implement core GitHub API health checks**.
+Create a feature branch and implement **[[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure** and **[[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks**.
 
 ### Branch to Create
 ```
@@ -93,7 +93,7 @@ Status: HEALTHY ✅ Ready for development
 3. Use "Create PR" to open a PR back to main
 4. Include in PR description:
    - Reference: `[[WE-251231-25qq]]`
-   - Tickets: `[[TKT-25qq-001]]`, `[[TKT-25qq-002]]`
+   - Tickets: `[[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]`, `[[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]`
 
 ## Feedback Loop
 

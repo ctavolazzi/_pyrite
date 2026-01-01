@@ -17,12 +17,12 @@
 - Foundation for multi-repo management coming later
 
 **Tickets:**
-1. [[TKT-25qq-001]]: Define tool architecture and file structure
-2. [[TKT-25qq-002]]: Implement core GitHub API health checks
-3. [[TKT-25qq-003]]: Add security layer for token handling
-4. [[TKT-25qq-004]]: Create CLI interface for manual runs
-5. [[TKT-25qq-005]]: Add MCP server integration for AI tools
-6. [[TKT-25qq-006]]: Write documentation for forkers
+1. [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure
+2. [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks
+3. [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]]: Add security layer for token handling
+4. [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]]: Create CLI interface for manual runs
+5. [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]]: Add MCP server integration for AI tools
+6. [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]]: Write documentation for forkers
 
 **Cross-Chat Coordination:**
 - Cursor (local): Architecture decisions, review, testing
@@ -44,13 +44,13 @@
 - Updated main README.md
 
 **Tickets Completed:**
-- ✅ [[TKT-25qq-001]]: Define tool architecture and file structure
-- ✅ [[TKT-25qq-002]]: Implement core GitHub API health checks
-- ✅ [[TKT-25qq-003]]: Add security layer for token handling
-- ✅ [[TKT-25qq-004]]: Create CLI interface for manual runs
-- ⏳ [[TKT-25qq-005]]: MCP server integration (partial - Claude skills done)
-- ✅ [[TKT-25qq-006]]: Write documentation for forkers
-- 📋 [[TKT-25qq-007]]: Refactor to modular structure (future, low priority)
+- ✅ [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure
+- ✅ [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks
+- ✅ [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]]: Add security layer for token handling
+- ✅ [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]]: Create CLI interface for manual runs
+- ⏳ [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]]: MCP server integration (partial - Claude skills done)
+- ✅ [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]]: Write documentation for forkers
+- 📋 [[TKT-25qq-007_refactor_to_modular_structure_future_enhancement|TKT-25qq-007]]: Refactor to modular structure (future, low priority)
 
 **Cross-Chat Coordination Success:**
 - Cursor created work effort and architectural plan
@@ -61,7 +61,7 @@
 **Testing Note:** Local SSL certificate issue on macOS (Python urllib). Tool correctly reports the error. `gh auth status` confirms authentication works.
 
 **Next Steps:**
-1. Complete [[TKT-25qq-005]] (full MCP server integration)
+1. Complete [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]] (full MCP server integration)
 2. Test in fresh Claude Code session
 3. Document the forker setup workflow
 
@@ -692,7 +692,7 @@ mcp-servers/dashboard/
 - `mcp-servers/dashboard/public/styles.css`
 
 **Work Effort:** [[WE-251227-fwmv]] - Mission Control Responsive & Interactive Features
-**Ticket:** [[TKT-fwmv-001]] - Responsive CSS framework and breakpoints
+**Ticket:** [[TKT-fwmv-001_responsive_css_framework_and_breakpoints|TKT-fwmv-001]] - Responsive CSS framework and breakpoints
 
 **Status:** ✅ Complete
 

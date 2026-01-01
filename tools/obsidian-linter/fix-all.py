@@ -148,15 +148,17 @@ class ObsidianFixer:
             if own_ticket_id and ticket_id == own_ticket_id:
                 continue
 
-            # Check if ticket file exists
-            found = False
+            # Check if ticket file exists and get full filename
+            found_file = None
             for file_key, indexed_path in self.markdown_files.items():
                 if indexed_path.stem.startswith(ticket_id) or file_key.startswith(ticket_id):
-                    found = True
+                    found_file = indexed_path
                     break
 
-            if found:
-                replacements.append((match.start(), match.end(), f"[[{ticket_id}]]"))
+            if found_file:
+                # Use alias format: [[full_filename|short_id]] so links work in Obsidian
+                full_name = found_file.stem
+                replacements.append((match.start(), match.end(), f"[[{full_name}|{ticket_id}]]"))
                 links_added += 1
 
         # Fix work effort IDs

@@ -115,27 +115,50 @@ class LinkFixer:
             if we_match:
                 own_we_id = we_match.group(0)
 
-        # Fix ticket IDs
+        # Fix ticket IDs (both unlinked and broken links)
         for match in self.TICKET_ID_PATTERN.finditer(content):
-            if is_inside_wikilink(match.start()):
-                continue
             if is_in_frontmatter(match.start()):
                 continue
 
             ticket_id = match.group(0)
+            match_start = match.start()
+            match_end = match.end()
 
             if own_ticket_id and ticket_id == own_ticket_id:
                 continue
 
-            # Check if ticket file exists
-            found = False
+            # Check if we're inside a wikilink
+            inside_wikilink = is_inside_wikilink(match_start)
+            
+            # Find the ticket file
+            found_file = None
             for file_key, indexed_path in self.markdown_files.items():
                 if indexed_path.stem.startswith(ticket_id) or file_key.startswith(ticket_id):
-                    found = True
+                    found_file = indexed_path
                     break
 
-            if found:
-                replacements.append((match.start(), match.end(), f"[[{ticket_id}]]"))
+            if found_file:
+                full_name = found_file.stem
+                
+                if inside_wikilink:
+                    # We're inside a wikilink - check if it needs fixing
+                    # Find the wikilink range
+                    for wl_start, wl_end in wikilink_ranges:
+                        if wl_start <= match_start < wl_end:
+                            # Extract the current link text
+                            link_text = content[wl_start+2:wl_end-2]  # Remove [[ and ]]
+                            
+                            # Check if it's just the ID (needs alias) or already has alias
+                            if link_text == ticket_id:
+                                # Broken link - needs full filename with alias
+                                replacements.append((wl_start, wl_end, f"[[{full_name}|{ticket_id}]]"))
+                            elif link_text.startswith(ticket_id + "_") and "|" not in link_text:
+                                # Has full filename but no alias - add alias for readability
+                                replacements.append((wl_start, wl_end, f"[[{link_text}|{ticket_id}]]"))
+                            break
+                else:
+                    # Not linked - add link with alias
+                    replacements.append((match_start, match_end, f"[[{full_name}|{ticket_id}]]"))
 
         # Fix work effort IDs
         for match in self.WORK_EFFORT_ID_PATTERN.finditer(content):

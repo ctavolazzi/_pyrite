@@ -24,10 +24,10 @@ Build a real-time visual dashboard for monitoring work efforts across multiple r
 
 | ID | Title | Status |
 |----|-------|--------|
-| [[TKT-1gku-001]] | Fix MCP server folder path bug | pending |
-| [[TKT-1gku-002]] | Build dashboard server | pending |
-| [[TKT-1gku-003]] | Build dashboard UI | pending |
-| [[TKT-1gku-004]] | Create documentation | pending |
+| [[TKT-1gku-001_fix_mcp_server_folder_path_bug|TKT-1gku-001]] | Fix MCP server folder path bug | pending |
+| [[TKT-1gku-002_build_dashboard_server|TKT-1gku-002]] | Build dashboard server | pending |
+| [[TKT-1gku-003_build_dashboard_ui|TKT-1gku-003]] | Build dashboard UI | pending |
+| [[TKT-1gku-004_create_documentation|TKT-1gku-004]] | Create documentation | pending |
 
 ## Commits
 - 12/27/2025: All 4 tickets completed. Dashboard running at localhost:3847 with real-time WebSocket updates.

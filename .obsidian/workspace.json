@@ -171,6 +171,7 @@
   },
   "active": "5add458fadfcc797",
   "lastOpenFiles": [
+    "tools/obsidian-linter/FEATURES.md",
     "_coordination/tasks/TASK_obsidian_linter_phase2.md",
     "tools/obsidian-linter/validate.py",
     "tools/obsidian-linter/fix-all.py",

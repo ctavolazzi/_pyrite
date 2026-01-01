@@ -266,6 +266,8 @@ python3 tools/obsidian-linter/check.py --scope _work_efforts
 - **Obsidian-specific features** - Focuses on core features (frontmatter, wikilinks, basic formatting)
 - **Not checked**: Callouts, embeds, tags, LaTeX, footnotes (future enhancements)
 
+**See `FEATURES.md` for complete coverage matrix of what's checked vs. not checked.**
+
 ## Examples
 
 ### Check specific directory
