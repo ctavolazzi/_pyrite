@@ -169,6 +169,129 @@ class ObsidianLinter:
                 message=f"Missing standard fields: {', '.join(sorted(missing_fields))}"
             ))
 
+        # Validate ID format
+        if 'id' in fields:
+            id_value = fields['id']
+            file_stem = file_path.stem
+            
+            # Check if ID matches file naming pattern
+            if file_stem.startswith('WE-') or file_stem.endswith('_index'):
+                # Work effort ID: WE-YYMMDD-xxxx
+                if not re.match(r'^WE-\d{6}-[a-z0-9]{4}$', id_value):
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="error",
+                        category="frontmatter",
+                        message=f"Invalid work effort ID format: {id_value} (expected WE-YYMMDD-xxxx)"
+                    ))
+            elif file_stem.startswith('TKT-'):
+                # Ticket ID: TKT-xxxx-NNN
+                if not re.match(r'^TKT-[a-z0-9]{4}-\d{3}$', id_value):
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="error",
+                        category="frontmatter",
+                        message=f"Invalid ticket ID format: {id_value} (expected TKT-xxxx-NNN)"
+                    ))
+
+        # Validate status values
+        if 'status' in fields:
+            status = fields['status'].lower()
+            file_stem = file_path.stem
+            
+            if file_stem.startswith('WE-') or file_stem.endswith('_index'):
+                valid_statuses = {'active', 'paused', 'completed'}
+                if status not in valid_statuses:
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="warning",
+                        category="frontmatter",
+                        message=f"Invalid work effort status: {status} (expected: {', '.join(sorted(valid_statuses))})"
+                    ))
+            elif file_stem.startswith('TKT-'):
+                valid_statuses = {'pending', 'in_progress', 'completed', 'blocked'}
+                if status not in valid_statuses:
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="warning",
+                        category="frontmatter",
+                        message=f"Invalid ticket status: {status} (expected: {', '.join(sorted(valid_statuses))})"
+                    ))
+
+        # Validate date formats
+        if 'created' in fields:
+            created = fields['created']
+            # Check ISO 8601 format (basic validation)
+            if not re.match(r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$', created):
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=1,
+                    severity="warning",
+                    category="frontmatter",
+                    message=f"Invalid date format: {created} (expected ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ)"
+                ))
+
+        # Validate ticket parent relationship
+        if file_stem.startswith('TKT-') and 'parent' in fields:
+            parent_id = fields['parent']
+            # Check if parent ID format is valid
+            if not re.match(r'^WE-\d{6}-[a-z0-9]{4}$', parent_id):
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=1,
+                    severity="error",
+                    category="frontmatter",
+                    message=f"Invalid parent ID format: {parent_id} (expected WE-YYMMDD-xxxx)"
+                ))
+            else:
+                # Check if parent work effort exists
+                parent_found = False
+                for file_key, indexed_path in self.markdown_files.items():
+                    if parent_id in file_key or indexed_path.stem.startswith(parent_id):
+                        parent_found = True
+                        break
+                
+                if not parent_found:
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="warning",
+                        category="frontmatter",
+                        message=f"Parent work effort not found: {parent_id}"
+                    ))
+
+        # Validate ID matches filename pattern
+        if 'id' in fields:
+            id_value = fields['id']
+            if file_stem.startswith('WE-') or file_stem.endswith('_index'):
+                # Check if ID matches folder/file name
+                expected_prefix = id_value.replace('WE-', 'WE-')
+                if not file_stem.startswith(expected_prefix) and not str(file_path.parent).endswith(id_value):
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=1,
+                        severity="info",
+                        category="frontmatter",
+                        message=f"ID '{id_value}' may not match file/folder naming pattern"
+                    ))
+            elif file_stem.startswith('TKT-'):
+                # Check if ticket ID matches parent work effort suffix
+                ticket_suffix = id_value.split('-')[1]  # TKT-xxxx-NNN -> xxxx
+                if 'parent' in fields:
+                    parent_suffix = fields['parent'].split('-')[-1]  # WE-YYMMDD-xxxx -> xxxx
+                    if ticket_suffix != parent_suffix:
+                        issues.append(LintIssue(
+                            file_path=rel_path,
+                            line_num=1,
+                            severity="warning",
+                            category="frontmatter",
+                            message=f"Ticket ID suffix '{ticket_suffix}' doesn't match parent work effort suffix '{parent_suffix}'"
+                        ))
+
         return issues
 
     def _parse_simple_yaml(self, yaml_text: str) -> Dict[str, str]:
