@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔮 Pyrite Console</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="console-container">
+    <!-- Header -->
+    <header class="console-header">
+      <h1>🔮 Pyrite Console</h1>
+      <div class="header-actions">
+        <button id="stats-btn" class="btn-icon" title="View Stats">📊</button>
+        <button id="settings-btn" class="btn-icon" title="Settings">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Main Chat Area -->
+    <main class="chat-container">
+      <div id="messages" class="messages"></div>
+      <div class="input-area">
+        <form id="chat-form">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Ask about work efforts, create tickets, or search..."
+            autocomplete="off"
+          />
+          <button type="submit" id="send-btn">Send</button>
+        </form>
+      </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Settings</h2>
+        <div class="setting-group">
+          <label for="api-key-input">Anthropic API Key</label>
+          <input
+            type="password"
+            id="api-key-input"
+            placeholder="sk-ant-..."
+          />
+          <small>Your key is stored locally and never sent to our servers</small>
+        </div>
+        <div class="modal-actions">
+          <button id="save-settings-btn" class="btn-primary">Save</button>
+          <button id="close-settings-btn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Repository Stats</h2>
+        <div id="stats-content">Loading...</div>
+        <div class="modal-actions">
+          <button id="close-stats-btn" class="btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
