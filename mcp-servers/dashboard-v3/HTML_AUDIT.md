@@ -79,9 +79,9 @@
 
 ### Low Priority (Keep As-Is Initially)
 
-4. **Search Container** (lines 46-53) - Works okay
-5. **Tree Nav** (lines 56-63) - Works okay in drawer
-6. **Toast Container** (line 471) - Works with position adjustments
+1. **Search Container** (lines 46-53) - Works okay
+2. **Tree Nav** (lines 56-63) - Works okay in drawer
+3. **Toast Container** (line 471) - Works with position adjustments
 
 ## Required HTML Changes for V3
 
