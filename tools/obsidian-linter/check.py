@@ -63,6 +63,23 @@ class ObsidianLinter:
     TASK_LIST_PATTERN = re.compile(r'^(\s*)- \[([ xX])\](.*)$', re.MULTILINE)
     CODE_FENCE_PATTERN = re.compile(r'^```', re.MULTILINE)
 
+    # Phase 2B: Advanced markdown patterns
+    # Callout pattern: > [!type] optional title
+    CALLOUT_PATTERN = re.compile(r'^>\s*\[!([a-zA-Z-]+)\](.*)$', re.MULTILINE)
+    # Valid callout types in Obsidian
+    VALID_CALLOUT_TYPES = {
+        'note', 'abstract', 'summary', 'tldr', 'info', 'todo', 'tip', 'hint',
+        'important', 'success', 'check', 'done', 'question', 'help', 'faq',
+        'warning', 'caution', 'attention', 'failure', 'fail', 'missing',
+        'danger', 'error', 'bug', 'example', 'quote', 'cite'
+    }
+    # Tag pattern: #tag or #nested/tag
+    TAG_PATTERN = re.compile(r'(?:^|[^#\w])#([a-zA-Z][\w/-]*)', re.MULTILINE)
+    # Embed pattern: ![[file]] or ![[file#heading]] or ![[file|alias]]
+    EMBED_PATTERN = re.compile(r'!\[\[([^\]]+)\]\]')
+    # Code fence with language specifier
+    CODE_FENCE_WITH_LANG_PATTERN = re.compile(r'^```([a-zA-Z0-9_+-]*)\s*$', re.MULTILINE)
+
     # Required frontmatter fields (warnings only)
     STANDARD_FRONTMATTER_FIELDS = {'id', 'title', 'status', 'created'}
 
@@ -540,6 +557,170 @@ class ObsidianLinter:
 
         return issues
 
+    def _check_callouts(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check callout syntax and type validity."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find code fence ranges to skip callouts in code blocks
+        code_fence_positions = [m.start() for m in self.CODE_FENCE_PATTERN.finditer(content)]
+        code_ranges = []
+        for i in range(0, len(code_fence_positions) - 1, 2):
+            code_ranges.append((code_fence_positions[i], code_fence_positions[i + 1]))
+
+        def is_in_code_block(pos: int) -> bool:
+            """Check if position is inside a code block."""
+            return any(start <= pos <= end for start, end in code_ranges)
+
+        # Find all callouts
+        for match in self.CALLOUT_PATTERN.finditer(content):
+            # Skip if in code block
+            if is_in_code_block(match.start()):
+                continue
+
+            callout_type = match.group(1).lower()
+            line_num = content[:match.start()].count('\n') + 1
+
+            # Check if callout type is valid
+            if callout_type not in self.VALID_CALLOUT_TYPES:
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="warning",
+                    category="callout",
+                    message=f"Unknown callout type: {callout_type} (valid types: {', '.join(sorted(self.VALID_CALLOUT_TYPES)[:5])}...)"
+                ))
+
+        return issues
+
+    def _check_tags(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check tag syntax and formatting."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find code fence ranges to skip tags in code blocks
+        code_fence_positions = [m.start() for m in self.CODE_FENCE_PATTERN.finditer(content)]
+        code_ranges = []
+        for i in range(0, len(code_fence_positions) - 1, 2):
+            code_ranges.append((code_fence_positions[i], code_fence_positions[i + 1]))
+
+        def is_in_code_block(pos: int) -> bool:
+            """Check if position is inside a code block."""
+            return any(start <= pos <= end for start, end in code_ranges)
+
+        # Find all tags
+        for match in self.TAG_PATTERN.finditer(content):
+            # Skip if in code block
+            if is_in_code_block(match.start()):
+                continue
+
+            tag = match.group(1)
+            line_num = content[:match.start()].count('\n') + 1
+
+            # Check for invalid characters in tag
+            if not re.match(r'^[a-zA-Z][\w/-]*$', tag):
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="warning",
+                    category="tag",
+                    message=f"Invalid tag format: #{tag} (tags must start with letter and contain only alphanumeric, /, -, or _)"
+                ))
+
+            # Check for multiple consecutive slashes
+            if '//' in tag:
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="info",
+                    category="tag",
+                    message=f"Tag has consecutive slashes: #{tag}",
+                    fix_available=True
+                ))
+
+        return issues
+
+    def _check_embeds(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check embed syntax and referenced files."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find code fence ranges to skip embeds in code blocks
+        code_fence_positions = [m.start() for m in self.CODE_FENCE_PATTERN.finditer(content)]
+        code_ranges = []
+        for i in range(0, len(code_fence_positions) - 1, 2):
+            code_ranges.append((code_fence_positions[i], code_fence_positions[i + 1]))
+
+        def is_in_code_block(pos: int) -> bool:
+            """Check if position is inside a code block."""
+            return any(start <= pos <= end for start, end in code_ranges)
+
+        # Find all embeds
+        for match in self.EMBED_PATTERN.finditer(content):
+            # Skip if in code block
+            if is_in_code_block(match.start()):
+                continue
+
+            embed_target = match.group(1)
+            line_num = content[:match.start()].count('\n') + 1
+
+            # Parse embed target (file#heading|alias)
+            file_part = embed_target.split('|')[0]  # Remove alias
+            file_part = file_part.split('#')[0]     # Remove heading
+
+            # Check if embedded file exists
+            file_found = False
+            for file_key in self.markdown_files.keys():
+                if file_part in file_key or file_part == file_key:
+                    file_found = True
+                    break
+
+            if not file_found and file_part:  # Only warn if there's a file to find
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="warning",
+                    category="embed",
+                    message=f"Embedded file not found: {file_part}"
+                ))
+
+        return issues
+
+    def _check_code_blocks(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check code block syntax and formatting."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find all code fences
+        code_fences = list(self.CODE_FENCE_WITH_LANG_PATTERN.finditer(content))
+
+        # Check for paired fences
+        if len(code_fences) % 2 != 0:
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=None,
+                severity="error",
+                category="code_block",
+                message=f"Unmatched code fence: found {len(code_fences)} fence(s) (should be even)"
+            ))
+
+        # Check language specifiers
+        for match in code_fences:
+            lang = match.group(1)
+            line_num = content[:match.start()].count('\n') + 1
+
+            # Warn if no language specified (informational only)
+            if not lang:
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="info",
+                    category="code_block",
+                    message="Code block missing language specifier (e.g., ```python)"
+                ))
+
+        return issues
+
     def _check_formatting(self, file_path: Path, content: str,
                          original_content: str) -> Tuple[List[LintIssue], Optional[str]]:
         """
@@ -644,6 +825,11 @@ class ObsidianLinter:
         issues.extend(self._check_wikilinks(file_path, content))
         issues.extend(self._check_unlinked_references(file_path, content))
         issues.extend(self._check_task_lists(file_path, content))
+        # Phase 2B: Advanced markdown checks
+        issues.extend(self._check_callouts(file_path, content))
+        issues.extend(self._check_tags(file_path, content))
+        issues.extend(self._check_embeds(file_path, content))
+        issues.extend(self._check_code_blocks(file_path, content))
 
         formatting_issues, fixed_content = self._check_formatting(
             file_path, content, original_content

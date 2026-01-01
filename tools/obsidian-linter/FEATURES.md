@@ -17,36 +17,40 @@ This document tracks which Obsidian markdown features are checked, fixed, and va
 - ✅ **Orphaned Files** - Files not linked from anywhere
 - ✅ **Case Sensitivity** - Potential case conflicts
 
-## Not Yet Supported ❌
+## Phase 2B: Advanced Markdown Features ✅
 
-### Obsidian-Specific Features
-- ❌ **Callouts** - `> [!note]`, `> [!warning]`, `> [!tip]`, etc.
-  - Not checked for syntax errors
-  - Not validated for proper nesting
-  - Not auto-fixed
+- ✅ **Callouts** - `> [!note]`, `> [!warning]`, `> [!tip]`, etc. (Phase 2B - IMPLEMENTED)
+  - Validated: Checks callout type against Obsidian's standard types
+  - Warns on unknown callout types (note, warning, tip, danger, info, etc.)
+  - Skips callouts in code blocks
 
-- ❌ **Tags** - `#tag` syntax
-  - Not indexed or validated
-  - Not checked for consistency
-  - Not checked for broken tag references
+- ✅ **Tags** - `#tag` syntax (Phase 2B - IMPLEMENTED)
+  - Validated: Tag format (must start with letter, alphanumeric/dash/underscore/slash)
+  - Detects: Consecutive slashes in tags (e.g., `#bad//tag`)
+  - Skips tags in code blocks
 
-- ❌ **Embeds** - `![[file]]` syntax
-  - Not validated (target file existence)
-  - Not checked for broken embeds
-  - Not auto-fixed
+- ✅ **Embeds** - `![[file]]` syntax (Phase 2B - IMPLEMENTED)
+  - Validated: Embedded file existence
+  - Supports: Headings `![[file#heading]]` and aliases `![[file|alias]]`
+  - Warns on broken embed targets
+  - Skips embeds in code blocks
 
-- ❌ **Dates** - Date linking `[[2025-12-31]]`, date formatting
-  - Not validated
-  - Not checked for format consistency
-
-- ❌ **Code Blocks** - Syntax highlighting validation
-  - Not checked for valid language tags
-  - Not validated for proper closing
+- ✅ **Code Blocks** - Syntax highlighting validation (Phase 2B - IMPLEMENTED)
+  - Validated: Checks for matched fence pairs (opening/closing ```)
+  - Warns: Missing language specifiers (informational)
+  - Detects: Unmatched code fences
 
 - ✅ **Task Lists** - `- [ ]` and `- [x]` syntax (Phase 2A - IMPLEMENTED)
   - Checked: Uppercase [X] vs lowercase [x], missing spaces
   - Auto-fixed: Normalizes [X] → [x], adds missing spaces
   - Skips task lists in code blocks
+
+## Not Yet Supported ❌
+
+### Obsidian-Specific Features
+- ❌ **Dates** - Date linking `[[2025-12-31]]`, date formatting
+  - Not validated
+  - Not checked for format consistency
 
 - ❌ **LaTeX/Math** - `$...$` and `$$...$$` syntax
   - Not validated
@@ -72,16 +76,12 @@ This document tracks which Obsidian markdown features are checked, fixed, and va
   - Not validated
   - Not checked for consistency
 
-## Planned for Phase 2 🚧
+## Completed: Phase 2 ✅
 
-See `_coordination/tasks/TASK_obsidian_linter_phase2.md` for the full Phase 2 scope.
+**Phase 2A** (Task Lists) - Completed 2025-12-31
+**Phase 2B** (Callouts, Tags, Embeds, Code Blocks) - Completed 2026-01-01
 
-**Priority Features:**
-1. Callout syntax checking
-2. Tag validation and indexing
-3. Embed validation
-4. Date linking validation
-5. Code block syntax validation
+See `_coordination/tasks/TASK_obsidian_linter_phase2.md` for details.
 
 ## Current Limitations
 
@@ -129,11 +129,11 @@ See `_coordination/tasks/TASK_obsidian_linter_phase2.md` for the full Phase 2 sc
 | Wikilinks | ✅ | ✅ | ✅ |
 | Unlinked IDs | ✅ | ✅ | ✅ |
 | Formatting | ✅ | ✅ | ❌ |
-| Callouts | ❌ | ❌ | ❌ |
-| Tags | ❌ | ❌ | ❌ |
-| Embeds | ❌ | ❌ | ❌ |
+| **Callouts** | ✅ | ❌ | ✅ |
+| **Tags** | ✅ | ⚠️ Partial | ✅ |
+| **Embeds** | ✅ | ❌ | ✅ |
 | Dates | ❌ | ❌ | ❌ |
-| Code Blocks | ❌ | ❌ | ❌ |
+| **Code Blocks** | ✅ | ❌ | ✅ |
 | Task Lists | ✅ | ✅ | ❌ |
 | LaTeX | ❌ | ❌ | ❌ |
 | Footnotes | ❌ | ❌ | ❌ |
@@ -142,6 +142,6 @@ See `_coordination/tasks/TASK_obsidian_linter_phase2.md` for the full Phase 2 sc
 
 ---
 
-**Last Updated:** 2025-12-31
-**Phase 2 Task:** `_coordination/tasks/TASK_obsidian_linter_phase2.md`
+**Last Updated:** 2026-01-01
+**Phase 2 Complete:** See `_coordination/tasks/TASK_obsidian_linter_phase2.md`
 

@@ -1,9 +1,22 @@
 # Obsidian Markdown Tools
 
-A suite of tools for maintaining Obsidian-flavored markdown files:
+A two-tier system for maintaining and enhancing Obsidian-flavored markdown files:
+
+## Tier 1: Standardization (Current - v0.6.1) ✅
+Foundation tier - Validates, detects issues, fixes formatting
 - **Linter** - Detects issues (read-only)
 - **Link Fixer** - Auto-fixes unlinked references
 - **Comprehensive Fixer** - Auto-fixes all fixable issues
+
+## Tier 2: Enhancement (Future - v0.7.0+) 🚧
+Intelligence tier - AI-powered features, auto-indexing, frameworks
+- **Auto-Indexing** - Generate and maintain index files
+- **Framework Support** - Zettelkasten, GTD, PARA
+- **AI Integration** - Smart linking, summaries, auto-tagging
+- **Knowledge Graph** - Relationship mapping and visualization
+
+**📖 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the full vision**
+**🗺️ See [ROADMAP_ENHANCEMENT.md](./ROADMAP_ENHANCEMENT.md) for Tier 2 features**
 
 ## Quick Start
 
@@ -46,13 +59,22 @@ Validates Obsidian-flavored markdown files for syntax, consistency, and common i
 
 Checks markdown files for Obsidian-specific features and best practices including frontmatter, wikilinks, and formatting. Helps maintain consistency across your Obsidian vault or documentation.
 
-## What It Checks
+## What It Checks (Phase 2B Complete ✅)
 
+**Core Features:**
 - ✅ **Frontmatter** - YAML syntax validity and standard fields
 - ✅ **Wikilinks** - Link syntax and broken link detection
 - ✅ **Task Lists** - Checkbox formatting, style consistency
 - ✅ **Formatting** - Trailing whitespace, heading consistency, final newlines
 - ✅ **Structure** - Heading level hierarchy, multiple H1s
+
+**Advanced Features (Phase 2B - NEW!):**
+- ✅ **Callouts** - Validates callout types (`> [!note]`, `> [!warning]`, etc.)
+- ✅ **Tags** - Checks tag format (`#tag`, `#nested/tag`)
+- ✅ **Embeds** - Validates embedded files (`![[file]]`, `![[file#heading]]`)
+- ✅ **Code Blocks** - Checks fence matching and language specifiers
+
+**📋 See [FEATURES.md](./FEATURES.md) for complete coverage matrix**
 
 ## Tools
 
