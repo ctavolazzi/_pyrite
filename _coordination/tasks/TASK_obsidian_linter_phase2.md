@@ -1,11 +1,11 @@
 ---
-status: partial_complete
+status: completed
 assigned_to: claude_code
 created: 2025-12-31T17:30:00-08:00
 created_by: cursor
 task_type: tool_development
 priority: normal
-last_updated: 2025-12-31T18:15:00-08:00
+last_updated: 2026-01-01T02:30:00-08:00
 ---
 
 # Task: Obsidian Linter Phase 2 - Advanced Features
@@ -18,8 +18,11 @@ last_updated: 2025-12-31T18:15:00-08:00
 - Add missing spaces after checkboxes
 - Skip task lists in code blocks
 
-**Phase 2B: NOT STARTED**
-- Callouts, tags, embeds, code blocks, etc.
+**Phase 2B: COMPLETE** ✅ (Feature branch: claude/phase-2b-advanced-markdown)
+- Callout validation (type checking against Obsidian standards)
+- Tag validation (format checking, consecutive slash detection)
+- Embed validation (file existence checking)
+- Code block validation (fence matching, language specifier warnings)
 
 ---
 
@@ -29,18 +32,46 @@ last_updated: 2025-12-31T18:15:00-08:00
 |---------|--------|-----|
 | Task list validation | ✅ Complete | #14 |
 | Task list auto-fix | ✅ Complete | #14 |
-| Callouts | ❌ Not started | - |
-| Tags | ❌ Not started | - |
-| Embeds | ❌ Not started | - |
-| Code blocks | ❌ Not started | - |
-| LaTeX | ❌ Not started | - |
-| Footnotes | ❌ Not started | - |
-| Comments | ❌ Not started | - |
-| Highlights | ❌ Not started | - |
+| **Callouts** | ✅ Complete | Pending |
+| **Tags** | ✅ Complete | Pending |
+| **Embeds** | ✅ Complete | Pending |
+| **Code blocks** | ✅ Complete | Pending |
+| LaTeX | ⚪ Skipped | - |
+| Footnotes | ⚪ Skipped | - |
+| Comments | ⚪ Skipped | - |
+| Highlights | ⚪ Skipped | - |
 
 ---
 
-## What's Left (Phase 2B+)
+## Implementation Details (Phase 2B)
+
+### Callouts (`check.py:560-594`)
+- Pattern: `^>\s*\[!([a-zA-Z-]+)\](.*)$`
+- Validates callout type against 24 standard Obsidian types
+- Warns on unknown types
+- Skips callouts in code blocks
+
+### Tags (`check.py:596-641`)
+- Pattern: `(?:^|[^#\w])#([a-zA-Z][\w/-]*)`
+- Validates format (must start with letter)
+- Detects consecutive slashes
+- Skips tags in code blocks
+
+### Embeds (`check.py:643-687`)
+- Pattern: `!\[\[([^\]]+)\]\]`
+- Validates embedded file existence
+- Supports headings and aliases
+- Skips embeds in code blocks
+
+### Code Blocks (`check.py:689-722`)
+- Pattern: `^```([a-zA-Z0-9_+-]*)\s*$`
+- Checks for matched fence pairs
+- Warns on missing language specifiers
+- Detects unmatched fences
+
+---
+
+## What's Left (Phase 3+)
 
 ### Features Not Yet Implemented
 
@@ -102,5 +133,14 @@ If you want to add more Phase 2 features:
 
 ## Completion Log
 
+- **2026-01-01 02:30 PST:** Phase 2B (callouts, tags, embeds, code blocks) implemented on feature branch
 - **2025-12-31 18:15 PST:** Phase 2A (task lists) merged via PR #14
 - **2025-12-31 17:30 PST:** Task created by Cursor
+
+## Next Steps
+
+- Merge Phase 2B branch via PR
+- Consider auto-fix implementations for:
+  - Tag consecutive slashes (low priority)
+  - Callout type corrections (low priority)
+- Future: Date validation, LaTeX, footnotes (if needed)
