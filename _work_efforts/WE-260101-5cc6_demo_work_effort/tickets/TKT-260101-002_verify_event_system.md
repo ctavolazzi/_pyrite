@@ -1,8 +1,8 @@
 ---
-id: TKT-5cc6-002
-title: "Verify event system"
+id: TKT-260101-002
+title: Verify event system
 status: pending
-created: 2026-01-01T04:53:28.290Z
+created: 2026-01-01 04:53:28.290000+00:00
 ---
 
 # Verify event system
