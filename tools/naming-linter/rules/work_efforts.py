@@ -216,6 +216,22 @@ class WorkEffortValidator:
                 print(f"  Would update frontmatter ID: {violation['actual']} → {violation['expected']}")
             elif vtype == 'MISSING_FRONTMATTER_FIELD':
                 print(f"  Would add missing field to {violation['path']}")
+            elif vtype == 'INVALID_TICKET_NAME':
+                # Extract what the new name would be
+                ticket_path = Path(violation['path'])
+                we_folder = ticket_path.parent.parent.name
+                we_id_match = re.match(r'^(WE-\d{6}-[a-z0-9]{4})_', we_folder)
+                if we_id_match:
+                    date_part = we_id_match.group(1).split('-')[1]
+                    seq_match = re.search(r'-(\d{3})_', ticket_path.name)
+                    desc_match = re.search(r'-\d{3}_(.+)\.md$', ticket_path.name)
+                    if seq_match and desc_match:
+                        new_name = f"TKT-{date_part}-{seq_match.group(1)}_{desc_match.group(1)}.md"
+                        print(f"  Would rename ticket: {ticket_path.name} → {new_name}")
+                    else:
+                        print(f"  Would fix ticket: {ticket_path.name}")
+                else:
+                    print(f"  Cannot auto-fix: {vtype} - {violation['message']}")
             else:
                 print(f"  Cannot auto-fix: {vtype} - {violation['message']}")
 
@@ -246,6 +262,13 @@ class WorkEffortValidator:
                     print(f"  ✓ Updated ID in: {violation['path']}")
                     fixed_count += 1
 
+                elif vtype == 'INVALID_TICKET_NAME':
+                    # Fix ticket filename and frontmatter
+                    old_path = Path(violation['path'])
+                    if self._fix_ticket_name(old_path):
+                        print(f"  ✓ Fixed ticket: {old_path.name}")
+                        fixed_count += 1
+
                 # Some violations cannot be auto-fixed
                 # (e.g., missing files, invalid folder names require manual intervention)
 
@@ -272,3 +295,58 @@ class WorkEffortValidator:
 
             with open(index_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
+
+    def _fix_ticket_name(self, ticket_path: Path) -> bool:
+        """
+        Fix ticket filename by extracting date from parent WE folder
+
+        Args:
+            ticket_path: Path to ticket file with wrong name
+
+        Returns:
+            True if fixed successfully, False otherwise
+        """
+        # Extract parent WE folder name
+        we_folder = ticket_path.parent.parent.name
+
+        # Extract WE ID from folder (e.g., "WE-260101-5cc6" from "WE-260101-5cc6_demo")
+        we_id_match = re.match(r'^(WE-\d{6}-[a-z0-9]{4})_', we_folder)
+        if not we_id_match:
+            return False
+
+        we_id = we_id_match.group(1)
+        date_part = we_id.split('-')[1]  # Extract "260101"
+
+        # Parse current filename to extract sequence and description
+        current_name = ticket_path.name
+
+        # Try to extract sequence number from current name (handles both TKT-xxxx-NNN and TKT-YYMMDD-NNN)
+        seq_match = re.search(r'-(\d{3})_', current_name)
+        if not seq_match:
+            return False
+
+        sequence = seq_match.group(1)
+
+        # Extract description (everything after "NNN_" and before ".md")
+        desc_match = re.search(r'-\d{3}_(.+)\.md$', current_name)
+        if not desc_match:
+            return False
+
+        description = desc_match.group(1)
+
+        # Generate correct filename
+        correct_filename = f"TKT-{date_part}-{sequence}_{description}.md"
+        new_path = ticket_path.parent / correct_filename
+
+        # Don't rename if already correct
+        if ticket_path.name == correct_filename:
+            return True
+
+        # Rename file
+        ticket_path.rename(new_path)
+
+        # Update frontmatter ID
+        correct_ticket_id = f"TKT-{date_part}-{sequence}"
+        self._fix_frontmatter_id(new_path, correct_ticket_id)
+
+        return True
