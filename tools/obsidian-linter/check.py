@@ -1,0 +1,507 @@
+#!/usr/bin/env python3
+"""
+Obsidian Markdown Linter
+
+Validates Obsidian-flavored markdown files for syntax and consistency.
+Checks frontmatter, wikilinks, and basic formatting.
+"""
+
+import os
+import sys
+import re
+import argparse
+from pathlib import Path
+from typing import List, Dict, Tuple, Optional, Set
+from dataclasses import dataclass, field
+
+
+@dataclass
+class LintIssue:
+    """Represents a linting issue found in a file."""
+    file_path: str
+    line_num: Optional[int]
+    severity: str  # "error", "warning", "info"
+    category: str  # "frontmatter", "wikilink", "formatting"
+    message: str
+    fix_available: bool = False
+
+    def __str__(self) -> str:
+        severity_icon = {
+            "error": "❌",
+            "warning": "⚠️ ",
+            "info": "ℹ️ "
+        }
+        icon = severity_icon.get(self.severity, "•")
+        line_info = f":{self.line_num}" if self.line_num else ""
+        return f"{icon} {self.file_path}{line_info} - {self.message}"
+
+
+@dataclass
+class LintStats:
+    """Statistics from linting run."""
+    files_checked: int = 0
+    files_with_issues: int = 0
+    errors: int = 0
+    warnings: int = 0
+    infos: int = 0
+    fixes_applied: int = 0
+    issues: List[LintIssue] = field(default_factory=list)
+
+
+class ObsidianLinter:
+    """Lints Obsidian-flavored markdown files."""
+
+    # Regex patterns
+    FRONTMATTER_PATTERN = re.compile(r'^---\s*\n(.*?)\n---\s*\n', re.DOTALL | re.MULTILINE)
+    WIKILINK_PATTERN = re.compile(r'\[\[([^\]]+?)\]\]')
+    HEADING_PATTERN = re.compile(r'^(#{1,6})\s+(.+)$', re.MULTILINE)
+    TRAILING_WHITESPACE_PATTERN = re.compile(r' +$', re.MULTILINE)
+
+    # Required frontmatter fields (warnings only)
+    STANDARD_FRONTMATTER_FIELDS = {'id', 'title', 'status', 'created'}
+
+    def __init__(self, root_path: str = ".", scope: Optional[str] = None,
+                 strict: bool = False, dry_run: bool = False):
+        """
+        Initialize the linter.
+
+        Args:
+            root_path: Root directory to search for markdown files
+            scope: Limit checking to specific directory (e.g., "_work_efforts")
+            strict: Enable stricter checking
+            dry_run: Preview fixes without applying them
+        """
+        self.root_path = Path(root_path).resolve()
+        self.scope = scope
+        self.strict = strict
+        self.dry_run = dry_run
+        self.stats = LintStats()
+
+        # Build index of all markdown files for wikilink resolution
+        self.markdown_files: Dict[str, Path] = {}
+        self._index_markdown_files()
+
+    def _index_markdown_files(self):
+        """Build an index of all markdown files for wikilink validation."""
+        search_path = self.root_path / self.scope if self.scope else self.root_path
+
+        for md_file in search_path.rglob("*.md"):
+            # Skip hidden directories and files
+            if any(part.startswith('.') for part in md_file.parts):
+                continue
+
+            # Store both with and without .md extension
+            name = md_file.stem
+            rel_path = md_file.relative_to(self.root_path)
+
+            self.markdown_files[name] = md_file
+            self.markdown_files[str(rel_path)] = md_file
+            self.markdown_files[str(rel_path.with_suffix(''))] = md_file
+
+    def _find_markdown_files(self) -> List[Path]:
+        """Find all markdown files in scope."""
+        search_path = self.root_path / self.scope if self.scope else self.root_path
+        files = []
+
+        for md_file in search_path.rglob("*.md"):
+            # Skip hidden directories and files
+            if any(part.startswith('.') for part in md_file.parts):
+                continue
+            files.append(md_file)
+
+        return sorted(files)
+
+    def _check_frontmatter(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check YAML frontmatter validity and structure."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Check if file starts with frontmatter
+        if not content.startswith('---\n'):
+            if self.strict:
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=1,
+                    severity="warning",
+                    category="frontmatter",
+                    message="No YAML frontmatter found"
+                ))
+            return issues
+
+        # Extract frontmatter
+        match = self.FRONTMATTER_PATTERN.match(content)
+        if not match:
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=1,
+                severity="error",
+                category="frontmatter",
+                message="Malformed frontmatter (missing closing ---)"
+            ))
+            return issues
+
+        frontmatter_text = match.group(1)
+
+        # Parse YAML manually (stdlib only - no yaml module)
+        try:
+            fields = self._parse_simple_yaml(frontmatter_text)
+        except ValueError as e:
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=1,
+                severity="error",
+                category="frontmatter",
+                message=f"Invalid YAML syntax: {e}"
+            ))
+            return issues
+
+        # Check for standard fields
+        missing_fields = self.STANDARD_FRONTMATTER_FIELDS - fields.keys()
+        if missing_fields:
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=1,
+                severity="warning",
+                category="frontmatter",
+                message=f"Missing standard fields: {', '.join(sorted(missing_fields))}"
+            ))
+
+        return issues
+
+    def _parse_simple_yaml(self, yaml_text: str) -> Dict[str, str]:
+        """
+        Parse simple YAML (key: value pairs).
+        Not a full YAML parser - just enough for frontmatter.
+        """
+        fields = {}
+        for line in yaml_text.split('\n'):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+
+            if ':' in line:
+                key, value = line.split(':', 1)
+                key = key.strip()
+                value = value.strip()
+
+                # Remove quotes if present
+                if value.startswith('"') and value.endswith('"'):
+                    value = value[1:-1]
+                elif value.startswith("'") and value.endswith("'"):
+                    value = value[1:-1]
+
+                fields[key] = value
+
+        return fields
+
+    def _check_wikilinks(self, file_path: Path, content: str) -> List[LintIssue]:
+        """Check wikilink syntax and validate targets exist."""
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+
+        # Find all wikilinks
+        for match in self.WIKILINK_PATTERN.finditer(content):
+            link_text = match.group(1)
+
+            # Handle [[page|alias]] format
+            if '|' in link_text:
+                target, alias = link_text.split('|', 1)
+            else:
+                target = link_text
+
+            target = target.strip()
+
+            # Check if target exists in our index
+            if target not in self.markdown_files:
+                # Calculate line number
+                line_num = content[:match.start()].count('\n') + 1
+
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=line_num,
+                    severity="warning",
+                    category="wikilink",
+                    message=f"Broken wikilink: [[{link_text}]] - target not found"
+                ))
+
+        return issues
+
+    def _check_formatting(self, file_path: Path, content: str,
+                         original_content: str) -> Tuple[List[LintIssue], Optional[str]]:
+        """
+        Check basic formatting issues.
+        Returns (issues, fixed_content) where fixed_content is None if no fixes.
+        """
+        issues = []
+        rel_path = str(file_path.relative_to(self.root_path))
+        fixed_content = content
+        has_fixes = False
+
+        # Check trailing whitespace
+        trailing_ws_lines = []
+        for i, line in enumerate(content.split('\n'), 1):
+            if line.endswith(' ') or line.endswith('\t'):
+                trailing_ws_lines.append(i)
+
+        if trailing_ws_lines:
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=trailing_ws_lines[0],
+                severity="info",
+                category="formatting",
+                message=f"Trailing whitespace on {len(trailing_ws_lines)} line(s)",
+                fix_available=True
+            ))
+            # Fix: remove trailing whitespace
+            fixed_content = self.TRAILING_WHITESPACE_PATTERN.sub('', fixed_content)
+            has_fixes = True
+
+        # Check final newline
+        if not content.endswith('\n'):
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=None,
+                severity="info",
+                category="formatting",
+                message="Missing final newline",
+                fix_available=True
+            ))
+            fixed_content += '\n'
+            has_fixes = True
+
+        # Check heading consistency
+        headings = self.HEADING_PATTERN.findall(content)
+        if headings:
+            prev_level = 0
+            for i, (hashes, text) in enumerate(headings, 1):
+                level = len(hashes)
+
+                # Check for skipped levels (e.g., # then ###)
+                if prev_level > 0 and level > prev_level + 1:
+                    # Find line number
+                    pattern = re.escape(hashes + ' ' + text)
+                    match = re.search(pattern, content)
+                    line_num = content[:match.start()].count('\n') + 1 if match else None
+
+                    issues.append(LintIssue(
+                        file_path=rel_path,
+                        line_num=line_num,
+                        severity="warning",
+                        category="formatting",
+                        message=f"Heading level skipped: {prev_level} -> {level}"
+                    ))
+
+                prev_level = level
+
+            # Check for multiple H1s
+            h1_count = sum(1 for h, _ in headings if len(h) == 1)
+            if h1_count > 1:
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=None,
+                    severity="warning",
+                    category="formatting",
+                    message=f"Multiple H1 headings ({h1_count}) - should have only one"
+                ))
+
+        return issues, (fixed_content if has_fixes else None)
+
+    def lint_file(self, file_path: Path) -> List[LintIssue]:
+        """Lint a single markdown file."""
+        issues = []
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                original_content = f.read()
+                content = original_content
+        except Exception as e:
+            rel_path = str(file_path.relative_to(self.root_path))
+            issues.append(LintIssue(
+                file_path=rel_path,
+                line_num=None,
+                severity="error",
+                category="file",
+                message=f"Cannot read file: {e}"
+            ))
+            return issues
+
+        # Run all checks
+        issues.extend(self._check_frontmatter(file_path, content))
+        issues.extend(self._check_wikilinks(file_path, content))
+
+        formatting_issues, fixed_content = self._check_formatting(
+            file_path, content, original_content
+        )
+        issues.extend(formatting_issues)
+
+        # Apply fixes if requested and available
+        if fixed_content and not self.dry_run:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.write(fixed_content)
+                self.stats.fixes_applied += sum(
+                    1 for issue in formatting_issues if issue.fix_available
+                )
+            except Exception as e:
+                rel_path = str(file_path.relative_to(self.root_path))
+                issues.append(LintIssue(
+                    file_path=rel_path,
+                    line_num=None,
+                    severity="error",
+                    category="file",
+                    message=f"Cannot write fixes: {e}"
+                ))
+
+        return issues
+
+    def lint_all(self) -> LintStats:
+        """Lint all markdown files in scope."""
+        files = self._find_markdown_files()
+
+        print(f"\n📝 Obsidian Markdown Linter")
+        print("=" * 50)
+        print(f"Scope: {self.scope or 'entire repository'}")
+        print(f"Files found: {len(files)}")
+        if self.dry_run:
+            print("Mode: DRY RUN (no changes will be made)")
+        print("=" * 50 + "\n")
+
+        files_with_issues_set: Set[str] = set()
+
+        for file_path in files:
+            self.stats.files_checked += 1
+            issues = self.lint_file(file_path)
+
+            if issues:
+                rel_path = str(file_path.relative_to(self.root_path))
+                files_with_issues_set.add(rel_path)
+
+                for issue in issues:
+                    self.stats.issues.append(issue)
+
+                    if issue.severity == "error":
+                        self.stats.errors += 1
+                    elif issue.severity == "warning":
+                        self.stats.warnings += 1
+                    else:
+                        self.stats.infos += 1
+
+        self.stats.files_with_issues = len(files_with_issues_set)
+
+        return self.stats
+
+    def print_results(self):
+        """Print linting results."""
+        stats = self.stats
+
+        # Print issues grouped by file
+        if stats.issues:
+            print("Issues found:\n")
+
+            issues_by_file: Dict[str, List[LintIssue]] = {}
+            for issue in stats.issues:
+                if issue.file_path not in issues_by_file:
+                    issues_by_file[issue.file_path] = []
+                issues_by_file[issue.file_path].append(issue)
+
+            for file_path in sorted(issues_by_file.keys()):
+                print(f"\n📄 {file_path}")
+                for issue in issues_by_file[file_path]:
+                    line_info = f"  Line {issue.line_num}: " if issue.line_num else "  "
+                    print(f"  {line_info}{issue.message}")
+
+        # Print summary
+        print("\n" + "=" * 50)
+        print(f"Files checked: {stats.files_checked}")
+        print(f"Files with issues: {stats.files_with_issues}")
+        print(f"❌ Errors: {stats.errors}")
+        print(f"⚠️  Warnings: {stats.warnings}")
+        print(f"ℹ️  Info: {stats.infos}")
+
+        if stats.fixes_applied > 0:
+            print(f"✅ Fixes applied: {stats.fixes_applied}")
+
+        print("=" * 50)
+
+        if stats.errors == 0 and stats.warnings == 0:
+            print("\n✨ All markdown files look good!")
+        elif stats.errors == 0:
+            print(f"\n⚠️  {stats.warnings} warning(s) found")
+        else:
+            print(f"\n❌ {stats.errors} error(s) found")
+
+
+def main():
+    """Main entry point."""
+    parser = argparse.ArgumentParser(
+        description="Lint Obsidian-flavored markdown files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Lint entire repository
+  python3 tools/obsidian-linter/check.py
+
+  # Lint specific directory
+  python3 tools/obsidian-linter/check.py --scope _work_efforts
+
+  # Preview fixes without applying
+  python3 tools/obsidian-linter/check.py --dry-run
+
+  # Apply fixes automatically
+  python3 tools/obsidian-linter/check.py --fix
+
+  # Strict mode with all checks
+  python3 tools/obsidian-linter/check.py --strict
+        """
+    )
+
+    parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Root path to check (default: current directory)"
+    )
+    parser.add_argument(
+        "--scope",
+        help="Limit to specific directory (e.g., '_work_efforts', '_docs')"
+    )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Enable stricter checking"
+    )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Automatically fix issues (safe fixes only)"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview fixes without applying (implies --fix)"
+    )
+
+    args = parser.parse_args()
+
+    # If dry-run is specified, treat it as --fix but don't apply
+    if args.dry_run:
+        args.fix = True
+
+    # Create linter
+    linter = ObsidianLinter(
+        root_path=args.path,
+        scope=args.scope,
+        strict=args.strict,
+        dry_run=args.dry_run
+    )
+
+    # Run linting
+    stats = linter.lint_all()
+    linter.print_results()
+
+    # Exit with appropriate code
+    sys.exit(1 if stats.errors > 0 else 0)
+
+
+if __name__ == "__main__":
+    main()
