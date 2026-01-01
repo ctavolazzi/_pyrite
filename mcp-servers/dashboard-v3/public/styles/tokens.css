@@ -34,6 +34,8 @@
   /* Status Colors */
   --status-active: #ff9d3d;
   --status-active-bg: rgba(255, 157, 61, 0.1);
+  --status-in-progress: #3b9eff;
+  --status-in-progress-bg: rgba(59, 158, 255, 0.1);
   --status-completed: #10b981;
   --status-completed-bg: rgba(16, 185, 129, 0.1);
   --status-pending: #6b7280;
@@ -226,6 +228,39 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
+  
+  /* Legacy alias */
+  --radius: var(--radius-md);
+
+  /* =========================================================================
+     LEGACY COMPATIBILITY ALIASES
+     ========================================================================= */
+  
+  --accent-dim: var(--accent-glow);
+  --bg-card-hover: var(--bg-hover);
+  --bg-highlight: var(--bg-active);
+  --border: var(--border-default);
+  --sidebar-collapsed: var(--sidebar-width-collapsed);
+
+  /* =========================================================================
+     COMPONENT-SPECIFIC TOKENS
+     ========================================================================= */
+  
+  /* Button Tokens */
+  --btn-height-sm: 36px;
+  --btn-height-md: 44px;
+  --btn-height-lg: 56px;
+  --btn-radius: var(--radius-md);
+  
+  /* Card Tokens */
+  --card-padding: var(--space-md);
+  --card-radius: var(--radius-lg);
+  
+  /* Indicator Tokens */
+  --indicator-size-sm: 8px;
+  --indicator-size-md: 12px;
+  --indicator-size-lg: 16px;
+  --indicator-glow: 4px;
 }
 
 /* ============================================================================

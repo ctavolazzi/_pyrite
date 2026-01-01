@@ -528,9 +528,16 @@
   }
 }
 
-@container main (width >= 1000px) {
+@container main (width >= 1000px) and (width < 1400px) {
   .stats-section {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    /* Use fixed 4 columns instead of auto-fit minmax which can overflow */
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@container main (width >= 1400px) {
+  .stats-section {
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 

@@ -1,0 +1,644 @@
+/* ============================================================================
+   MISSION CONTROL V3 - Button Components
+
+   A comprehensive button system with consistent sizing, variants, and states.
+   All buttons are touch-friendly with minimum 44px interaction areas.
+
+   Naming Convention (BEM-like):
+   - .btn              Base button
+   - .btn--primary     Primary action (accent color)
+   - .btn--secondary   Secondary action (outline)
+   - .btn--success     Success/complete (green)
+   - .btn--warning     Warning/caution (orange)
+   - .btn--danger      Destructive (red)
+   - .btn--ghost       Text-only, no background
+   - .btn--icon        Icon-only button
+   - .btn--sm          Small size
+   - .btn--lg          Large size
+
+   @author _pyrite
+   @version 0.7.0
+   ============================================================================ */
+
+/* ============================================================================
+   Button Tokens (component-specific)
+   ============================================================================ */
+:root {
+  --btn-height-sm: 36px;
+  --btn-height-md: 44px;
+  --btn-height-lg: 56px;
+  --btn-padding-sm: var(--space-xs) var(--space-sm);
+  --btn-padding-md: var(--space-sm) var(--space-md);
+  --btn-padding-lg: var(--space-md) var(--space-lg);
+  --btn-font-sm: var(--text-xs);
+  --btn-font-md: var(--text-sm);
+  --btn-font-lg: var(--text-base);
+  --btn-radius: var(--radius-md);
+}
+
+/* ============================================================================
+   Base Button
+   ============================================================================ */
+.btn {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+
+  /* Sizing */
+  min-height: var(--btn-height-md);
+  padding: var(--btn-padding-md);
+
+  /* Typography */
+  font-family: var(--font-body);
+  font-size: var(--btn-font-md);
+  font-weight: var(--fw-medium);
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+
+  /* Appearance */
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+
+  /* Transitions */
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+
+  /* Prevent overflow */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  /* Reset */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+/* States */
+.btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.btn:active {
+  background: var(--bg-active);
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+.btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn.is-loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn.is-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   Button Variants
+   ============================================================================ */
+
+/* Primary - Main call to action */
+.btn--primary {
+  color: var(--bg-deep);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn--primary:hover {
+  background: var(--accent-bright);
+  border-color: var(--accent-bright);
+}
+
+.btn--primary:active {
+  background: var(--accent-muted);
+  border-color: var(--accent-muted);
+}
+
+/* Secondary - Outline style */
+.btn--secondary {
+  color: var(--text-secondary);
+  background: transparent;
+  border-color: var(--border-default);
+}
+
+.btn--secondary:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+/* Success - Complete/confirm actions */
+.btn--success {
+  color: var(--bg-deep);
+  background: var(--status-completed);
+  border-color: var(--status-completed);
+}
+
+.btn--success:hover {
+  background: #0ea472; /* Slightly darker green */
+  border-color: #0ea472;
+}
+
+/* Warning - Caution actions */
+.btn--warning {
+  color: var(--bg-deep);
+  background: var(--status-paused);
+  border-color: var(--status-paused);
+}
+
+.btn--warning:hover {
+  background: #d97706; /* Slightly darker orange */
+  border-color: #d97706;
+}
+
+/* Danger - Destructive actions */
+.btn--danger {
+  color: var(--text-primary);
+  background: transparent;
+  border-color: var(--status-blocked);
+}
+
+.btn--danger:hover {
+  color: var(--bg-deep);
+  background: var(--status-blocked);
+  border-color: var(--status-blocked);
+}
+
+/* Ghost - Text only, minimal chrome */
+.btn--ghost {
+  color: var(--text-secondary);
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn--ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+/* ============================================================================
+   Button Sizes
+   ============================================================================ */
+
+/* Small */
+.btn--sm {
+  min-height: var(--btn-height-sm);
+  padding: var(--btn-padding-sm);
+  font-size: var(--btn-font-sm);
+  border-radius: var(--radius-sm);
+}
+
+/* Large */
+.btn--lg {
+  min-height: var(--btn-height-lg);
+  padding: var(--btn-padding-lg);
+  font-size: var(--btn-font-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* Full Width */
+.btn--full {
+  width: 100%;
+}
+
+/* ============================================================================
+   Icon Button
+   ============================================================================ */
+.btn--icon {
+  width: var(--btn-height-md);
+  min-width: var(--btn-height-md);
+  padding: 0;
+  justify-content: center;
+}
+
+.btn--icon.btn--sm {
+  width: var(--btn-height-sm);
+  min-width: var(--btn-height-sm);
+}
+
+.btn--icon.btn--lg {
+  width: var(--btn-height-lg);
+  min-width: var(--btn-height-lg);
+}
+
+/* ============================================================================
+   Button Icon (within button)
+   ============================================================================ */
+.btn__icon {
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  font-size: 1.25em;
+}
+
+.btn__icon--left {
+  margin-right: var(--space-2xs);
+}
+
+.btn__icon--right {
+  margin-left: var(--space-2xs);
+}
+
+/* ============================================================================
+   Button Group
+   ============================================================================ */
+.btn-group {
+  display: inline-flex;
+  gap: 0;
+}
+
+.btn-group .btn {
+  border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+  border-radius: var(--btn-radius) 0 0 var(--btn-radius);
+}
+
+.btn-group .btn:last-child {
+  border-radius: 0 var(--btn-radius) var(--btn-radius) 0;
+}
+
+.btn-group .btn:not(:first-child) {
+  margin-left: -1px;
+}
+
+.btn-group .btn:hover,
+.btn-group .btn:focus {
+  z-index: 1;
+}
+
+/* Vertical button group */
+.btn-group--vertical {
+  flex-direction: column;
+}
+
+.btn-group--vertical .btn {
+  width: 100%;
+}
+
+.btn-group--vertical .btn:first-child {
+  border-radius: var(--btn-radius) var(--btn-radius) 0 0;
+}
+
+.btn-group--vertical .btn:last-child {
+  border-radius: 0 0 var(--btn-radius) var(--btn-radius);
+}
+
+.btn-group--vertical .btn:not(:first-child) {
+  margin-left: 0;
+  margin-top: -1px;
+}
+
+/* ============================================================================
+   Action Buttons (Grid Layout)
+
+   Used in detail view for quick actions. 2x2 grid on desktop,
+   single column on mobile.
+   ============================================================================ */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+}
+
+@media (max-width: 768px) {
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.action-btn-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 56px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.action-btn-grid:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.action-btn-grid:active {
+  transform: scale(0.98);
+}
+
+.action-btn-grid:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.action-btn-grid .action-icon {
+  font-size: var(--text-lg);
+  color: var(--text-muted);
+}
+
+.action-btn-grid .action-text {
+  font-size: 0.7rem;
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Action button variants */
+.action-btn-grid.action-primary {
+  border-color: var(--accent);
+  border-width: 2px;
+}
+
+.action-btn-grid.action-primary .action-icon {
+  color: var(--accent);
+}
+
+.action-btn-grid.action-primary:hover {
+  background: var(--accent-glow);
+}
+
+.action-btn-grid.action-success {
+  border-color: var(--status-completed);
+}
+
+.action-btn-grid.action-success .action-icon {
+  color: var(--status-completed);
+}
+
+.action-btn-grid.action-success:hover {
+  background: var(--status-completed-bg);
+}
+
+.action-btn-grid.action-warning {
+  border-color: var(--status-paused);
+  opacity: 0.8;
+}
+
+.action-btn-grid.action-warning .action-icon {
+  color: var(--status-paused);
+}
+
+.action-btn-grid.action-warning:hover {
+  background: var(--status-paused-bg);
+  opacity: 1;
+}
+
+/* ============================================================================
+   Status Buttons
+
+   Used in detail view header for changing work effort status.
+   ============================================================================ */
+.status-controls {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.status-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: var(--btn-height-md);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.status-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.status-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.status-btn.is-active,
+.status-btn.current {
+  border-color: currentColor;
+  background: currentColor;
+  background-clip: padding-box;
+}
+
+.status-btn.pending { color: var(--status-pending); }
+.status-btn.active { color: var(--status-active); }
+.status-btn.paused { color: var(--status-paused); }
+.status-btn.completed { color: var(--status-completed); }
+
+.status-btn.is-active.pending,
+.status-btn.is-active.active,
+.status-btn.is-active.paused,
+.status-btn.is-active.completed {
+  color: var(--bg-deep);
+}
+
+.status-btn .status-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.status-btn .status-label {
+  display: inline;
+  margin-left: 4px;
+}
+
+@media (max-width: 768px) {
+  .status-btn .status-label {
+    display: none;
+  }
+
+  .status-btn {
+    min-width: 44px;
+    padding: var(--space-xs);
+  }
+}
+
+/* ============================================================================
+   Filter Buttons
+
+   Used for filtering lists (queue, tickets, etc.)
+   ============================================================================ */
+.filter-group {
+  display: flex;
+  gap: var(--space-xs);
+  overflow-x: auto;
+  padding-bottom: var(--space-2xs);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-group::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-btn {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-medium);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 36px;
+}
+
+.filter-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+.filter-btn.active,
+.filter-btn.is-active,
+.filter-btn[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.filter-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Close/Dismiss Button
+   ============================================================================ */
+.btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--btn-height-md);
+  height: var(--btn-height-md);
+  padding: 0;
+  font-size: var(--text-xl);
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.btn-close:active {
+  background: var(--bg-active);
+}
+
+/* ============================================================================
+   Accessibility: Reduced Motion
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .action-btn-grid,
+  .status-btn,
+  .filter-btn {
+    transition: none;
+  }
+
+  .btn:active,
+  .action-btn-grid:active {
+    transform: none;
+  }
+
+  .btn.is-loading::after {
+    animation: none;
+  }
+}
+
+/* ============================================================================
+   Accessibility: High Contrast
+   ============================================================================ */
+@media (prefers-contrast: high) {
+  .btn {
+    border-width: 2px;
+  }
+
+  .btn--ghost {
+    border-width: 1px;
+    border-color: currentColor;
+  }
+}
+
+/* ============================================================================
+   Touch Target Enhancement
+   ============================================================================ */
+@media (hover: none) {
+  .btn {
+    min-height: var(--btn-height-md);
+  }
+
+  .btn--sm {
+    min-height: 40px; /* Slightly larger on touch */
+  }
+
+  .action-btn-grid {
+    min-height: 64px;
+  }
+
+  .status-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .filter-btn {
+    min-height: 44px;
+  }
+}
+
