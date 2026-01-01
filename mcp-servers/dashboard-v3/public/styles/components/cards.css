@@ -54,6 +54,10 @@
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);
+  /* Prevent overflow */
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .stat-card:hover {
@@ -100,10 +104,14 @@
 
 .stat-value {
   font-family: var(--font-mono);
-  font-size: var(--text-2xl);
+  font-size: clamp(1.25rem, 3vw, 2rem); /* Responsive! */
   font-weight: var(--fw-bold);
   line-height: 1;
   color: var(--text-primary);
+  /* Prevent overflow */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   font-variant-numeric: tabular-nums;
 }
 

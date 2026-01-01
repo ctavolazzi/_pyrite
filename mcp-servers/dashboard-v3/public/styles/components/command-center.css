@@ -1,0 +1,651 @@
+/**
+ * @fileoverview Command Center Component Styles
+ *
+ * Styles for the Live AI Command Center view including:
+ * - Header with status badge and action buttons
+ * - Two-panel body: Activity Feed + Work Queue
+ * - Command input bar at the bottom
+ *
+ * @author _pyrite
+ * @version 0.6.3
+ */
+
+/* =============================================================================
+   COMMAND CENTER LAYOUT
+   ============================================================================= */
+
+.command-center {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface-primary);
+}
+
+/* =============================================================================
+   COMMAND HEADER
+   ============================================================================= */
+
+.command-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  flex-wrap: wrap;
+}
+
+.command-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  min-width: 0;
+  flex: 1;
+}
+
+.command-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.command-back-btn:hover {
+  background: var(--surface-tertiary);
+  color: var(--text-primary);
+}
+
+.command-title-area {
+  min-width: 0;
+}
+
+.command-title {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.command-id {
+  font-family: var(--font-mono);
+  color: var(--color-amber-500);
+}
+
+/* Status Badge */
+.command-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.command-status .status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.command-status.active,
+.command-status.in_progress {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-emerald-400);
+}
+
+.command-status.pending {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--color-amber-400);
+}
+
+.command-status.paused {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--color-indigo-400);
+}
+
+.command-status.completed {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-emerald-400);
+}
+
+.command-status.blocked {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-red-400);
+}
+
+/* Header Right - Action Buttons */
+.command-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.command-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.command-action-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-secondary);
+}
+
+.command-action-btn.primary {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--color-emerald-500);
+  color: var(--color-emerald-400);
+}
+
+.command-action-btn.primary:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.command-action-btn.success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--color-emerald-600);
+  color: var(--color-emerald-400);
+}
+
+.command-action-btn.success:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.command-action-btn .action-text {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .command-action-btn .action-text {
+    display: inline;
+  }
+}
+
+/* =============================================================================
+   COMMAND BODY - TWO PANEL LAYOUT
+   ============================================================================= */
+
+.command-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .command-body {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .command-body {
+    grid-template-columns: 1fr 380px;
+  }
+}
+
+/* =============================================================================
+   ACTIVITY FEED PANEL
+   ============================================================================= */
+
+.feed-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--border-primary);
+  background: var(--surface-primary);
+}
+
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.feed-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.feed-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-emerald-500);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.feed-controls {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.feed-control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.feed-control-btn:hover {
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+}
+
+.feed-control-btn.active {
+  background: var(--color-amber-500);
+  color: var(--color-stone-900);
+  border-color: var(--color-amber-500);
+}
+
+/* Feed Content */
+.feed-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.feed-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+.feed-empty-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-sm);
+  opacity: 0.5;
+}
+
+.feed-empty p {
+  margin: 0;
+}
+
+.feed-empty p:first-of-type {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Feed Entries */
+.feed-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+
+.feed-entry:hover {
+  background: var(--surface-secondary);
+}
+
+.feed-timestamp {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+}
+
+.feed-icon {
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+.feed-message {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+/* Entry Types */
+.feed-entry.info .feed-icon { color: var(--color-blue-400); }
+.feed-entry.success .feed-icon { color: var(--color-emerald-400); }
+.feed-entry.warning .feed-icon { color: var(--color-amber-400); }
+.feed-entry.error .feed-icon { color: var(--color-red-400); }
+.feed-entry.action .feed-icon { color: var(--color-indigo-400); }
+.feed-entry.system .feed-icon { color: var(--text-tertiary); }
+.feed-entry.command .feed-icon { color: var(--color-amber-500); }
+
+.feed-entry.highlight {
+  background: rgba(251, 191, 36, 0.1);
+  border-left: 2px solid var(--color-amber-500);
+}
+
+.feed-entry.highlight .feed-icon {
+  color: var(--color-amber-400);
+}
+
+.feed-entry.highlight .feed-message {
+  color: var(--color-amber-300);
+  font-weight: 500;
+}
+
+/* Typing Indicator */
+.feed-entry.typing {
+  opacity: 0.7;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-4px); }
+}
+
+/* =============================================================================
+   WORK QUEUE PANEL
+   ============================================================================= */
+
+.queue-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--surface-secondary);
+}
+
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.queue-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.queue-count {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.queue-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.queue-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+/* Queue Groups */
+.queue-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.queue-group:last-child {
+  margin-bottom: 0;
+}
+
+.queue-group-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+}
+
+.queue-group-icon {
+  font-size: 0.875rem;
+}
+
+.queue-group-count {
+  opacity: 0.7;
+}
+
+.queue-group.in_progress .queue-group-header { color: var(--color-indigo-400); }
+.queue-group.pending .queue-group-header { color: var(--text-tertiary); }
+.queue-group.completed .queue-group-header { color: var(--color-emerald-400); }
+.queue-group.blocked .queue-group-header { color: var(--color-red-400); }
+
+.queue-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* Queue Items */
+.queue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--surface-tertiary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.queue-item:hover {
+  background: var(--surface-hover);
+}
+
+.queue-item.active {
+  background: rgba(251, 191, 36, 0.1);
+  border-left: 2px solid var(--color-amber-500);
+}
+
+.queue-item-status {
+  flex-shrink: 0;
+  width: 16px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.queue-item.in_progress .queue-item-status { color: var(--color-indigo-400); }
+.queue-item.completed .queue-item-status { color: var(--color-emerald-400); }
+.queue-item.blocked .queue-item-status { color: var(--color-red-400); }
+
+.queue-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.queue-item-id {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-amber-500);
+  margin-bottom: 2px;
+}
+
+.queue-item-title {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   COMMAND INPUT BAR
+   ============================================================================= */
+
+.command-input-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--surface-secondary);
+  border-top: 1px solid var(--border-primary);
+}
+
+.command-input-prefix {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-amber-500);
+}
+
+.command-input {
+  flex: 1;
+  padding: var(--spacing-sm);
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.command-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.command-input:focus {
+  border-color: var(--color-amber-500);
+  background: var(--surface-primary);
+}
+
+.command-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-amber-500);
+  border-radius: var(--radius-sm);
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--color-amber-400);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.command-submit-btn:hover {
+  background: rgba(251, 191, 36, 0.25);
+  color: var(--color-amber-300);
+}
+
+/* =============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================= */
+
+@media (max-width: 767px) {
+  .command-header {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .command-body {
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .feed-panel {
+    border-right: none;
+    border-bottom: 1px solid var(--border-primary);
+  }
+
+  .queue-panel {
+    min-height: 200px;
+  }
+}
+
+/* Mobile-first: hide queue on very small screens, show in modal/drawer */
+@media (max-width: 480px) {
+  .command-body {
+    grid-template-rows: 1fr;
+  }
+
+  .queue-panel {
+    display: none;
+  }
+}

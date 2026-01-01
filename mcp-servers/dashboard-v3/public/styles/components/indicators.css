@@ -1,0 +1,540 @@
+/* ============================================================================
+   MISSION CONTROL V3 - Indicator Components
+
+   Status indicators, badges, progress bars, and visual feedback elements.
+
+   Naming Convention (BEM-like):
+   - .indicator           Base status dot
+   - .indicator--active   Active/in-progress (pulsing)
+   - .indicator--completed Completed (green)
+   - .indicator--pending  Pending (gray)
+   - .indicator--blocked  Blocked (red)
+   - .badge               Text badge
+   - .progress            Progress bar
+
+   @author _pyrite
+   @version 0.7.0
+   ============================================================================ */
+
+/* ============================================================================
+   Indicator Tokens (component-specific)
+   ============================================================================ */
+:root {
+  --indicator-size-sm: 8px;
+  --indicator-size-md: 12px;
+  --indicator-size-lg: 16px;
+  --indicator-glow: 4px;
+}
+
+/* ============================================================================
+   Status Indicator (Dot)
+   ============================================================================ */
+.indicator {
+  display: inline-block;
+  width: var(--indicator-size-md);
+  height: var(--indicator-size-md);
+  border-radius: 50%;
+  background: var(--status-pending);
+  flex-shrink: 0;
+  /* Use filter for glow to prevent overflow issues */
+  box-shadow: none;
+}
+
+/* Size variants */
+.indicator--sm {
+  width: var(--indicator-size-sm);
+  height: var(--indicator-size-sm);
+}
+
+.indicator--lg {
+  width: var(--indicator-size-lg);
+  height: var(--indicator-size-lg);
+}
+
+/* Status variants */
+.indicator--active,
+.indicator.active {
+  background: var(--status-active);
+  filter: drop-shadow(0 0 var(--indicator-glow) var(--status-active));
+}
+
+.indicator--in-progress,
+.indicator.in_progress {
+  background: var(--status-in-progress);
+  animation: indicator-pulse 1.5s ease-in-out infinite;
+}
+
+.indicator--completed,
+.indicator.completed {
+  background: var(--status-completed);
+}
+
+.indicator--pending,
+.indicator.pending {
+  background: var(--status-pending);
+}
+
+.indicator--paused,
+.indicator.paused {
+  background: var(--status-paused);
+}
+
+.indicator--blocked,
+.indicator.blocked {
+  background: var(--status-blocked);
+  filter: drop-shadow(0 0 var(--indicator-glow) var(--status-blocked));
+}
+
+/* Pulsing animation for in-progress status */
+@keyframes indicator-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px var(--status-in-progress));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 6px var(--status-in-progress));
+    opacity: 0.7;
+  }
+}
+
+/* ============================================================================
+   Activity Indicator (with label)
+   ============================================================================ */
+.activity-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-full);
+}
+
+.activity-indicator .indicator {
+  width: var(--indicator-size-sm);
+  height: var(--indicator-size-sm);
+}
+
+.activity-indicator.is-active {
+  color: var(--status-active);
+}
+
+.activity-indicator.is-active .indicator {
+  background: var(--status-active);
+  animation: indicator-pulse-active 2s ease-in-out infinite;
+}
+
+@keyframes indicator-pulse-active {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.activity-text {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .activity-text {
+    display: block;
+  }
+}
+
+/* ============================================================================
+   Badge
+   ============================================================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs) var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  border-radius: var(--radius-full);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+
+/* Badge with indicator dot */
+.badge--dot {
+  padding-left: var(--space-xs);
+}
+
+.badge--dot::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Size variants */
+.badge--sm {
+  padding: 2px var(--space-xs);
+  font-size: 0.6rem;
+}
+
+.badge--lg {
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--text-sm);
+}
+
+/* Status variants */
+.badge--active,
+.badge.active {
+  background: var(--status-active-bg);
+  color: var(--status-active);
+}
+
+.badge--in-progress,
+.badge.in_progress {
+  background: var(--status-in-progress-bg);
+  color: var(--status-in-progress);
+}
+
+.badge--completed,
+.badge.completed {
+  background: var(--status-completed-bg);
+  color: var(--status-completed);
+}
+
+.badge--pending,
+.badge.pending {
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
+}
+
+.badge--paused,
+.badge.paused {
+  background: var(--status-paused-bg);
+  color: var(--status-paused);
+}
+
+.badge--blocked,
+.badge.blocked {
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+}
+
+/* Semantic variants */
+.badge--success {
+  background: var(--status-completed-bg);
+  color: var(--status-completed);
+}
+
+.badge--warning {
+  background: var(--status-paused-bg);
+  color: var(--status-paused);
+}
+
+.badge--danger {
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+}
+
+.badge--info {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--info);
+}
+
+/* Accent badge */
+.badge--accent {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+/* ============================================================================
+   Notification Badge (count)
+   ============================================================================ */
+.notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  color: var(--bg-deep);
+  background: var(--accent);
+  border-radius: var(--radius-full);
+}
+
+.notification-badge.is-empty,
+.notification-badge:empty {
+  display: none;
+}
+
+/* ============================================================================
+   Progress Bar
+   ============================================================================ */
+.progress {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--status-completed) 100%);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-normal);
+}
+
+/* Size variants */
+.progress--sm {
+  height: 4px;
+}
+
+.progress--lg {
+  height: 12px;
+}
+
+/* Status variants */
+.progress--success .progress__bar {
+  background: var(--status-completed);
+}
+
+.progress--warning .progress__bar {
+  background: var(--status-paused);
+}
+
+.progress--danger .progress__bar {
+  background: var(--status-blocked);
+}
+
+/* Striped variant */
+.progress--striped .progress__bar {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 1rem 1rem;
+}
+
+/* Animated striped */
+.progress--animated .progress__bar {
+  animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+  from { background-position: 1rem 0; }
+  to { background-position: 0 0; }
+}
+
+/* ============================================================================
+   Progress Mini (inline)
+   ============================================================================ */
+.progress-mini {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 100px;
+}
+
+.progress-mini__text {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.progress-mini__bar {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.progress-mini__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--status-completed) 100%);
+  border-radius: 3px;
+  transition: width var(--transition-normal);
+}
+
+/* ============================================================================
+   Progress Ring (circular)
+   ============================================================================ */
+.progress-ring {
+  --size: 120px;
+  --stroke-width: 8px;
+  --radius: calc((var(--size) - var(--stroke-width)) / 2);
+  --circumference: calc(2 * 3.14159 * var(--radius));
+
+  width: var(--size);
+  height: var(--size);
+  transform: rotate(-90deg);
+}
+
+.progress-ring__background {
+  fill: none;
+  stroke: var(--bg-primary);
+  stroke-width: var(--stroke-width);
+}
+
+.progress-ring__progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: var(--stroke-width);
+  stroke-linecap: round;
+  stroke-dasharray: var(--circumference);
+  stroke-dashoffset: var(--circumference);
+  transition: stroke-dashoffset var(--transition-slow);
+}
+
+/* Size variants */
+.progress-ring--sm {
+  --size: 80px;
+  --stroke-width: 6px;
+}
+
+.progress-ring--lg {
+  --size: 160px;
+  --stroke-width: 10px;
+}
+
+/* ============================================================================
+   Loading Spinner
+   ============================================================================ */
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--bg-elevated);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Size variants */
+.spinner--sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.spinner--lg {
+  width: 32px;
+  height: 32px;
+  border-width: 4px;
+}
+
+/* ============================================================================
+   Skeleton Loading
+   ============================================================================ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    var(--bg-hover) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton--text {
+  height: 1em;
+  margin: 0.25em 0;
+}
+
+.skeleton--circle {
+  border-radius: 50%;
+}
+
+.skeleton--button {
+  height: var(--btn-height-md);
+  border-radius: var(--btn-radius);
+}
+
+/* ============================================================================
+   Accessibility: Reduced Motion
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .indicator--in-progress,
+  .indicator.in_progress,
+  .activity-indicator.is-active .indicator {
+    animation: none;
+  }
+
+  .progress--animated .progress__bar {
+    animation: none;
+  }
+
+  .spinner {
+    animation-duration: 1.5s;
+  }
+
+  .skeleton {
+    animation: none;
+    background: var(--bg-elevated);
+  }
+}
+
+/* ============================================================================
+   Queue Indicator (Legacy Support)
+   
+   Maps queue-indicator to indicator classes with overflow-safe styling.
+   ============================================================================ */
+.queue-indicator {
+  width: var(--indicator-size-md);
+  height: var(--indicator-size-md);
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* Use filter instead of box-shadow to prevent overflow */
+  box-shadow: none;
+}
+
+.queue-indicator.active {
+  background: var(--status-active);
+  filter: drop-shadow(0 0 var(--indicator-glow) var(--status-active));
+}
+
+.queue-indicator.in_progress {
+  background: var(--status-in-progress);
+  animation: indicator-pulse 1.5s ease-in-out infinite;
+}
+
+.queue-indicator.pending {
+  background: var(--status-pending);
+}
+
+.queue-indicator.completed {
+  background: var(--status-completed);
+}
+
+.queue-indicator.paused {
+  background: var(--status-paused);
+}
+
+.queue-indicator.blocked {
+  background: var(--status-blocked);
+}
+

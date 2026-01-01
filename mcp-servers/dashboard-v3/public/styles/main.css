@@ -17,6 +17,9 @@
 @import url('./components/nav.css');
 @import url('./components/sidebar.css');
 @import url('./components/cards.css');
+@import url('./components/buttons.css');
+@import url('./components/indicators.css');
+@import url('./components/command-center.css');
 
 /* ============================================================================
    TEMPORARY: Styles migrated from V2 that need component files

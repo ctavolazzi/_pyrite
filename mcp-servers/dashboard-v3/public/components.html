@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Component Library | Mission Control V3</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- V3 Modular CSS -->
+  <link rel="stylesheet" href="styles/main.css">
+
+  <style>
+    /* Demo Page Specific Styles */
+    .demo-page {
+      min-height: 100vh;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+    }
+
+    .demo-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .demo-header h1 {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--accent);
+    }
+
+    .demo-nav {
+      display: flex;
+      gap: var(--space-xs);
+      overflow-x: auto;
+    }
+
+    .demo-nav a {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      white-space: nowrap;
+    }
+
+    .demo-nav a:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .demo-nav a.active {
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .demo-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-xl);
+    }
+
+    .demo-section {
+      margin-bottom: var(--space-3xl);
+    }
+
+    .demo-section h2 {
+      font-size: var(--text-2xl);
+      font-weight: var(--fw-bold);
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .demo-section h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--fw-semibold);
+      color: var(--text-secondary);
+      margin: var(--space-xl) 0 var(--space-md);
+    }
+
+    .demo-grid {
+      display: grid;
+      gap: var(--space-lg);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .demo-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .demo-card-header {
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    .demo-card-body {
+      padding: var(--space-lg);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-card-body.vertical {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+
+    .demo-spacer {
+      height: var(--space-lg);
+    }
+
+    /* Code Preview */
+    .demo-code {
+      background: var(--bg-deep);
+      border-top: 1px solid var(--border-subtle);
+      padding: var(--space-md);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    .demo-card:hover .demo-code {
+      display: block;
+    }
+
+    /* Back to top */
+    .back-to-top {
+      position: fixed;
+      bottom: var(--space-lg);
+      right: var(--space-lg);
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="demo-page">
+
+  <header class="demo-header">
+    <h1>💎 Component Library</h1>
+    <nav class="demo-nav">
+      <a href="#buttons" class="active">Buttons</a>
+      <a href="#cards">Cards</a>
+      <a href="#indicators">Indicators</a>
+      <a href="#badges">Badges</a>
+      <a href="#progress">Progress</a>
+      <a href="#utilities">Utilities</a>
+    </nav>
+  </header>
+
+  <main class="demo-content">
+
+    <!-- BUTTONS SECTION -->
+    <section id="buttons" class="demo-section">
+      <h2>Buttons</h2>
+
+      <h3>Button Variants</h3>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-card-header">Primary Buttons</div>
+          <div class="demo-card-body">
+            <button class="btn btn--primary">Primary</button>
+            <button class="btn btn--primary" disabled>Disabled</button>
+            <button class="btn btn--primary is-loading">Loading</button>
+          </div>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-card-header">Secondary Buttons</div>
+          <div class="demo-card-body">
+            <button class="btn btn--secondary">Secondary</button>
+            <button class="btn btn--secondary" disabled>Disabled</button>
+          </div>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-card-header">Status Buttons</div>
+          <div class="demo-card-body">
+            <button class="btn btn--success">Success</button>
+            <button class="btn btn--warning">Warning</button>
+            <button class="btn btn--danger">Danger</button>
+          </div>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-card-header">Ghost Button</div>
+          <div class="demo-card-body">
+            <button class="btn btn--ghost">Ghost</button>
+            <button class="btn btn--ghost">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <h3>Button Sizes</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Small / Medium / Large</div>
+        <div class="demo-card-body">
+          <button class="btn btn--sm">Small (36px)</button>
+          <button class="btn">Medium (44px)</button>
+          <button class="btn btn--lg">Large (56px)</button>
+        </div>
+      </div>
+
+      <h3>Icon Buttons</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Icon Only & With Text</div>
+        <div class="demo-card-body">
+          <button class="btn btn--icon btn--sm">⚙️</button>
+          <button class="btn btn--icon">🔔</button>
+          <button class="btn btn--icon btn--lg">📁</button>
+          <button class="btn">
+            <span class="btn__icon btn__icon--left">📁</span>
+            Open File
+          </button>
+          <button class="btn btn--primary">
+            Save
+            <span class="btn__icon btn__icon--right">→</span>
+          </button>
+        </div>
+      </div>
+
+      <h3>Button Groups</h3>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-card-header">Horizontal Group</div>
+          <div class="demo-card-body">
+            <div class="btn-group">
+              <button class="btn">Left</button>
+              <button class="btn">Center</button>
+              <button class="btn">Right</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-card-header">Vertical Group</div>
+          <div class="demo-card-body vertical">
+            <div class="btn-group btn-group--vertical">
+              <button class="btn">Top</button>
+              <button class="btn">Middle</button>
+              <button class="btn">Bottom</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Filter Buttons</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">filter-group & filter-btn</div>
+        <div class="demo-card-body">
+          <div class="filter-group">
+            <button class="filter-btn active">All</button>
+            <button class="filter-btn">Active</button>
+            <button class="filter-btn">Pending</button>
+            <button class="filter-btn">Completed</button>
+            <button class="filter-btn">Paused</button>
+          </div>
+        </div>
+      </div>
+
+      <h3>Status Controls</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">status-btn for work effort status</div>
+        <div class="demo-card-body">
+          <div class="status-controls">
+            <button class="status-btn pending">
+              <span class="status-icon">⏳</span>
+              <span class="status-label">Pending</span>
+            </button>
+            <button class="status-btn active is-active">
+              <span class="status-icon">▶</span>
+              <span class="status-label">Active</span>
+            </button>
+            <button class="status-btn paused">
+              <span class="status-icon">⏸</span>
+              <span class="status-label">Paused</span>
+            </button>
+            <button class="status-btn completed">
+              <span class="status-icon">✓</span>
+              <span class="status-label">Complete</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <h3>Action Grid</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">2x2 action button grid</div>
+        <div class="demo-card-body vertical">
+          <div class="action-grid" style="max-width: 400px;">
+            <button class="action-btn-grid action-primary">
+              <span class="action-icon">▶</span>
+              <span class="action-text">Resume</span>
+            </button>
+            <button class="action-btn-grid action-success">
+              <span class="action-icon">✓</span>
+              <span class="action-text">Complete</span>
+            </button>
+            <button class="action-btn-grid">
+              <span class="action-icon">📋</span>
+              <span class="action-text">View Tickets</span>
+            </button>
+            <button class="action-btn-grid action-warning">
+              <span class="action-icon">⏸</span>
+              <span class="action-text">Pause</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARDS SECTION -->
+    <section id="cards" class="demo-section">
+      <h2>Cards</h2>
+
+      <h3>Stat Cards</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">stats-section with stat-card</div>
+        <div class="demo-card-body vertical">
+          <div class="stats-section">
+            <div class="stat-card">
+              <div class="stat-icon">📊</div>
+              <div class="stat-content">
+                <span class="stat-value">42</span>
+                <span class="stat-label">Total Tasks</span>
+              </div>
+            </div>
+            <div class="stat-card highlight">
+              <div class="stat-icon pulsing">🔥</div>
+              <div class="stat-content">
+                <span class="stat-value">8</span>
+                <span class="stat-label">In Progress</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div class="stat-content">
+                <span class="stat-value">28</span>
+                <span class="stat-label">Completed</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⏳</div>
+              <div class="stat-content">
+                <span class="stat-value">6</span>
+                <span class="stat-label">Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Action Cards (Test/Demo)</h3>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-card-header">test-card</div>
+          <div class="demo-card-body">
+            <div class="stat-card test-card" style="width: 160px; height: 80px;">
+              <button class="test-btn">
+                <span class="test-icon">🧪</span>
+                <span class="test-label">Test System</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-card-header">demo-card</div>
+          <div class="demo-card-body">
+            <div class="stat-card demo-card" style="width: 160px; height: 80px;">
+              <button class="demo-btn">
+                <span class="demo-icon">🎬</span>
+                <span class="demo-label">Live Demo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Queue Cards</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">queue-item (legacy) / queue-card (v3)</div>
+        <div class="demo-card-body vertical">
+          <div class="queue-list" style="max-width: 600px;">
+            <div class="queue-item">
+              <div class="queue-indicator active"></div>
+              <div class="queue-info">
+                <div class="queue-id">WE-251231-abcd</div>
+                <div class="queue-title">Component Library Architecture</div>
+                <div class="queue-meta">3/5 tickets • Started 2h ago</div>
+              </div>
+              <span class="queue-badge active">Active</span>
+              <div class="queue-actions">
+                <button class="queue-action-btn">👁</button>
+                <button class="queue-action-btn">✓</button>
+              </div>
+            </div>
+
+            <div class="queue-item">
+              <div class="queue-indicator in_progress"></div>
+              <div class="queue-info">
+                <div class="queue-id">WE-251230-efgh</div>
+                <div class="queue-title">Dashboard Overflow Fixes</div>
+                <div class="queue-meta">5/8 tickets • Updated 30m ago</div>
+              </div>
+              <span class="queue-badge in_progress">In Progress</span>
+            </div>
+
+            <div class="queue-item">
+              <div class="queue-indicator completed"></div>
+              <div class="queue-info">
+                <div class="queue-id">WE-251229-ijkl</div>
+                <div class="queue-title">Detail View Overhaul</div>
+                <div class="queue-meta">7/7 tickets • Completed</div>
+              </div>
+              <span class="queue-badge completed">Completed</span>
+            </div>
+
+            <div class="queue-item">
+              <div class="queue-indicator pending"></div>
+              <div class="queue-info">
+                <div class="queue-id">WE-251228-mnop</div>
+                <div class="queue-title">Mobile Responsive Design</div>
+                <div class="queue-meta">0/4 tickets • Not started</div>
+              </div>
+              <span class="queue-badge pending">Pending</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Panel Sections</h3>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-card-header">panel-section</div>
+          <div class="demo-card-body vertical">
+            <div class="panel-section">
+              <h3 class="panel-title">Overview</h3>
+              <p style="color: var(--text-muted); font-size: var(--text-sm);">
+                Panel content goes here. This is a standard panel section used in the detail view.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo-card">
+          <div class="demo-card-header">panel-section.stat-highlight</div>
+          <div class="demo-card-body vertical">
+            <div class="panel-section stat-highlight">
+              <h3 class="panel-title">Key Metrics</h3>
+              <div class="stat-row">
+                <div class="mini-stat">
+                  <span class="mini-stat-value">5</span>
+                  <span class="mini-stat-label">Tickets</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-value">60%</span>
+                  <span class="mini-stat-label">Progress</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-value">2d</span>
+                  <span class="mini-stat-label">Remaining</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INDICATORS SECTION -->
+    <section id="indicators" class="demo-section">
+      <h2>Indicators</h2>
+
+      <h3>Status Dots</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">indicator variants</div>
+        <div class="demo-card-body">
+          <div class="demo-row" style="gap: var(--space-xl);">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+              <span class="indicator indicator--active"></span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">Active</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+              <span class="indicator indicator--in-progress"></span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">In Progress</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+              <span class="indicator indicator--completed"></span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">Completed</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+              <span class="indicator indicator--pending"></span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">Pending</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+              <span class="indicator indicator--paused"></span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">Paused</span>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+              <span class="indicator indicator--blocked"></span>
+              <span style="font-size: var(--text-xs); color: var(--text-muted);">Blocked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Indicator Sizes</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Small / Medium / Large</div>
+        <div class="demo-card-body">
+          <span class="indicator indicator--sm indicator--active"></span>
+          <span class="indicator indicator--active"></span>
+          <span class="indicator indicator--lg indicator--active"></span>
+        </div>
+      </div>
+
+      <h3>Activity Indicator</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">activity-indicator with label</div>
+        <div class="demo-card-body">
+          <div class="activity-indicator">
+            <span class="indicator"></span>
+            <span class="activity-text">Idle</span>
+          </div>
+          <div class="activity-indicator is-active">
+            <span class="indicator"></span>
+            <span class="activity-text">Working</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Loading States</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">spinner variants</div>
+        <div class="demo-card-body">
+          <span class="spinner spinner--sm"></span>
+          <span class="spinner"></span>
+          <span class="spinner spinner--lg"></span>
+        </div>
+      </div>
+
+      <h3>Skeleton Loading</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">skeleton placeholders</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-sm);">
+          <div class="skeleton skeleton--text" style="width: 80%;"></div>
+          <div class="skeleton skeleton--text" style="width: 60%;"></div>
+          <div class="skeleton skeleton--text" style="width: 70%;"></div>
+          <div style="display: flex; gap: var(--space-md); margin-top: var(--space-md);">
+            <div class="skeleton skeleton--circle" style="width: 40px; height: 40px;"></div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: var(--space-xs);">
+              <div class="skeleton skeleton--text" style="width: 50%;"></div>
+              <div class="skeleton skeleton--text" style="width: 30%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BADGES SECTION -->
+    <section id="badges" class="demo-section">
+      <h2>Badges</h2>
+
+      <h3>Status Badges</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">badge status variants</div>
+        <div class="demo-card-body">
+          <span class="badge badge--active">Active</span>
+          <span class="badge badge--in-progress">In Progress</span>
+          <span class="badge badge--completed">Completed</span>
+          <span class="badge badge--pending">Pending</span>
+          <span class="badge badge--paused">Paused</span>
+          <span class="badge badge--blocked">Blocked</span>
+        </div>
+      </div>
+
+      <h3>Semantic Badges</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">success, warning, danger, info</div>
+        <div class="demo-card-body">
+          <span class="badge badge--success">Success</span>
+          <span class="badge badge--warning">Warning</span>
+          <span class="badge badge--danger">Error</span>
+          <span class="badge badge--info">Info</span>
+          <span class="badge badge--accent">Featured</span>
+        </div>
+      </div>
+
+      <h3>Badge Sizes</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Small / Default / Large</div>
+        <div class="demo-card-body">
+          <span class="badge badge--sm badge--active">Small</span>
+          <span class="badge badge--active">Default</span>
+          <span class="badge badge--lg badge--active">Large</span>
+        </div>
+      </div>
+
+      <h3>Badges with Dots</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">badge--dot modifier</div>
+        <div class="demo-card-body">
+          <span class="badge badge--dot badge--active">Active</span>
+          <span class="badge badge--dot badge--completed">Completed</span>
+          <span class="badge badge--dot badge--blocked">Blocked</span>
+        </div>
+      </div>
+
+      <h3>Notification Badges</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">notification-badge (count)</div>
+        <div class="demo-card-body">
+          <div style="position: relative; display: inline-block;">
+            <button class="btn btn--icon">🔔</button>
+            <span class="notification-badge" style="position: absolute; top: -4px; right: -4px;">3</span>
+          </div>
+          <div style="position: relative; display: inline-block;">
+            <button class="btn btn--icon">📧</button>
+            <span class="notification-badge" style="position: absolute; top: -4px; right: -4px;">12</span>
+          </div>
+          <div style="position: relative; display: inline-block;">
+            <button class="btn btn--icon">💬</button>
+            <span class="notification-badge" style="position: absolute; top: -4px; right: -4px;">99+</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRESS SECTION -->
+    <section id="progress" class="demo-section">
+      <h2>Progress</h2>
+
+      <h3>Progress Bars</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Basic progress bar</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-md);">
+          <div class="progress">
+            <div class="progress__bar" style="width: 25%"></div>
+          </div>
+          <div class="progress">
+            <div class="progress__bar" style="width: 50%"></div>
+          </div>
+          <div class="progress">
+            <div class="progress__bar" style="width: 75%"></div>
+          </div>
+          <div class="progress">
+            <div class="progress__bar" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Progress Sizes</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Small / Default / Large</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-md);">
+          <div class="progress progress--sm">
+            <div class="progress__bar" style="width: 60%"></div>
+          </div>
+          <div class="progress">
+            <div class="progress__bar" style="width: 60%"></div>
+          </div>
+          <div class="progress progress--lg">
+            <div class="progress__bar" style="width: 60%"></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Progress Status Variants</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">success, warning, danger</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-md);">
+          <div class="progress progress--success">
+            <div class="progress__bar" style="width: 100%"></div>
+          </div>
+          <div class="progress progress--warning">
+            <div class="progress__bar" style="width: 65%"></div>
+          </div>
+          <div class="progress progress--danger">
+            <div class="progress__bar" style="width: 30%"></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Striped & Animated</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">progress--striped progress--animated</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-md);">
+          <div class="progress progress--striped">
+            <div class="progress__bar" style="width: 70%"></div>
+          </div>
+          <div class="progress progress--striped progress--animated">
+            <div class="progress__bar" style="width: 70%"></div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Progress Mini</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Inline progress with label</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-md);">
+          <div class="progress-mini">
+            <span class="progress-mini__text">3/5</span>
+            <div class="progress-mini__bar">
+              <div class="progress-mini__fill" style="width: 60%"></div>
+            </div>
+          </div>
+          <div class="progress-mini">
+            <span class="progress-mini__text">100%</span>
+            <div class="progress-mini__bar">
+              <div class="progress-mini__fill" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- UTILITIES SECTION -->
+    <section id="utilities" class="demo-section">
+      <h2>Utilities</h2>
+
+      <h3>Flex Utilities</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">flex, flex-col, items-*, justify-*, gap-*</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-lg);">
+          <div class="flex gap-md" style="background: var(--bg-elevated); padding: var(--space-md); border-radius: var(--radius-md);">
+            <div style="background: var(--accent-glow); padding: var(--space-sm); border-radius: var(--radius-sm);">Item 1</div>
+            <div style="background: var(--accent-glow); padding: var(--space-sm); border-radius: var(--radius-sm);">Item 2</div>
+            <div style="background: var(--accent-glow); padding: var(--space-sm); border-radius: var(--radius-sm);">Item 3</div>
+          </div>
+
+          <div class="flex justify-between" style="background: var(--bg-elevated); padding: var(--space-md); border-radius: var(--radius-md);">
+            <div style="background: var(--accent-glow); padding: var(--space-sm); border-radius: var(--radius-sm);">Left</div>
+            <div style="background: var(--accent-glow); padding: var(--space-sm); border-radius: var(--radius-sm);">Center</div>
+            <div style="background: var(--accent-glow); padding: var(--space-sm); border-radius: var(--radius-sm);">Right</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Text Utilities</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">text-left, text-center, text-right, truncate</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-md);">
+          <p class="text-left" style="background: var(--bg-elevated); padding: var(--space-sm); border-radius: var(--radius-sm);">Left aligned text</p>
+          <p class="text-center" style="background: var(--bg-elevated); padding: var(--space-sm); border-radius: var(--radius-sm);">Center aligned text</p>
+          <p class="text-right" style="background: var(--bg-elevated); padding: var(--space-sm); border-radius: var(--radius-sm);">Right aligned text</p>
+          <p class="truncate" style="background: var(--bg-elevated); padding: var(--space-sm); border-radius: var(--radius-sm); max-width: 200px;">This is a very long text that will be truncated with an ellipsis</p>
+        </div>
+      </div>
+
+      <h3>Spacing Scale</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Fluid spacing tokens</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-sm);">
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-3xs</code>
+            <div style="width: var(--space-3xs); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">2-3px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-2xs</code>
+            <div style="width: var(--space-2xs); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">3-5px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-xs</code>
+            <div style="width: var(--space-xs); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">4-7px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-sm</code>
+            <div style="width: var(--space-sm); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">6-10px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-md</code>
+            <div style="width: var(--space-md); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">8-14px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-lg</code>
+            <div style="width: var(--space-lg); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">12-20px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-xl</code>
+            <div style="width: var(--space-xl); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">16-28px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <code style="width: 100px; font-size: var(--text-xs);">--space-2xl</code>
+            <div style="width: var(--space-2xl); height: 20px; background: var(--accent);"></div>
+            <span style="font-size: var(--text-xs); color: var(--text-muted);">24-40px</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>Color Tokens</h3>
+      <div class="demo-card">
+        <div class="demo-card-header">Background scale</div>
+        <div class="demo-card-body vertical" style="gap: var(--space-sm);">
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div style="width: 60px; height: 40px; background: var(--bg-deep); border: 1px solid var(--border-default); border-radius: var(--radius-sm);"></div>
+            <code style="font-size: var(--text-xs);">--bg-deep</code>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div style="width: 60px; height: 40px; background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: var(--radius-sm);"></div>
+            <code style="font-size: var(--text-xs);">--bg-primary</code>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div style="width: 60px; height: 40px; background: var(--bg-secondary); border: 1px solid var(--border-default); border-radius: var(--radius-sm);"></div>
+            <code style="font-size: var(--text-xs);">--bg-secondary</code>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-sm);"></div>
+            <code style="font-size: var(--text-xs);">--bg-elevated</code>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div style="width: 60px; height: 40px; background: var(--bg-card); border: 1px solid var(--border-default); border-radius: var(--radius-sm);"></div>
+            <code style="font-size: var(--text-xs);">--bg-card</code>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-md);">
+            <div style="width: 60px; height: 40px; background: var(--accent); border-radius: var(--radius-sm);"></div>
+            <code style="font-size: var(--text-xs);">--accent</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <a href="#" class="back-to-top btn btn--icon btn--primary">↑</a>
+
+  <script>
+    // Simple navigation highlighting
+    document.querySelectorAll('.demo-nav a').forEach(link => {
+      link.addEventListener('click', function() {
+        document.querySelectorAll('.demo-nav a').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Intersection observer for nav highlighting
+    const sections = document.querySelectorAll('.demo-section');
+    const navLinks = document.querySelectorAll('.demo-nav a');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + entry.target.id) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+
+</body>
+</html>
+
