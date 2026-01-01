@@ -884,6 +884,15 @@ class MissionControl {
     const allItems = this.getAllWorkEfforts();
     const filtered = this.filterItems(allItems);
 
+    // #region agent log - Hypothesis E: Check queue section styles
+    const queueSection = document.querySelector('.queue-section');
+    if (queueSection) {
+      const styles = getComputedStyle(queueSection);
+      const rect = queueSection.getBoundingClientRect();
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:renderQueue',message:'Queue section styles',data:{overflow:styles.overflow,width:rect.width,height:rect.height,display:styles.display,itemCount:filtered.length,filter:this.currentFilter},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'E'})}).catch(()=>{});
+    }
+    // #endregion
+
     if (filtered.length === 0) {
       this.elements.queueEmpty?.classList.remove('hidden');
       this.elements.queueList.innerHTML = '';
