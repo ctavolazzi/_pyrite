@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""
+Pyrite CLI - Unified command-line interface for Pyrite toolkit
+
+Usage:
+    pyrite <command> [options]
+
+Commands:
+    lint       Run Obsidian markdown linter
+    health     Check GitHub integration health
+    structure  Verify repository structure
+
+Examples:
+    pyrite lint --scope _work_efforts --fix
+    pyrite health
+    pyrite structure --fix
+    pyrite --version
+"""
+
+import sys
+import argparse
+import subprocess
+from pathlib import Path
+
+
+__version__ = "0.7.0"
+
+
+def get_repo_root():
+    """Get the repository root directory."""
+    # Script is in repo root
+    return Path(__file__).parent.resolve()
+
+
+def run_tool(script_path, args):
+    """Run a tool script with the given arguments."""
+    cmd = [sys.executable, str(script_path)] + args
+    result = subprocess.run(cmd)
+    return result.returncode
+
+
+def cmd_lint(args):
+    """Run the Obsidian markdown linter."""
+    repo_root = get_repo_root()
+    script = repo_root / "tools" / "obsidian-linter" / "lint.py"
+    return run_tool(script, args)
+
+
+def cmd_health(args):
+    """Run the GitHub health check."""
+    repo_root = get_repo_root()
+    script = repo_root / "tools" / "github-health-check" / "check.py"
+    return run_tool(script, args)
+
+
+def cmd_structure(args):
+    """Run the structure check."""
+    repo_root = get_repo_root()
+    script = repo_root / "tools" / "structure-check" / "check.py"
+    return run_tool(script, args)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog='pyrite',
+        description='Pyrite - AI-powered repository management toolkit',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Commands:
+  lint       Run Obsidian markdown linter
+  health     Check GitHub integration health
+  structure  Verify repository structure
+
+Examples:
+  pyrite lint --scope _work_efforts --fix
+  pyrite health
+  pyrite structure --fix
+  pyrite --version
+
+For command-specific help:
+  pyrite <command> --help
+        """
+    )
+
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=f'%(prog)s {__version__}'
+    )
+
+    # Use subparsers for commands
+    subparsers = parser.add_subparsers(dest='command', help='Command to run')
+
+    # Lint command
+    lint_parser = subparsers.add_parser(
+        'lint',
+        help='Run Obsidian markdown linter',
+        add_help=False  # Let the underlying tool handle --help
+    )
+
+    # Health command
+    health_parser = subparsers.add_parser(
+        'health',
+        help='Check GitHub integration health',
+        add_help=False
+    )
+
+    # Structure command
+    structure_parser = subparsers.add_parser(
+        'structure',
+        help='Verify repository structure',
+        add_help=False
+    )
+
+    # Parse known args to allow forwarding unknowns to subcommands
+    args, unknown = parser.parse_known_args()
+
+    # If no command specified, show help
+    if not args.command:
+        parser.print_help()
+        return 0
+
+    # Route to appropriate command handler
+    handlers = {
+        'lint': cmd_lint,
+        'health': cmd_health,
+        'structure': cmd_structure,
+    }
+
+    handler = handlers.get(args.command)
+    if handler:
+        return handler(unknown)
+    else:
+        print(f"Unknown command: {args.command}", file=sys.stderr)
+        parser.print_help()
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

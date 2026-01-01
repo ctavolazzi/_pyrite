@@ -29,14 +29,16 @@ Pyrite is a **configurable toolkit** for AI-assisted development. Drop it into a
 ```bash
 # Clone into your project (or as a standalone workspace)
 git clone https://github.com/ctavolazzi/_pyrite.git
+cd _pyrite
 
-# Run the linter on any markdown folder
+# Using the unified CLI (recommended)
+./pyrite lint --scope path/to/docs --fix
+./pyrite health
+./pyrite structure --fix
+
+# Or use tools directly
 python3 tools/obsidian-linter/lint.py --scope path/to/docs --fix
-
-# Check GitHub integration
 python3 tools/github-health-check/check.py
-
-# Verify structure
 python3 tools/structure-check/check.py --fix
 ```
 
@@ -97,6 +99,37 @@ _work_efforts/
 
 This is **optional** and maintained for backwards compatibility. New work should use MCP Work Efforts.
 
+## CLI
+
+### Unified Command (v0.7.0)
+
+Use the `pyrite` CLI wrapper for convenient access to all tools:
+
+```bash
+# Show all available commands
+./pyrite --help
+
+# Lint markdown files
+./pyrite lint --scope _work_efforts --fix
+
+# Check GitHub integration
+./pyrite health
+
+# Verify repository structure
+./pyrite structure --fix
+
+# Show version
+./pyrite --version
+```
+
+**Benefits:**
+- Shorter, more memorable commands
+- Unified help system (`pyrite --help`)
+- Future-ready for plugin architecture
+- Backward compatible (old paths still work)
+
+For command-specific options, use `./pyrite <command> --help`
+
 ## Tools
 
 ### Obsidian Linter (v0.6.0)
@@ -104,7 +137,8 @@ This is **optional** and maintained for backwards compatibility. New work should
 Validates and fixes Obsidian-flavored markdown:
 
 ```bash
-python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
+./pyrite lint --scope _work_efforts --fix
+# Or: python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
 ```
 
 - **Link fixing**: Auto-converts `TKT-xxxx-NNN` and `WE-YYMMDD-xxxx` to wikilinks
@@ -119,7 +153,8 @@ See [`tools/obsidian-linter/`](tools/obsidian-linter/README.md) for details.
 Session startup verification for GitHub integration:
 
 ```bash
-python3 tools/github-health-check/check.py
+./pyrite health
+# Or: python3 tools/github-health-check/check.py
 ```
 
 - Authentication status
@@ -134,7 +169,8 @@ See [`tools/github-health-check/`](tools/github-health-check/README.md) for deta
 Verifies and fixes repository structure:
 
 ```bash
-python3 tools/structure-check/check.py --fix
+./pyrite structure --fix
+# Or: python3 tools/structure-check/check.py --fix
 ```
 
 See [`tools/structure-check/`](tools/structure-check/README.md) for details.
@@ -250,7 +286,7 @@ Pyrite integrates with these MCP servers (configured separately):
 
 - [ ] **Plugin system** — Drop-in tool modules
 - [ ] **Config file** — Central `pyrite.config.json` for all tools
-- [ ] **CLI wrapper** — `pyrite lint`, `pyrite check`, etc.
+- [x] **CLI wrapper** — `pyrite lint`, `pyrite check`, etc. ✨
 - [ ] **Templates** — Starter configs for common project types
 - [ ] **Deprecate Johnny Decimal** — Full migration to MCP Work Efforts
 
