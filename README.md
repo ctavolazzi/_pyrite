@@ -17,22 +17,27 @@ Pyrite is a cross-repository workspace for AI-assisted development across the fu
 
 ```
 _pyrite/
-├── README.md           # This file
-├── _work_efforts/      # Johnny Decimal task tracking
-├── .claude/            # Claude Code configuration
-│   └── skills/         # Session start hooks
-├── tools/              # Development tools
-│   └── github-health-check/  # GitHub integration verification
-├── experiments/        # Exploratory code and prototypes
-├── integrations/       # Cross-repo integration work
-└── docs/               # Plans, decisions, learnings
+├── README.md              # This file
+├── _work_efforts/         # Johnny Decimal task tracking
+│   └── checkpoints/       # Session journal entries
+├── .claude/               # Claude Code configuration
+│   └── skills/            # Session start hooks
+├── tools/                 # Development tools
+│   ├── github-health-check/   # GitHub integration verification
+│   ├── obsidian-linter/       # Obsidian markdown validation & fixing
+│   └── structure-check/       # Repository structure verification
+├── experiments/           # Exploratory code and prototypes
+├── integrations/          # Cross-repo integration work
+└── docs/                  # Plans, decisions, learnings
 ```
 
 ## Active Projects
 
 | Project | Status | Description |
 |---------|--------|-------------|
+| Obsidian Linter | **v0.6.0** | Validates & fixes Obsidian-flavored markdown |
 | GitHub Health Check | Active | Session startup verification for GitHub integration |
+| Structure Check | Active | Repository structure verification |
 
 ## Related Repos
 
@@ -44,6 +49,21 @@ This workspace integrates with:
 
 ## Tools
 
+### Obsidian Linter (v0.6.0)
+
+Unified command to check, validate, and fix Obsidian-flavored markdown:
+
+```bash
+python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
+```
+
+- **Link fixing**: Auto-converts ticket/work effort IDs to wikilinks
+- **Frontmatter validation**: ID formats, status values, dates
+- **Task list support**: Validates and fixes `[ ]` and `[x]` syntax
+- **Validation**: Detects broken links, duplicates, orphaned files
+
+See [`tools/obsidian-linter/`](tools/obsidian-linter/README.md) for details.
+
 ### GitHub Health Check
 
 Automatically runs at session start to verify GitHub integration:
@@ -53,6 +73,16 @@ Automatically runs at session start to verify GitHub integration:
 - Branch, PR, and issue operations
 
 See [`tools/github-health-check/`](tools/github-health-check/README.md) for details.
+
+### Structure Check
+
+Verifies repository structure matches expected layout:
+
+```bash
+python3 tools/structure-check/check.py --fix
+```
+
+See [`tools/structure-check/`](tools/structure-check/README.md) for details.
 
 ## Convention
 
@@ -65,4 +95,4 @@ See [`tools/github-health-check/`](tools/github-health-check/README.md) for deta
 
 ---
 
-*Created: 2025-12-20*
+*Created: 2025-12-20* | *Updated: 2025-12-31* | *Version: 0.6.0*
