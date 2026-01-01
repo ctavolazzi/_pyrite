@@ -11,6 +11,30 @@
     },
     {
       "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^./primitives/.*\\.md$"
+    },
+    {
+      "pattern": "^./data-flow/.*\\.md$"
+    },
+    {
+      "pattern": "^./state-machines/.*\\.md$"
+    },
+    {
+      "pattern": "^./composition/.*\\.md$"
+    },
+    {
+      "pattern": "^../state-machines/.*\\.md$"
+    },
+    {
+      "pattern": "^../primitives/.*\\.md$"
+    },
+    {
+      "pattern": "^../data-flow/.*\\.md$"
+    },
+    {
+      "pattern": "^../composition/.*\\.md$"
     }
   ],
   "timeout": "20s",
