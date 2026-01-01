@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2025-12-31
+
+### Added
+- **Unified Obsidian Linter Command** (`lint.py`)
+  - Single command runs check → validate → (optional) fix in sequence
+  - Supports `--scope`, `--fix`, `--dry-run`, `--strict` flags
+  - Clear step-by-step output with summary
+
+- **Link Fixing Tools**
+  - `fix-links.py` - Auto-converts ticket/work effort IDs to wikilinks
+  - `fix-all.py` - Comprehensive auto-fixer for all fixable issues
+  - Table-aware linking (no aliases in tables to prevent markdown breakage)
+  - Fixed 105 unlinked references across 40 files
+
+- **Enhanced Validation**
+  - `validate.py` - Duplicate IDs, broken links, orphaned files, naming consistency
+  - ID format validation (WE-YYMMDD-xxxx, TKT-xxxx-NNN)
+  - Status value validation (active/paused/completed, etc.)
+  - Date format validation (ISO 8601)
+  - Parent relationship validation (ticket → work effort)
+
+- **Task List Support** (Phase 2A - via Claude Code PR #14)
+  - Task list syntax validation (`- [ ]`, `- [x]`)
+  - Auto-fixes `[X]` → `[x]`, adds missing spaces
+  - Skips task lists in code blocks
+
+- **Documentation**
+  - `FEATURES.md` - Coverage matrix of checked vs. not checked features
+  - `FRONTMATTER.md` - Frontmatter validation guide
+
+### Changed
+- Enhanced `check.py` with unlinked reference detection and frontmatter validation
+- Updated `README.md` with unified command as recommended approach
+
+### Workflow
+- **Cross-chat coordination**: Cursor (local) + Claude Code (cloud) working together
+- PR #11: Frontmatter validation (merged)
+- PR #12: Link fixers and table handling (merged)
+- PR #14: Phase 2A task list support (Claude Code, merged)
+
+### Session Checkpoint
+- **ID**: CKPT-251231-1800
+- **Status**: Complete - Obsidian Linter System v1.0 delivered
+
 ## [0.5.0] - 2025-12-31
 
 ### Added

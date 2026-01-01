@@ -767,3 +767,63 @@ mcp-servers/dashboard/
 - `mcp-servers/dashboard/package.json`
 
 **Status:** ✅ Complete
+
+[2026-01-01 01:58:06] ## SESSION CHECKPOINT: CKPT-251231-1800
+
+### Summary
+Complete Obsidian Linter System delivered - unified command, link fixing, frontmatter validation, task list support.
+
+### Features Delivered
+
+1. **Link Fixing Tools**
+   - `fix-links.py` - Auto-converts TKT-xxxx-NNN and WE-YYMMDD-xxxx to wikilinks
+   - Table-aware: Uses full filenames in tables (no aliases) to prevent markdown breakage
+   - Fixed 105 links across 40 work effort files
+
+2. **Frontmatter Validation**
+   - ID format validation (WE-YYMMDD-xxxx, TKT-xxxx-NNN)
+   - Status value validation (active/paused/completed, pending/in_progress/completed/blocked)
+   - Date format validation (ISO 8601)
+   - Parent relationship validation (ticket → work effort)
+
+3. **Validation Tools**
+   - `validate.py` - Duplicate IDs, broken links, orphaned files, naming consistency
+   - `check.py` - Enhanced with unlinked reference detection
+
+4. **Unified Command**
+   - `lint.py` - Single command runs check → validate → (optional) fix
+   - Supports --scope, --fix, --dry-run, --strict flags
+
+5. **Task List Support (Phase 2A - Claude Code)**
+   - Task list syntax validation
+   - Auto-fixes [X] → [x], adds missing spaces
+   - Skips task lists in code blocks
+
+### PRs Merged
+- PR #11: Enhanced frontmatter validation
+- PR #12: Link fixers and table handling
+- PR #14: Phase 2A task list support (Claude Code)
+
+### Files Created/Modified
+- tools/obsidian-linter/lint.py (NEW)
+- tools/obsidian-linter/fix-links.py (NEW)
+- tools/obsidian-linter/fix-all.py (NEW)
+- tools/obsidian-linter/validate.py (NEW)
+- tools/obsidian-linter/check.py (ENHANCED)
+- tools/obsidian-linter/FEATURES.md (NEW)
+- tools/obsidian-linter/FRONTMATTER.md (NEW)
+- tools/obsidian-linter/README.md (UPDATED)
+
+### Usage
+```bash
+python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
+```
+
+### What's NOT Checked (Phase 2B+)
+- Callouts, tags, embeds, dates, code blocks, LaTeX, footnotes, comments, highlights
+
+### Branches Cleaned
+All feature branches deleted. Only main remains.
+
+### Status
+✅ Complete - System ready for use
