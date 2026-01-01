@@ -23,13 +23,14 @@ _pyrite/
 ## Current State
 
 ### Active Task
-**File:** `_coordination/tasks/TASK_obsidian_linter.md`
-**Status:** `in_progress`
+**File:** `_coordination/tasks/TASK_obsidian_linter_phase2.md`
+**Status:** `awaiting_pickup`
 **Assigned:** `claude_code`
-**Phase:** Scope Proposal (awaiting approval)
+**Phase:** Research & Scope Proposal
 
 ### Completed Work Efforts
 - **WE-251231-25qq** - GitHub Health Check Tool ✅
+- **Obsidian Linter Phase 1** - Basic linter, fixers, validator ✅ (extended by Cursor)
 
 ---
 
