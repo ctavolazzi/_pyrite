@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2025-12-31
+
+### Added
+- **Obsidian Markdown Linter**: Validates Obsidian-flavored markdown files
+  - YAML frontmatter validation (syntax + standard field warnings)
+  - Wikilink checking with broken link detection
+  - Basic formatting checks (whitespace, headings, newlines)
+  - CLI with `--fix`, `--dry-run`, `--scope`, `--strict` flags
+  - Auto-fix for safe changes only
+  - Zero dependencies (507 lines, pure Python stdlib)
+
+### Changed
+- Task workflow validated: Semi-ambiguous request → Research → Scope proposal → Approval → Implementation
+- Tasks now archived to `_coordination/completed/` after completion
+
+### Workflow Milestone
+- **First successful cross-chat coordinated feature development**
+- Claude Code proposed scope, stopped and waited for approval
+- Cursor reviewed, adjusted, and approved before implementation
+- Tool quality exceeded expectations
+
 ## [0.4.0] - 2025-12-31
 
 ### Added
