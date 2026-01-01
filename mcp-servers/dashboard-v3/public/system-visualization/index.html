@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Counter System Visualization - Pyrite Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .system-page {
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary, #e0e0e0);
+    }
+
+    .page-header p {
+      color: var(--text-secondary, #a0a0a0);
+      font-size: 1rem;
+    }
+
+    /* Grid Layout */
+    .system-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Cards */
+    .system-card {
+      background: var(--bg-secondary, #1e1e1e);
+      border: 1px solid var(--border-color, #333);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .system-card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--text-primary, #e0e0e0);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .system-card h3 {
+      font-size: 1rem;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary, #a0a0a0);
+    }
+
+    /* Counter Display */
+    .counter-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-tertiary, #252525);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .counter-display label {
+      color: var(--text-secondary, #a0a0a0);
+      font-size: 0.9rem;
+    }
+
+    .counter-display .value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent-color, #4a9eff);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Status Indicators */
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-indicator.valid {
+      background: rgba(0, 200, 100, 0.2);
+      color: #00c864;
+    }
+
+    .status-indicator.invalid {
+      background: rgba(255, 80, 80, 0.2);
+      color: #ff5050;
+    }
+
+    .status-indicator.pending {
+      background: rgba(255, 200, 0, 0.2);
+      color: #ffc800;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Flow Diagram */
+    .flow-diagram {
+      padding: 2rem;
+      background: var(--bg-tertiary, #252525);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .flow-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent-color, #4a9eff);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .step-arrow {
+      width: 24px;
+      height: 2px;
+      background: var(--border-color, #333);
+      margin: 0 1rem;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content h4 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary, #e0e0e0);
+    }
+
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--text-secondary, #a0a0a0);
+      margin: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent-color, #4a9eff);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #3a8eef;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary, #252525);
+      color: var(--text-primary, #e0e0e0);
+      border: 1px solid var(--border-color, #333);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary, #1e1e1e);
+    }
+
+    .btn-danger {
+      background: rgba(255, 80, 80, 0.2);
+      color: #ff5050;
+      border: 1px solid rgba(255, 80, 80, 0.4);
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 80, 80, 0.3);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    /* Audit Log */
+    .audit-log {
+      max-height: 400px;
+      overflow-y: auto;
+      background: var(--bg-tertiary, #252525);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+
+    .audit-entry {
+      padding: 0.75rem;
+      border-left: 3px solid var(--accent-color, #4a9eff);
+      margin-bottom: 0.75rem;
+      background: var(--bg-secondary, #1e1e1e);
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .audit-entry:last-child {
+      margin-bottom: 0;
+    }
+
+    .audit-entry .timestamp {
+      color: var(--text-secondary, #a0a0a0);
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .audit-entry .action {
+      color: var(--text-primary, #e0e0e0);
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Validation Results */
+    .validation-check {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-tertiary, #252525);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .check-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .check-icon.pass {
+      background: rgba(0, 200, 100, 0.2);
+      color: #00c864;
+    }
+
+    .check-icon.fail {
+      background: rgba(255, 80, 80, 0.2);
+      color: #ff5050;
+    }
+
+    .check-content {
+      flex: 1;
+    }
+
+    .check-content .name {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary, #e0e0e0);
+    }
+
+    .check-content .message {
+      font-size: 0.85rem;
+      color: var(--text-secondary, #a0a0a0);
+    }
+
+    /* Loading */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: var(--text-secondary, #a0a0a0);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--border-color, #333);
+      border-top-color: var(--accent-color, #4a9eff);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Full Width Sections */
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Architecture Diagram */
+    .architecture {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      padding: 2rem;
+      background: var(--bg-tertiary, #252525);
+      border-radius: 8px;
+    }
+
+    .arch-component {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--bg-secondary, #1e1e1e);
+      border: 2px solid var(--border-color, #333);
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .arch-component:hover {
+      border-color: var(--accent-color, #4a9eff);
+      transform: translateY(-4px);
+    }
+
+    .arch-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .arch-component h4 {
+      margin-bottom: 0.5rem;
+      color: var(--text-primary, #e0e0e0);
+    }
+
+    .arch-component p {
+      font-size: 0.85rem;
+      color: var(--text-secondary, #a0a0a0);
+    }
+
+    @media (max-width: 768px) {
+      .architecture {
+        grid-template-columns: 1fr;
+      }
+
+      .system-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="site-nav"></div>
+
+  <div class="system-page">
+    <div class="page-header">
+      <h1>🔢 Counter System Visualization</h1>
+      <p>Real-time monitoring and visualization of the sequential numbering system</p>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="system-grid">
+      <div class="system-card">
+        <h2>📊 Live Counters</h2>
+        <div id="counters-display">
+          <div class="loading">
+            <div class="spinner"></div>
+            Loading counters...
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="refreshCounters()">
+            🔄 Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="system-card">
+        <h2>✅ Validation Status</h2>
+        <div id="validation-status">
+          <div class="loading">
+            <div class="spinner"></div>
+            Checking status...
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="runValidation()">
+            🔍 Run Validation
+          </button>
+          <button class="btn btn-danger" onclick="autoRepair()" id="repair-btn" disabled>
+            🔧 Auto-Repair
+          </button>
+        </div>
+      </div>
+
+      <div class="system-card">
+        <h2>🔐 System Integrity</h2>
+        <div id="integrity-display">
+          <div class="loading">
+            <div class="spinner"></div>
+            Checking integrity...
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="viewStatistics()">
+            📈 View Stats
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Architecture -->
+    <div class="system-card full-width">
+      <h2>🏗️ System Architecture</h2>
+      <div class="architecture">
+        <div class="arch-component">
+          <div class="arch-icon">⚙️</div>
+          <h4>Counter Service</h4>
+          <p>Core sequential numbering engine with state management and audit trail</p>
+        </div>
+        <div class="arch-component">
+          <div class="arch-icon">✅</div>
+          <h4>Validator</h4>
+          <p>Integrity checking and auto-repair capabilities for consistency</p>
+        </div>
+        <div class="arch-component">
+          <div class="arch-icon">🔄</div>
+          <h4>Migrator</h4>
+          <p>Filesystem scanning and counter initialization for existing data</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="system-card full-width">
+      <h2>🔄 How Counter Assignment Works</h2>
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <div class="step-number">1</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Request New Number</h4>
+            <p>System requests a new sequential number for a work effort, ticket, or checkpoint</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-number">2</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Lock State</h4>
+            <p>Counter service acquires lock to prevent race conditions</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-number">3</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Increment Counter</h4>
+            <p>Global counter and scoped counters (by repo, by work effort) are incremented</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-number">4</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Add Audit Entry</h4>
+            <p>Operation is logged with timestamp, context, and new value</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-number">5</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Calculate Checksum</h4>
+            <p>SHA-256 checksum is calculated for integrity verification</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-number">6</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Persist State</h4>
+            <p>Updated state is written to disk (state.json)</p>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-number">7</div>
+          <div class="step-arrow"></div>
+          <div class="step-content">
+            <h4>Release Lock & Return</h4>
+            <p>Lock is released and new number is returned to caller</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validation Details -->
+    <div class="system-grid">
+      <div class="system-card full-width">
+        <h2>🔍 Validation Checks</h2>
+        <div id="validation-checks">
+          <div class="loading">
+            <div class="spinner"></div>
+            Run validation to see results...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div class="system-card full-width">
+      <h2>📜 Recent Audit Log</h2>
+      <div class="audit-log" id="audit-log">
+        <div class="loading">
+          <div class="spinner"></div>
+          Loading audit log...
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="refreshAuditLog()">
+          🔄 Refresh Log
+        </button>
+      </div>
+    </div>
+
+    <!-- Migration Tools -->
+    <div class="system-card full-width">
+      <h2>🔄 Migration Tools</h2>
+      <p style="color: var(--text-secondary, #a0a0a0); margin-bottom: 1rem;">
+        Scan the filesystem and initialize counters based on existing work efforts and tickets.
+      </p>
+      <div id="migration-status">
+        <p style="color: var(--text-secondary, #a0a0a0);">
+          Click "Preview Migration" to see what would change, or "Run Migration" to initialize counters.
+        </p>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="previewMigration()">
+          👁️ Preview Migration
+        </button>
+        <button class="btn btn-danger" onclick="runMigration()">
+          🚀 Run Migration
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/components/nav.js"></script>
+  <script src="visualization.js"></script>
+</body>
+</html>
