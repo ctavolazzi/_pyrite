@@ -100,25 +100,28 @@
   flex-direction: column;
   gap: var(--space-2xs);
   min-width: 0;
+  flex: 1;
+  overflow: visible;
 }
 
 .stat-value {
   font-family: var(--font-mono);
-  font-size: clamp(1.25rem, 3vw, 2rem); /* Responsive! */
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
   font-weight: var(--fw-bold);
   line-height: 1;
   color: var(--text-primary);
-  /* Prevent overflow */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
   font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
-  font-size: var(--text-sm);
+  font-size: clamp(0.6rem, 1.5vw, 0.75rem);
   color: var(--text-muted);
-  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  /* Allow wrapping on narrow screens */
+  word-break: break-word;
+  hyphens: auto;
 }
 
 /* Highlighted stat card */
@@ -139,111 +142,128 @@
 /* ============================================================================
    Stats Section Grid
 
-   Responsive grid that never overflows. Uses auto-fit with constrained widths.
+   Responsive grid using auto-fit to accommodate all 6 cards (4 stats + 2 actions).
+   Uses minmax() with 110px minimum to fit all cards while keeping text readable.
    ============================================================================ */
 .stats-section {
   display: grid;
   gap: var(--space-sm);
   width: 100%;
   max-width: 100%;
-  overflow: hidden; /* Prevent any overflow */
-
-  /* Mobile: 2 columns with min width */
-  grid-template-columns: repeat(2, 1fr);
+  /* Use auto-fit with 110px minimum - fits 6 cards in ~730px */
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
 }
 
-/* Larger phones: Still 2 columns but with gap */
-@media (min-width: 400px) {
+/* Larger gap on bigger screens */
+@media (min-width: 480px) {
   .stats-section {
     gap: var(--space-md);
   }
 }
 
-/* Tablet: 3 columns */
-@media (min-width: 640px) {
-  .stats-section {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Small desktop: 4 columns */
-@media (min-width: 900px) {
-  .stats-section {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* Large desktop: 6 columns for all cards including actions */
-@media (min-width: 1200px) {
-  .stats-section {
-    grid-template-columns: repeat(6, 1fr);
-  }
-}
-
-/* Very large screens: Auto-fit with min/max */
-@media (min-width: 1440px) {
+/* On large screens, increase minimum card size for better readability */
+@media (min-width: 1000px) {
   .stats-section {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    max-width: 1200px; /* Cap the width */
+  }
+}
+
+/* On very large screens, cap the maximum */
+@media (min-width: 1400px) {
+  .stats-section {
+    grid-template-columns: repeat(6, minmax(140px, 200px));
+    justify-content: start;
   }
 }
 
 /* ============================================================================
    Action Card (Test/Demo Buttons)
+
+   These cards contain action buttons and should match stat card height.
    ============================================================================ */
-.stat-card.action-card {
+.stat-card.test-card,
+.stat-card.demo-card {
   padding: 0;
-  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  /* Match height of regular stat cards */
+  min-height: var(--touch-target-comfortable);
 }
 
-.action-btn {
+/* Shared button styles for test and demo */
+.test-btn,
+.demo-btn {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   width: 100%;
   height: 100%;
   min-height: 60px;
-  padding: var(--space-md);
-  font-size: var(--text-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--text-primary);
   background: transparent;
   border: none;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.action-btn:hover {
-  background: var(--bg-hover);
-}
-
-.action-btn:active {
-  background: var(--bg-active);
-}
-
-.action-icon {
-  font-size: var(--text-lg);
-  color: var(--accent);
-}
-
-/* Test button specific */
+/* Test button styles */
 .test-btn {
-  composes: action-btn;
+  color: var(--accent);
+  background: linear-gradient(135deg, var(--accent-glow) 0%, transparent 100%);
+  border: 1px solid var(--accent);
 }
 
 .test-btn:hover {
-  background: linear-gradient(135deg, var(--bg-hover) 0%, var(--accent-glow) 100%);
+  background: var(--accent);
+  color: var(--bg-deep);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-glow);
 }
 
-/* Demo button specific */
+.test-btn:active {
+  transform: scale(0.98);
+}
+
+.test-icon,
+.demo-icon {
+  font-size: var(--text-lg);
+}
+
+.test-label,
+.demo-label {
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+/* Demo button styles */
 .demo-btn {
-  composes: action-btn;
-  background: linear-gradient(135deg, var(--bg-card) 0%, var(--status-completed-bg) 100%);
+  color: var(--status-completed);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, transparent 100%);
+  border: 1px solid var(--status-completed);
 }
 
-.demo-btn .action-icon {
-  color: var(--status-completed);
+.demo-btn:hover {
+  background: var(--status-completed);
+  color: var(--bg-deep);
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.demo-btn:active {
+  transform: scale(0.98);
 }
 
 /* ============================================================================
