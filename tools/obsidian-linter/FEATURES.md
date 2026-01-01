@@ -43,9 +43,10 @@ This document tracks which Obsidian markdown features are checked, fixed, and va
   - Not checked for valid language tags
   - Not validated for proper closing
 
-- ❌ **Task Lists** - `- [ ]` and `- [x]` syntax
-  - Not checked for consistency
-  - Not validated for proper nesting
+- ✅ **Task Lists** - `- [ ]` and `- [x]` syntax (Phase 2A - IMPLEMENTED)
+  - Checked: Uppercase [X] vs lowercase [x], missing spaces
+  - Auto-fixed: Normalizes [X] → [x], adds missing spaces
+  - Skips task lists in code blocks
 
 - ❌ **LaTeX/Math** - `$...$` and `$$...$$` syntax
   - Not validated
@@ -133,7 +134,7 @@ See `_coordination/tasks/TASK_obsidian_linter_phase2.md` for the full Phase 2 sc
 | Embeds | ❌ | ❌ | ❌ |
 | Dates | ❌ | ❌ | ❌ |
 | Code Blocks | ❌ | ❌ | ❌ |
-| Task Lists | ❌ | ❌ | ❌ |
+| Task Lists | ✅ | ✅ | ❌ |
 | LaTeX | ❌ | ❌ | ❌ |
 | Footnotes | ❌ | ❌ | ❌ |
 | Comments | ❌ | ❌ | ❌ |
