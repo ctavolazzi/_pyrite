@@ -2,17 +2,17 @@
 
 ## Context
 
-Work Effort `WE-251231-25qq` has been created locally in Cursor. We're coordinating work between:
+Work Effort `[[WE-251231-25qq]]` has been created locally in Cursor. We're coordinating work between:
 - **Cursor (local)**: Architecture decisions, file structure, local testing
 - **Claude Code (cloud)**: GitHub API implementation, PR creation
 
 ## Your Task
 
-Create a feature branch and implement **TKT-25qq-001: Define tool architecture and file structure** and **TKT-25qq-002: Implement core GitHub API health checks**.
+Create a feature branch and implement **[[TKT-25qq-001]]: Define tool architecture and file structure** and **[[TKT-25qq-002]]: Implement core GitHub API health checks**.
 
 ### Branch to Create
 ```
-feature/WE-251231-25qq-github_health_check_tool_foundation
+feature/[[WE-251231-25qq]]-github_health_check_tool_foundation
 ```
 
 ### File Structure to Create
@@ -92,8 +92,8 @@ Status: HEALTHY ✅ Ready for development
 2. Implement the structure and core checks
 3. Use "Create PR" to open a PR back to main
 4. Include in PR description:
-   - Reference: `WE-251231-25qq`
-   - Tickets: `TKT-25qq-001`, `TKT-25qq-002`
+   - Reference: `[[WE-251231-25qq]]`
+   - Tickets: `[[TKT-25qq-001]]`, `[[TKT-25qq-002]]`
 
 ## Feedback Loop
 

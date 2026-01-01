@@ -12,7 +12,7 @@ assigned_to: null
 
 ## Metadata
 - **Created**: Saturday, December 27, 2025 at 12:45:52 PM PST
-- **Parent Work Effort**: WE-251227-hldk
+- **Parent Work Effort**: [[WE-251227-hldk]]
 - **Author**: ctavolazzi
 
 ## Description
