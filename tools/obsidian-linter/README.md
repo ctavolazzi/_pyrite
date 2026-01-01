@@ -7,14 +7,32 @@ A suite of tools for maintaining Obsidian-flavored markdown files:
 
 ## Quick Start
 
+### Unified Command (Recommended)
+
+```bash
+# Check and validate (read-only)
+python3 tools/obsidian-linter/lint.py --scope _work_efforts
+
+# Preview fixes without applying
+python3 tools/obsidian-linter/lint.py --scope _work_efforts --dry-run
+
+# Check, validate, and apply fixes
+python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
+```
+
+### Individual Tools
+
 ```bash
 # 1. Check for issues
 python3 tools/obsidian-linter/check.py --scope _work_efforts
 
-# 2. Preview fixes
+# 2. Validate for accuracy
+python3 tools/obsidian-linter/validate.py --scope _work_efforts
+
+# 3. Preview fixes
 python3 tools/obsidian-linter/fix-all.py --scope _work_efforts --dry-run
 
-# 3. Apply fixes
+# 4. Apply fixes
 python3 tools/obsidian-linter/fix-all.py --scope _work_efforts
 ```
 
@@ -37,12 +55,13 @@ Checks markdown files for Obsidian-specific features and best practices includin
 
 ## Tools
 
-This directory contains four complementary tools:
+This directory contains five complementary tools:
 
-1. **`check.py`** - Linter that detects issues (read-only)
-2. **`fix-links.py`** - Auto-fixes unlinked ticket/work effort references
-3. **`fix-all.py`** - Comprehensive auto-fixer for all fixable issues
-4. **`validate.py`** - Validator for accuracy, collisions, aliases, and potential errors
+1. **`lint.py`** - **Unified command** - Runs all tools in sequence (recommended)
+2. **`check.py`** - Linter that detects issues (read-only)
+3. **`fix-links.py`** - Auto-fixes unlinked ticket/work effort references
+4. **`fix-all.py`** - Comprehensive auto-fixer for all fixable issues
+5. **`validate.py`** - Validator for accuracy, collisions, aliases, and potential errors
 
 ## Usage
 
@@ -347,3 +366,11 @@ MIT (same as parent project)
 **Created:** 2025-12-31
 **Pattern:** Follows `tools/github-health-check/` structure
 **Dependencies:** None (pure Python stdlib)
+
+## Integration
+
+See `INTEGRATION.md` for:
+- Project integration points
+- CI/CD setup
+- Pre-commit hooks
+- Script integration examples
