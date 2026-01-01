@@ -365,8 +365,8 @@ python3 tools/obsidian-linter/enhance.py --framework zettelkasten --scope notes/
 
 ### Enhancement Quality
 - User approval rate for AI suggestions
-- # of auto-generated indexes
-- # of new connections discovered
+- Number of auto-generated indexes
+- Number of new connections discovered
 - Graph density improvements
 
 ### User Adoption
@@ -401,7 +401,7 @@ python3 tools/obsidian-linter/enhance.py --framework zettelkasten --scope notes/
 ## Timeline
 
 | Version | Features | Target Date | Status |
-|---------|----------|-------------|--------|
+| ------- | -------- | ----------- | ------ |
 | v0.6.1 | Tier 1 Complete | 2026-01-01 | ✅ Done |
 | v0.7.0 | Auto-Indexing | 2026-02-01 | 🚧 Next |
 | v0.8.0 | Framework Support | 2026-03-01 | 📋 Planned |
