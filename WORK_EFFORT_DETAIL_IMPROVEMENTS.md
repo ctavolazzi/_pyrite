@@ -7,7 +7,7 @@
 
 ## Current Issues (From Screenshot Analysis)
 
-### Visual/UX Problems:
+### Visual/UX Problems
 1. **Poor spacing** - Elements are cramped, hard to scan
 2. **Truncated content** - "No description provided" cuts off in ticket cards
 3. **Weak hierarchy** - All text feels same importance level
@@ -19,7 +19,7 @@
 9. **Status badges** - Could be more visually distinct
 10. **Activity heatmap** - Feels disconnected from other metrics
 
-### Responsive Issues:
+### Responsive Issues
 1. Three-column layout breaks awkwardly on tablet
 2. Right panel hidden on some screen sizes (loses functionality)
 3. Charts don't resize optimally
@@ -169,7 +169,7 @@ Desktop (> 1200px):  Three columns, full layout
 
 ### 4. Responsive Optimizations
 
-#### Mobile (< 768px):
+#### Mobile (< 768px)
 ```
 - Single column layout
 - Sticky header with back button
@@ -183,7 +183,7 @@ Desktop (> 1200px):  Three columns, full layout
 - Activity heatmap: Scrollable horizontal
 ```
 
-#### Tablet (768px - 1200px):
+#### Tablet (768px - 1200px)
 ```
 - Two-column layout: Main + Sidebar
 - Main column: Tabs + content (60%)
@@ -194,7 +194,7 @@ Desktop (> 1200px):  Three columns, full layout
 - Metadata: Compact view
 ```
 
-#### Desktop (> 1200px):
+#### Desktop (> 1200px)
 ```
 - Three-column layout: Left (240px) + Center (flex) + Right (280px)
 - All features visible
