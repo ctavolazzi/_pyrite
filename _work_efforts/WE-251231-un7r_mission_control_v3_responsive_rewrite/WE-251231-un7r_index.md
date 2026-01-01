@@ -45,7 +45,7 @@ Ground-up CSS architecture rewrite with mobile-first responsive design. Support 
 ## Progress
 - 12/31/2025: Phase 1 complete: V3 running on port 3848 with modular CSS architecture (tokens, reset, typography, layout, components). Responsive breakpoints working at 320-1440px. Mobile drawer functional with touch gestures. Skip link and keyboard nav working. Legacy styles preserved for gradual migration.
 
-## Progress
+## Release Notes
 - 12/31/2025: v0.6.2 release: Completed responsive layout foundation, VS Code-style sidebar, hero banner redesign, footer visibility fix, sidebar/footer overlap fix. CSS architecture modularized with tokens, reset, typography, layout, and component files.
 
 ## Commits

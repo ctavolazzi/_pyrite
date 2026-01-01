@@ -65,23 +65,23 @@
 
 ### Medium Priority
 
-5. **Top Bar** (lines 82-119)
+1. **Top Bar** (lines 82-119)
    - Has `mobile-menu-btn` but layout needs work
    - Notification panel position on mobile
 
-6. **Queue Section** (lines 188-208)
+2. **Queue Section** (lines 188-208)
    - Filter buttons wrap awkwardly
    - Need horizontal scroll or dropdown on mobile
 
-7. **Modals** (lines 503-591)
+3. **Modals** (lines 503-591)
    - Need full-screen treatment on mobile
    - Better touch target sizing
 
 ### Low Priority (Keep As-Is Initially)
 
-8. **Search Container** (lines 46-53) - Works okay
-9. **Tree Nav** (lines 56-63) - Works okay in drawer
-10. **Toast Container** (line 471) - Works with position adjustments
+4. **Search Container** (lines 46-53) - Works okay
+5. **Tree Nav** (lines 56-63) - Works okay in drawer
+6. **Toast Container** (line 471) - Works with position adjustments
 
 ## Required HTML Changes for V3
 
