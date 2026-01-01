@@ -40,9 +40,39 @@
    - ID matches file/folder naming pattern
    - Ticket suffix matches parent work effort suffix
 
+## Linter Status Tracking (Tier System)
+
+**New in v0.7.0+**: Files track validation status to enable progressive enhancement.
+
+### Linter Metadata Fields
+
+```yaml
+linter_status: validated              # Current status (see values below)
+linter_last_check: 2026-01-01T12:00:00Z  # Last validation timestamp
+linter_version: 0.6.1                 # Linter version used
+```
+
+### Status Values
+
+| Value | Tier 1 | Tier 2 (Enhancement) | Meaning |
+|-------|--------|---------------------|---------|
+| `unvalidated` | ❌ Run linter | ⛔ Blocked | Never checked |
+| `validated` | ✅ Clean | ✅ Ready | Passed all checks |
+| `has_warnings` | ⚠️ Optional | ⚠️ Caution | Minor issues |
+| `has_errors` | ❌ Must fix | ⛔ Blocked | Critical issues |
+
+**Why this matters:**
+- Tier 1 tools validate and fix files (current features)
+- Tier 2 tools enhance validated files (AI, auto-indexing, frameworks)
+- Enhancement tier REQUIRES `linter_status: validated` to prevent garbage-in-garbage-out
+
+See `ARCHITECTURE.md` for details on the two-tier system.
+
+---
+
 ## Example Valid Frontmatter
 
-### Work Effort
+### Work Effort (Tier 1 Validated)
 ```yaml
 ---
 id: WE-251231-25qq
@@ -53,6 +83,36 @@ created_by: ctavolazzi
 last_updated: 2025-12-31T20:53:55.999Z
 branch: feature/WE-251231-25qq-github_health_check_tool_foundation
 repository: ctavolazzi/_pyrite
+linter_status: validated
+linter_last_check: 2026-01-01T12:00:00Z
+linter_version: 0.6.1
+---
+```
+
+### Work Effort (Tier 2 Enhanced - Future)
+```yaml
+---
+id: WE-251231-25qq
+title: "GitHub Health Check Tool"
+status: completed
+created: 2025-12-31T20:34:34.994Z
+created_by: ctavolazzi
+last_updated: 2025-12-31T20:53:55.999Z
+branch: feature/WE-251231-25qq-github_health_check_tool_foundation
+repository: ctavolazzi/_pyrite
+# Tier 1 metadata
+linter_status: validated
+linter_last_check: 2026-01-01T12:00:00Z
+linter_version: 0.6.1
+# Tier 2 enhancements (auto-generated)
+summary: "Tool for validating GitHub repository health and configuration"
+related:
+  - [[WE-251228-xyz_github_integration]]
+  - [[WE-251230-abc_tool_framework]]
+tags: [github, tooling, health-check]
+framework: gtd
+gtd_context: ["@computer", "@development"]
+gtd_priority: high
 ---
 ```
 
@@ -93,11 +153,33 @@ assigned_to: null
 
 **Fix:** Ticket ID must match parent: `TKT-25qq-001` → parent `WE-251231-25qq`
 
+## Tier System Progression
+
+### Tier 1: Standardization (Current - v0.6.1) ✅
+- Validates structure and syntax
+- Fixes formatting issues
+- Adds `linter_status: validated` when clean
+
+### Tier 2: Enhancement (Future - v0.7.0+) 🚧
+- Requires `linter_status: validated`
+- Auto-generates summaries, tags, relationships
+- Applies knowledge management frameworks
+- See `ROADMAP_ENHANCEMENT.md` for details
+
+---
+
 ## Future Enhancements
 
-### Planned for Phase 2
+### Planned for Tier 1 (v0.7.0)
+- Auto-add `linter_status` field
+- Track validation history
 - Auto-fix common issues (normalize status, fix date formats)
-- Validate additional fields (`created_by`, `assigned_to`, etc.)
+
+### Planned for Tier 2 (v0.8.0+)
+- AI-generated `summary` field
+- Auto-populated `related` links
+- Framework-specific fields (`gtd_*`, `zettelkasten_*`, `para_*`)
+- Auto-tagging based on content
 - Check for required fields per file type
 - Validate date ranges (created < updated)
 - Check for orphaned tickets (parent doesn't exist)
