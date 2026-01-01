@@ -312,7 +312,7 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation
 ## Related Documentation
 
 - [User Guide](docs/USER-GUIDE.md) - How to use the dashboard
-- [API Documentation](/docs/) - Interactive API docs (when server running)
+- [Architecture](docs/ARCHITECTURE.md) - Technical architecture documentation
 - [Brand Guidelines](public/assets/brand-backup/README.md) - Logo and color specs
 
 ## License

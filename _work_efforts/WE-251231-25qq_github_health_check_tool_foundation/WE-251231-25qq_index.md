@@ -18,7 +18,7 @@ repository: ctavolazzi/_pyrite
 - **Branch**: feature/[[WE-251231-25qq]]-github_health_check_tool_foundation
 
 ## Objective
-Create the first foundational tool for the _pyrite ecosystem: a GitHub health check/verification tool that validates GitHub API access, permissions, and readiness at the start of AI chat sessions. This is the first building block toward _pyrite becoming a cross-chat AI context management platform.
+Create the first foundational tool for the \`_pyrite\` ecosystem: a GitHub health check/verification tool that validates GitHub API access, permissions, and readiness at the start of AI chat sessions. This is the first building block toward \`_pyrite\` becoming a cross-chat AI context management platform.
 
 ## Tickets
 
@@ -32,9 +32,11 @@ Create the first foundational tool for the _pyrite ecosystem: a GitHub health ch
 | [[TKT-25qq-006]] | Write documentation for forkers | pending |
 
 ## Progress
+
+### Initial Completion
 - 12/31/2025: PR #9 merged - GitHub health check tool now in main. 5/6 tickets complete. Remaining: MCP server integration (partial via Claude skills).
 
-## Progress
+### Final Status
 - 12/31/2025: All critical tickets complete. TKT-007 (modular refactor) deferred as low-priority future enhancement. First cross-chat coordinated feature delivery successful.
 
 ## Commits
