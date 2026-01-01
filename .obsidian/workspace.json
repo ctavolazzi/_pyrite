@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
+                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "WE-251231-25qq_index"
+              "title": "TKT-sdc6-006_sidebar_tree_interaction_polish"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
+                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for WE-251231-25qq_index"
+              "title": "Backlinks for TKT-sdc6-006_sidebar_tree_interaction_polish"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
+                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from WE-251231-25qq_index"
+              "title": "Outgoing links from TKT-sdc6-006_sidebar_tree_interaction_polish"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
+                "file": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-006_sidebar_tree_interaction_polish.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of WE-251231-25qq_index"
+              "title": "Outline of TKT-sdc6-006_sidebar_tree_interaction_polish"
             }
           }
         ]
@@ -171,6 +171,9 @@
   },
   "active": "5add458fadfcc797",
   "lastOpenFiles": [
+    "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-017_touch_accessibility_audit.md",
+    "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/WE-251231-un7r_index.md",
+    "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md",
     "tools/obsidian-linter/ROADMAP_ENHANCEMENT.md",
     "tools/obsidian-linter/ARCHITECTURE.md",
     "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-009_remove_legacy_styles_css_dependency.md",
@@ -195,7 +198,6 @@
     "mcp-servers/dashboard-v3/public/styles/reset.css",
     "mcp-servers/dashboard-v3/HTML_AUDIT.md",
     "mcp-servers/dashboard-v3/CSS_AUDIT.md",
-    "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-017_touch_accessibility_audit.md",
     "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-016_breakpoint_testing_matrix.md",
     "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-015_js_drawer_toggle_logic.md",
     "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-014_js_breakpoint_detection.md",
@@ -205,8 +207,6 @@
     "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-010_sidebar_drawer_system.md",
     "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-009_navigation_bar_responsive.md",
     "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-008_layout_shell_css_grid.md",
-    "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-007_breakpoint_system.md",
-    "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-006_fluid_typography_scale.md",
     "mcp-servers/dashboard-v3/public/assets/brand-backup/pyrite-logo-premium.svg",
     "mcp-servers/dashboard-v3/public/assets/brand-backup/pyrite-logo-512.svg",
     "mcp-servers/dashboard-v3/public/assets/brand-backup/pyrite-logo-512.png",

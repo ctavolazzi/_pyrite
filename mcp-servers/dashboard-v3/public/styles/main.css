@@ -646,15 +646,36 @@
 /* ============================================================================
    Footer
    ============================================================================ */
+/* Footer - Sticky at bottom of viewport */
+#site-footer {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width); /* Account for sidebar */
+  right: 0;
+  z-index: var(--z-sticky);
+}
+
+@media (max-width: 639px) {
+  #site-footer {
+    left: 0; /* Full width on mobile */
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  #site-footer {
+    left: var(--sidebar-width-collapsed); /* Collapsed sidebar on tablet */
+  }
+}
+
 .site-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
-  padding: var(--space-lg);
-  margin-top: auto;
+  padding: var(--space-sm) var(--space-lg);
   border-top: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
