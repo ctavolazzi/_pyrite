@@ -9,9 +9,11 @@
 Pyrite is a **configurable toolkit** for AI-assisted development. Drop it into any repository to get:
 
 - 📋 **Work tracking** — Task management with tickets, checkpoints, and devlog
+- 💬 **Chat interface** — Natural language commands for creating/managing work efforts
+- 📊 **Real-time dashboard** — Visual monitoring of work across repositories
 - 🔍 **Code quality** — Linting, validation, and auto-fixing for markdown and more
 - 🤖 **AI coordination** — Session hooks, context sharing, and cross-tool collaboration
-- 📊 **Health checks** — GitHub integration verification, structure validation
+- 🔧 **Health checks** — GitHub integration verification, structure validation
 
 ### Use Cases
 
@@ -137,6 +139,51 @@ python3 tools/structure-check/check.py --fix
 
 See [`tools/structure-check/`](tools/structure-check/README.md) for details.
 
+## Interfaces
+
+### Pyrite Console (NEW)
+
+Chat interface for natural language work effort management:
+
+```bash
+cd mcp-servers/console
+npm install
+npm start
+# Open http://localhost:3000
+```
+
+- **Natural language commands**: "List work efforts", "Create a ticket for..."
+- **Streaming AI responses**: Real-time feedback with AI SDK
+- **Direct file system**: No MCP overhead, instant updates
+- **Your API key**: Stored locally in browser
+- **Instant reload**: Vanilla JS, no build step
+
+**AI Tools:**
+- List and search work efforts
+- Create tickets with auto-generated IDs
+- Update ticket status
+- Get detailed work effort information
+
+See [`mcp-servers/console/`](mcp-servers/console/README.md) for details.
+
+### Mission Control Dashboard
+
+Real-time monitoring dashboard for work efforts:
+
+```bash
+cd mcp-servers/dashboard
+npm install
+npm start
+# Open http://localhost:3847
+```
+
+- **Multi-repository support**: Monitor multiple repos
+- **WebSocket updates**: Real-time file watching
+- **Dual format parsing**: MCP v0.3.0 + Johnny Decimal
+- **Interactive charts**: Progress rings, heatmaps, velocity metrics
+
+See [`mcp-servers/dashboard/`](mcp-servers/dashboard/README.md) for details.
+
 ## Structure
 
 ```
@@ -145,6 +192,10 @@ _pyrite/
 │   ├── obsidian-linter/       # Markdown validation & fixing
 │   ├── github-health-check/   # GitHub integration verification
 │   └── structure-check/       # Repository structure validation
+├── mcp-servers/               # Web interfaces and MCP servers
+│   ├── console/               # Chat interface for work efforts (NEW)
+│   ├── dashboard/             # Real-time work effort monitoring
+│   └── work-efforts/          # MCP server for work effort operations
 ├── _work_efforts/             # Work tracking (MCP + optional Johnny Decimal)
 │   ├── WE-*/                  # MCP work efforts (primary)
 │   ├── checkpoints/           # Session journals
@@ -213,4 +264,4 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-*Created: 2025-12-20* | *Updated: 2025-12-31* | *Version: 0.6.1*
+*Created: 2025-12-20* | *Updated: 2026-01-01* | *Version: 0.7.0*
