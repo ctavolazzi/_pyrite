@@ -69,6 +69,22 @@ class LinkFixer:
 
         return sorted(files)
 
+    def _is_in_table(self, pos: int, content: str) -> bool:
+        """Check if position is inside a markdown table."""
+        # Find the line containing this position
+        lines = content[:pos].split('\n')
+        if not lines:
+            return False
+        
+        current_line = lines[-1]
+        # Check if we're in a table (has | characters and not a header separator)
+        if '|' in current_line and not current_line.strip().startswith('|') and '---' not in current_line:
+            # Check if there's a table header above
+            for i in range(len(lines) - 1, max(0, len(lines) - 10), -1):
+                if '|' in lines[i] and '---' in lines[i]:
+                    return True
+        return False
+
     def _fix_file(self, file_path: Path) -> Tuple[bool, int]:
         """
         Fix unlinked references in a single file.
@@ -129,7 +145,7 @@ class LinkFixer:
 
             # Check if we're inside a wikilink
             inside_wikilink = is_inside_wikilink(match_start)
-            
+
             # Find the ticket file
             found_file = None
             for file_key, indexed_path in self.markdown_files.items():
@@ -139,7 +155,8 @@ class LinkFixer:
 
             if found_file:
                 full_name = found_file.stem
-                
+                in_table = self._is_in_table(match_start, content)
+
                 if inside_wikilink:
                     # We're inside a wikilink - check if it needs fixing
                     # Find the wikilink range
@@ -147,18 +164,25 @@ class LinkFixer:
                         if wl_start <= match_start < wl_end:
                             # Extract the current link text
                             link_text = content[wl_start+2:wl_end-2]  # Remove [[ and ]]
-                            
+
                             # Check if it's just the ID (needs alias) or already has alias
                             if link_text == ticket_id:
-                                # Broken link - needs full filename with alias
-                                replacements.append((wl_start, wl_end, f"[[{full_name}|{ticket_id}]]"))
+                                # Broken link - use full filename only in tables, alias elsewhere
+                                if in_table:
+                                    replacements.append((wl_start, wl_end, f"[[{full_name}]]"))
+                                else:
+                                    replacements.append((wl_start, wl_end, f"[[{full_name}|{ticket_id}]]"))
                             elif link_text.startswith(ticket_id + "_") and "|" not in link_text:
-                                # Has full filename but no alias - add alias for readability
-                                replacements.append((wl_start, wl_end, f"[[{link_text}|{ticket_id}]]"))
+                                # Has full filename but no alias - add alias only if not in table
+                                if not in_table:
+                                    replacements.append((wl_start, wl_end, f"[[{link_text}|{ticket_id}]]"))
                             break
                 else:
-                    # Not linked - add link with alias
-                    replacements.append((match_start, match_end, f"[[{full_name}|{ticket_id}]]"))
+                    # Not linked - use full filename only in tables, alias elsewhere
+                    if in_table:
+                        replacements.append((match_start, match_end, f"[[{full_name}]]"))
+                    else:
+                        replacements.append((match_start, match_end, f"[[{full_name}|{ticket_id}]]"))
 
         # Fix work effort IDs
         for match in self.WORK_EFFORT_ID_PATTERN.finditer(content):

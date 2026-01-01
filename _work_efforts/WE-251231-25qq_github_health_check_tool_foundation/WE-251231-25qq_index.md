@@ -24,12 +24,12 @@ Create the first foundational tool for the \`_pyrite\` ecosystem: a GitHub healt
 
 | ID | Title | Status |
 |----|-------|--------|
-| [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]] | Define tool architecture and file structure | pending |
-| [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]] | Implement core GitHub API health checks | pending |
-| [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]] | Add security layer for token handling | pending |
-| [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]] | Create CLI interface for manual runs | pending |
-| [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]] | Add MCP server integration for AI tools | pending |
-| [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]] | Write documentation for forkers | pending |
+| [[TKT-25qq-001_define_tool_architecture_and_file_structure]] | Define tool architecture and file structure | pending |
+| [[TKT-25qq-002_implement_core_github_api_health_checks]] | Implement core GitHub API health checks | pending |
+| [[TKT-25qq-003_add_security_layer_for_token_handling]] | Add security layer for token handling | pending |
+| [[TKT-25qq-004_create_cli_interface_for_manual_runs]] | Create CLI interface for manual runs | pending |
+| [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools]] | Add MCP server integration for AI tools | pending |
+| [[TKT-25qq-006_write_documentation_for_forkers]] | Write documentation for forkers | pending |
 
 ## Progress
 

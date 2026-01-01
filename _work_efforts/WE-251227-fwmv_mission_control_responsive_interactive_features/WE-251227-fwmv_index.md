@@ -24,11 +24,11 @@ Make Mission Control fully responsive for mobile/tablet, add individual ticket d
 
 | ID | Title | Status |
 |----|-------|--------|
-| [[TKT-fwmv-001_responsive_css_framework_and_breakpoints|TKT-fwmv-001]] | Responsive CSS framework and breakpoints | **completed** |
-| [[TKT-fwmv-002_individual_ticket_detail_page_modal|TKT-fwmv-002]] | Individual ticket detail page/modal | pending |
-| [[TKT-fwmv-003_real_time_statistics_and_graphs|TKT-fwmv-003]] | Real-time statistics and graphs | pending |
-| [[TKT-fwmv-004_work_trigger_edit_cancel_controls|TKT-fwmv-004]] | Work trigger/edit/cancel controls | pending |
-| [[TKT-fwmv-005_agent_assignment_and_monitoring_ui|TKT-fwmv-005]] | Agent assignment and monitoring UI | pending |
+| [[TKT-fwmv-001_responsive_css_framework_and_breakpoints]] | Responsive CSS framework and breakpoints | **completed** |
+| [[TKT-fwmv-002_individual_ticket_detail_page_modal]] | Individual ticket detail page/modal | pending |
+| [[TKT-fwmv-003_real_time_statistics_and_graphs]] | Real-time statistics and graphs | pending |
+| [[TKT-fwmv-004_work_trigger_edit_cancel_controls]] | Work trigger/edit/cancel controls | pending |
+| [[TKT-fwmv-005_agent_assignment_and_monitoring_ui]] | Agent assignment and monitoring UI | pending |
 
 ## Progress
 - **12/28/2025**: Completed shared components system (nav.js, footer.js) with responsive mobile navigation

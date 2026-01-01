@@ -24,13 +24,13 @@ Build a robust command center dashboard with tree navigation, search, real-time 
 
 | ID | Title | Status |
 |----|-------|--------|
-| [[TKT-hldk-001_tree_navigation_component|TKT-hldk-001]] | Tree Navigation Component | pending |
-| [[TKT-hldk-002_search_functionality|TKT-hldk-002]] | Search Functionality | pending |
-| [[TKT-hldk-003_command_center_queue_view|TKT-hldk-003]] | Command Center Queue View | pending |
-| [[TKT-hldk-004_toast_notification_system|TKT-hldk-004]] | Toast Notification System | pending |
-| [[TKT-hldk-005_detail_page_view|TKT-hldk-005]] | Detail Page View | pending |
-| [[TKT-hldk-006_start_stop_controls|TKT-hldk-006]] | Start/Stop Controls | pending |
-| [[TKT-hldk-007_real_time_visual_indicators|TKT-hldk-007]] | Real-Time Visual Indicators | pending |
+| [[TKT-hldk-001_tree_navigation_component]] | Tree Navigation Component | pending |
+| [[TKT-hldk-002_search_functionality]] | Search Functionality | pending |
+| [[TKT-hldk-003_command_center_queue_view]] | Command Center Queue View | pending |
+| [[TKT-hldk-004_toast_notification_system]] | Toast Notification System | pending |
+| [[TKT-hldk-005_detail_page_view]] | Detail Page View | pending |
+| [[TKT-hldk-006_start_stop_controls]] | Start/Stop Controls | pending |
+| [[TKT-hldk-007_real_time_visual_indicators]] | Real-Time Visual Indicators | pending |
 
 ## Commits
 - 12/27/2025: All 7 tickets completed. Full Command Center dashboard with tree navigation, search, queue view, toasts, detail pages, and real-time visual indicators.
