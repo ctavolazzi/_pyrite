@@ -8,7 +8,7 @@
 
 Pyrite is a **configurable toolkit** for AI-assisted development. Drop it into any repository to get:
 
-- 📋 **Work tracking** — Johnny Decimal task management with tickets and checkpoints
+- 📋 **Work tracking** — Task management with tickets, checkpoints, and devlog
 - 🔍 **Code quality** — Linting, validation, and auto-fixing for markdown and more
 - 🤖 **AI coordination** — Session hooks, context sharing, and cross-tool collaboration
 - 📊 **Health checks** — GitHub integration verification, structure validation
@@ -45,6 +45,56 @@ python3 tools/structure-check/check.py --fix
 - **AI-first**: Built for AI-assisted development workflows
 - **Documented**: Track what you try, what works, what doesn't
 
+## Work Tracking System
+
+Pyrite uses a **hybrid work tracking system** that combines two approaches:
+
+### MCP Work Efforts (v0.3.0) — Primary System
+
+Active work uses timestamped IDs managed by MCP servers:
+
+```
+_work_efforts/
+├── WE-251227-1gku_mission_control_dashboard/
+│   ├── WE-251227-1gku_index.md      # Work effort with frontmatter
+│   └── tickets/
+│       ├── TKT-1gku-001_fix_bug.md
+│       ├── TKT-1gku-002_build_server.md
+│       └── ...
+├── WE-251231-25qq_github_health_check/
+│   └── ...
+├── checkpoints/                      # Session journals
+│   └── CKPT-251231-1800.md
+└── devlog.md                         # Rolling activity log
+```
+
+**ID Formats:**
+| Type | Format | Example |
+|------|--------|---------|
+| Work Effort | `WE-YYMMDD-xxxx` | `WE-251227-1gku` |
+| Ticket | `TKT-xxxx-NNN` | `TKT-1gku-001` |
+| Checkpoint | `CKPT-YYMMDD-HHMM` | `CKPT-251231-1800` |
+
+**MCP Tools:**
+- `mcp_work-efforts_create_work_effort` — New initiative
+- `mcp_work-efforts_create_ticket` — Add task to work effort
+- `mcp_work-efforts_update_ticket` — Change status
+- `mcp_work-efforts_search_work_efforts` — Find related work
+
+### Johnny Decimal (Legacy/Optional)
+
+Some older files use Johnny Decimal numbering for categorization:
+
+```
+_work_efforts/
+├── 00-09_meta/           # Organization, indexes
+├── 10-19_development/    # Active development
+├── 20-29_experiments/    # Exploratory work
+└── ...
+```
+
+This is **optional** and maintained for backwards compatibility. New work should use MCP Work Efforts.
+
 ## Tools
 
 ### Obsidian Linter (v0.6.0)
@@ -55,7 +105,7 @@ Validates and fixes Obsidian-flavored markdown:
 python3 tools/obsidian-linter/lint.py --scope _work_efforts --fix
 ```
 
-- **Link fixing**: Auto-converts references to wikilinks
+- **Link fixing**: Auto-converts `TKT-xxxx-NNN` and `WE-YYMMDD-xxxx` to wikilinks
 - **Frontmatter validation**: ID formats, status values, dates
 - **Task list support**: Validates and fixes `[ ]` and `[x]` syntax
 - **Validation**: Detects broken links, duplicates, orphaned files
@@ -95,8 +145,11 @@ _pyrite/
 │   ├── obsidian-linter/       # Markdown validation & fixing
 │   ├── github-health-check/   # GitHub integration verification
 │   └── structure-check/       # Repository structure validation
-├── _work_efforts/             # Johnny Decimal task tracking
-│   └── checkpoints/           # Session journal entries
+├── _work_efforts/             # Work tracking (MCP + optional Johnny Decimal)
+│   ├── WE-*/                  # MCP work efforts (primary)
+│   ├── checkpoints/           # Session journals
+│   ├── 00-09_meta/            # Johnny Decimal (legacy)
+│   └── devlog.md              # Rolling activity log
 ├── .claude/                   # Claude Code configuration
 │   └── skills/                # Session start hooks
 ├── .cursor/                   # Cursor IDE configuration
@@ -114,13 +167,6 @@ _pyrite/
 2. **Adapt paths** in scripts to match your structure
 3. **Configure AI hooks** in `.claude/` or `.cursor/` as needed
 
-### Work Effort Tracking
-
-Uses Johnny Decimal system with these ID formats:
-- **Work Efforts**: `WE-YYMMDD-xxxx` (e.g., `WE-251231-a1b2`)
-- **Tickets**: `TKT-xxxx-NNN` (e.g., `TKT-a1b2-001`)
-- **Checkpoints**: `CKPT-YYMMDD-HHMM` (session journals)
-
 ### AI Integration
 
 | AI Tool | Config Location | Purpose |
@@ -128,6 +174,18 @@ Uses Johnny Decimal system with these ID formats:
 | Claude Code | `.claude/` | Skills, session hooks |
 | Cursor | `.cursor/`, `.cursorrules` | Commands, rules |
 | Both | `AGENTS.md` | Shared instructions |
+
+### MCP Servers
+
+Pyrite integrates with these MCP servers (configured separately):
+
+| Server | Purpose |
+|--------|---------|
+| `work-efforts` | Create/update work efforts and tickets |
+| `memory` | Persist knowledge across sessions |
+| `sequential-thinking` | Complex problem breakdown |
+| `docs-maintainer` | Documentation management |
+| `dev-log` | Devlog entries |
 
 ## Conventions
 
@@ -143,6 +201,7 @@ Uses Johnny Decimal system with these ID formats:
 - [ ] **Config file** — Central `pyrite.config.json` for all tools
 - [ ] **CLI wrapper** — `pyrite lint`, `pyrite check`, etc.
 - [ ] **Templates** — Starter configs for common project types
+- [ ] **Deprecate Johnny Decimal** — Full migration to MCP Work Efforts
 
 ## Contributing
 
