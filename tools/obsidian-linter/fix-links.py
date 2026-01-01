@@ -75,7 +75,7 @@ class LinkFixer:
         lines = content[:pos].split('\n')
         if not lines:
             return False
-        
+
         current_line = lines[-1]
         # Check if we're in a table (has | characters and not a header separator)
         if '|' in current_line and not current_line.strip().startswith('|') and '---' not in current_line:
