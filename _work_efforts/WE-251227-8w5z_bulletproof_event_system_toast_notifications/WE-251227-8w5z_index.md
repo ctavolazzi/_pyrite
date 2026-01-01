@@ -6,7 +6,7 @@ created: 2025-12-28T03:53:53.884Z
 created_by: ctavolazzi
 last_updated: 2025-12-28T03:55:01.175Z
 branch: feature/WE-251227-8w5z-bulletproof_event_system_toast_notifications
-repository: 
+repository:
 ---
 
 # WE-251227-8w5z: Bulletproof Event System & Toast Notifications
