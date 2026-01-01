@@ -900,8 +900,8 @@ renderQueue() {
 }
 ```
 
-4. **Test changes** → Run existing tests, add new tests
-5. **Ship** → AI knows nothing broke because dependencies are clear
+1. **Test changes** → Run existing tests, add new tests
+2. **Ship** → AI knows nothing broke because dependencies are clear
 
 **Total time:** 30 minutes instead of 3 hours debugging spaghetti code
 
