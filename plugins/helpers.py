@@ -1,0 +1,222 @@
+"""
+Helper functions for plugin implementations
+
+Common utilities for generating work effort IDs, sanitizing titles,
+and validating folder names using the naming linter.
+"""
+
+import re
+import random
+import string
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+
+def generate_we_id() -> str:
+    """
+    Generate a work effort ID in WE-YYMMDD-xxxx format
+
+    Returns:
+        Work effort ID string (e.g., 'WE-260101-a7b3')
+
+    Example:
+        >>> we_id = generate_we_id()
+        >>> print(we_id)  # WE-260101-a7b3
+    """
+    date_str = datetime.now().strftime('%y%m%d')
+    random_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+    return f"WE-{date_str}-{random_str}"
+
+
+def sanitize_title(title: str, max_length: int = 50) -> str:
+    """
+    Convert task title to a valid folder name component
+
+    Args:
+        title: The task title to sanitize
+        max_length: Maximum length for sanitized title (default: 50)
+
+    Returns:
+        Sanitized title safe for use in folder names
+
+    Example:
+        >>> sanitize_title("Build User Authentication System!")
+        'build_user_authentication_system'
+        >>> sanitize_title("Fix Bug #123: Login Error")
+        'fix_bug_123_login_error'
+    """
+    # Convert to lowercase
+    title = title.lower()
+
+    # Replace spaces and special chars with underscores
+    title = re.sub(r'[^a-z0-9]+', '_', title)
+
+    # Remove leading/trailing underscores
+    title = title.strip('_')
+
+    # Collapse multiple consecutive underscores
+    title = re.sub(r'_+', '_', title)
+
+    # Truncate if too long
+    if len(title) > max_length:
+        title = title[:max_length].rstrip('_')
+
+    return title
+
+
+def validate_folder_name(folder_name: str) -> Optional[str]:
+    """
+    Validate work effort folder name using naming linter
+
+    Args:
+        folder_name: Folder name to validate (e.g., 'WE-260101-abcd_title')
+
+    Returns:
+        None if valid, error message string if invalid
+
+    Example:
+        >>> error = validate_folder_name('WE-260101-abcd_my_task')
+        >>> if error:
+        ...     print(f"Invalid: {error}")
+    """
+    try:
+        from tools.naming_linter.rules.common import validate_we_folder_name
+        return validate_we_folder_name(folder_name)
+    except ImportError:
+        # Naming linter not available - skip validation
+        return None
+
+
+def create_work_effort_structure(
+    base_path: Path,
+    we_id: str,
+    title: str,
+    validate: bool = True
+) -> tuple[Path, Path, Path]:
+    """
+    Create work effort folder structure
+
+    Args:
+        base_path: Base directory for work efforts (e.g., Path('_work_efforts'))
+        we_id: Work effort ID (e.g., 'WE-260101-abcd')
+        title: Task title (will be sanitized)
+        validate: Whether to validate folder name (default: True)
+
+    Returns:
+        Tuple of (folder_path, index_path, tickets_dir)
+
+    Raises:
+        ValueError: If folder name is invalid
+
+    Example:
+        >>> base = Path('_work_efforts')
+        >>> folder, index, tickets = create_work_effort_structure(
+        ...     base, 'WE-260101-abcd', 'My Task'
+        ... )
+    """
+    # Sanitize title and create folder name
+    sanitized_title = sanitize_title(title)
+    folder_name = f"{we_id}_{sanitized_title}"
+
+    # Validate folder name if requested
+    if validate:
+        error = validate_folder_name(folder_name)
+        if error:
+            raise ValueError(f"Invalid folder name '{folder_name}': {error}")
+
+    # Create directory structure
+    folder_path = base_path / folder_name
+    folder_path.mkdir(parents=True, exist_ok=True)
+
+    tickets_dir = folder_path / "tickets"
+    tickets_dir.mkdir(exist_ok=True)
+
+    index_path = folder_path / f"{we_id}_index.md"
+
+    return folder_path, index_path, tickets_dir
+
+
+def format_index_file(
+    we_id: str,
+    title: str,
+    description: Optional[str] = None,
+    source: Optional[str] = None,
+    source_url: Optional[str] = None,
+    labels: Optional[list[str]] = None,
+    created: Optional[datetime] = None
+) -> str:
+    """
+    Generate content for work effort index file
+
+    Args:
+        we_id: Work effort ID
+        title: Task title
+        description: Task description (optional)
+        source: Source service name (e.g., 'todoist')
+        source_url: URL to original task
+        labels: List of labels/tags
+        created: Creation timestamp
+
+    Returns:
+        Markdown content with YAML frontmatter
+
+    Example:
+        >>> content = format_index_file(
+        ...     'WE-260101-abcd',
+        ...     'My Task',
+        ...     description='Do the thing',
+        ...     source='todoist',
+        ...     labels=['urgent', 'backend']
+        ... )
+    """
+    created_iso = (created or datetime.now()).isoformat()
+    labels_str = labels or []
+
+    # Build YAML frontmatter
+    frontmatter = f"""---
+id: {we_id}
+title: "{title}"
+status: in_progress
+created: {created_iso}
+"""
+
+    if source:
+        frontmatter += f"source: {source}\n"
+    if source_url:
+        frontmatter += f"source_url: {source_url}\n"
+    if labels_str:
+        frontmatter += f"labels: {labels_str}\n"
+
+    frontmatter += "---\n"
+
+    # Build markdown content
+    content = f"{frontmatter}\n# {title}\n\n"
+
+    if description:
+        content += f"## Description\n\n{description}\n\n"
+
+    if source and source_url:
+        content += f"""## Source Task
+
+- **Service**: {source}
+- **URL**: {source_url}
+"""
+        if labels_str:
+            content += f"- **Labels**: {', '.join(labels_str)}\n"
+
+        content += "\n"
+
+    content += """## Progress
+
+- Work effort created
+- Ready for implementation
+
+## Next Steps
+
+1. Review task requirements
+2. Create tickets in `tickets/` directory
+3. Begin implementation
+"""
+
+    return content
