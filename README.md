@@ -274,6 +274,24 @@ Pyrite integrates with these MCP servers (configured separately):
 | `docs-maintainer` | Documentation management |
 | `dev-log` | Devlog entries |
 
+## Development Workflow
+
+### Branching Strategy
+
+This project uses **Git Flow**:
+
+- **`main`** - Production/stable code (protected)
+- **`develop`** - Development integration branch
+- **`feature/*`** - Feature branches (e.g., `feature/WE-260102-xxxx-work-effort`)
+
+**Workflow:**
+1. Create feature branches from `develop`
+2. Work on features, commit changes
+3. Merge feature branches → `develop` for integration
+4. Merge `develop` → `main` when ready for production
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for detailed contribution guidelines.
+
 ## Conventions
 
 - Prefix with `_` to sort to top of directory listing

@@ -15,13 +15,32 @@ _pyrite is a cross-repository workspace for AI-assisted development. It's experi
 3. Provide clear reproduction steps
 4. Include relevant context (OS, tools, versions)
 
+### Branching Strategy
+
+This project uses **Git Flow**:
+
+- `main` - Production/stable code
+- `develop` - Development integration branch
+- `feature/*` - Feature branches (e.g., `feature/WE-260102-xxxx-work-effort`)
+
+**Workflow:**
+1. Create feature branches from `develop`
+2. Work on features, commit changes
+3. Merge feature branches back to `develop` for integration
+4. Merge `develop` → `main` when ready for production
+
 ### Pull Requests
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
+2. Create a feature branch from `develop`:
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/your-feature
+   ```
 3. Follow existing code style and conventions
 4. Update documentation as needed
-5. Submit a PR with clear description
+5. Submit a PR targeting `develop` (or `main` for hotfixes)
 
 ### Work Efforts
 
