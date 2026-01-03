@@ -268,9 +268,346 @@ def test_event_system():
     return True
 
 
+def test_parse_subtasks():
+    """Test Phase 4: Subtask parsing from task description"""
+    print_test_header("Test 8: Parse Subtasks (Phase 4)")
+
+    plugin = TodoistPlugin(MOCK_CONFIG)
+
+    # Test task with subtasks
+    task_with_subtasks = ExternalTask(
+        id='task-456',
+        title='Build Auth System',
+        description="""Build authentication system
+
+- [ ] Create login form
+- [ ] Add password reset
+- [ ] Implement OAuth
+- [x] Setup database
+
+Additional notes here
+""",
+        created=datetime.now(),
+        due_date=None,
+        labels=['pyrite'],
+        url='https://todoist.com/task-456',
+        raw_data={}
+    )
+
+    subtasks = plugin.parse_subtasks(task_with_subtasks)
+
+    assert len(subtasks) == 4, f"Expected 4 subtasks, got {len(subtasks)}"
+    print(f"✓ Parsed {len(subtasks)} subtasks")
+
+    assert 'Create login form' in subtasks
+    assert 'Add password reset' in subtasks
+    assert 'Implement OAuth' in subtasks
+    assert 'Setup database' in subtasks
+    print(f"✓ All subtask titles extracted correctly")
+
+    # Test task with no subtasks
+    task_no_subtasks = ExternalTask(
+        id='task-789',
+        title='Simple task',
+        description='Just a description without checkboxes',
+        created=datetime.now(),
+        due_date=None,
+        labels=['pyrite'],
+        url='https://todoist.com/task-789',
+        raw_data={}
+    )
+
+    no_subtasks = plugin.parse_subtasks(task_no_subtasks)
+    assert len(no_subtasks) == 0
+    print(f"✓ Correctly returns empty list for no subtasks")
+
+    return True
+
+
+def test_find_work_effort():
+    """Test Phase 4: Finding existing work efforts"""
+    print_test_header("Test 9: Find Work Effort (Phase 4)")
+
+    temp_dir = tempfile.mkdtemp()
+    test_config = MOCK_CONFIG.copy()
+    test_config['work_efforts_dir'] = temp_dir
+
+    try:
+        plugin = TodoistPlugin(test_config)
+
+        # Create a work effort first
+        task = plugin._convert_to_external_task(MOCK_TASK_DATA)
+        we = plugin.create_work_effort(task)
+        we_id = we.we_id
+
+        print(f"✓ Created test work effort: {we_id}")
+
+        # Try to find it
+        found_path = plugin.find_work_effort(we_id)
+
+        assert found_path is not None, "Should find existing work effort"
+        assert found_path.exists(), "Found path should exist"
+        assert str(we_id) in str(found_path), "Path should contain WE-ID"
+        print(f"✓ Successfully found work effort: {found_path.name}")
+
+        # Try to find non-existent WE
+        not_found = plugin.find_work_effort('WE-999999-none')
+        assert not_found is None, "Should return None for non-existent WE"
+        print(f"✓ Correctly returns None for non-existent WE")
+
+        return True
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def test_ticket_creation():
+    """Test Phase 4: Creating tickets from subtasks"""
+    print_test_header("Test 10: Ticket Creation (Phase 4)")
+
+    temp_dir = tempfile.mkdtemp()
+    test_config = MOCK_CONFIG.copy()
+    test_config['work_efforts_dir'] = temp_dir
+
+    try:
+        plugin = TodoistPlugin(test_config)
+
+        # Create a work effort first
+        task = plugin._convert_to_external_task(MOCK_TASK_DATA)
+        we = plugin.create_work_effort(task)
+
+        # Create tickets
+        ticket1 = plugin.create_ticket(
+            we_path=we.folder_path,
+            we_id=we.we_id,
+            title='Create login form',
+            description='Build the login UI',
+            source_task_id='task-123',
+            source_url='https://todoist.com/task-123'
+        )
+
+        ticket2 = plugin.create_ticket(
+            we_path=we.folder_path,
+            we_id=we.we_id,
+            title='Add password reset',
+            description='Implement password reset flow',
+            source_task_id='task-123',
+            source_url='https://todoist.com/task-123'
+        )
+
+        # Verify tickets were created
+        assert ticket1.exists(), "First ticket should exist"
+        assert ticket2.exists(), "Second ticket should exist"
+        print(f"✓ Created 2 tickets: {ticket1.name}, {ticket2.name}")
+
+        # Verify ticket naming
+        assert 'TKT-' in ticket1.name
+        assert '001' in ticket1.name
+        assert '002' in ticket2.name
+        print(f"✓ Ticket IDs follow TKT-xxxx-NNN format")
+
+        # Verify ticket content
+        content1 = ticket1.read_text()
+        assert 'Create login form' in content1
+        assert 'task-123' in content1
+        print(f"✓ Ticket contains correct metadata")
+
+        return True
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def test_we_linking():
+    """Test Phase 4: Linking to existing work efforts"""
+    print_test_header("Test 11: WE Linking (Phase 4)")
+
+    temp_dir = tempfile.mkdtemp()
+    test_config = MOCK_CONFIG.copy()
+    test_config['work_efforts_dir'] = temp_dir
+
+    try:
+        plugin = TodoistPlugin(test_config)
+
+        # Create initial work effort
+        task1_data = MOCK_TASK_DATA.copy()
+        task1_data['id'] = 'task-001'
+        task1_data['content'] = 'Build Auth System'
+        task1_data['description'] = 'Initial task'
+        task1 = plugin._convert_to_external_task(task1_data)
+        we1 = plugin.create_work_effort(task1)
+
+        print(f"✓ Created initial work effort: {we1.we_id}")
+        assert not we1.linked_to_existing, "First WE should not be linked"
+
+        # Create second task that references the first WE
+        task2_data = MOCK_TASK_DATA.copy()
+        task2_data['id'] = 'task-002'
+        task2_data['content'] = f'Frontend Auth UI {we1.we_id}'
+        task2_data['description'] = 'Build login form'
+        task2 = plugin._convert_to_external_task(task2_data)
+        we2 = plugin.create_work_effort(task2)
+
+        print(f"✓ Created second task referencing {we1.we_id}")
+
+        # Verify linking
+        assert we2.linked_to_existing, "Second WE should be linked"
+        assert we2.we_id == we1.we_id, "Should use same WE-ID"
+        assert we2.folder_path == we1.folder_path, "Should use same folder"
+        print(f"✓ Successfully linked to existing WE")
+
+        return True
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def test_case_insensitive_we_linking():
+    """Test Phase 4: Case-insensitive WE-ID linking (Bug Fix)"""
+    print_test_header("Test 11b: Case-Insensitive WE Linking (Bug Fix)")
+
+    temp_dir = tempfile.mkdtemp()
+    test_config = MOCK_CONFIG.copy()
+    test_config['work_efforts_dir'] = temp_dir
+
+    try:
+        plugin = TodoistPlugin(test_config)
+
+        # Create initial work effort with uppercase WE-ID
+        task1_data = MOCK_TASK_DATA.copy()
+        task1_data['id'] = 'task-001'
+        task1_data['content'] = 'Build Auth System'
+        task1 = plugin._convert_to_external_task(task1_data)
+        we1 = plugin.create_work_effort(task1)
+
+        print(f"✓ Created work effort: {we1.we_id}")
+
+        # Test 1: Lowercase WE-ID reference
+        task2_data = MOCK_TASK_DATA.copy()
+        task2_data['id'] = 'task-002'
+        task2_data['content'] = f'Frontend work {we1.we_id.lower()}'  # lowercase!
+        task2 = plugin._convert_to_external_task(task2_data)
+        we2 = plugin.create_work_effort(task2)
+
+        assert we2.linked_to_existing, "Should link despite lowercase WE-ID"
+        assert we2.we_id == we1.we_id, "Should normalize to correct WE-ID"
+        print(f"✓ Linked successfully with lowercase: {we1.we_id.lower()}")
+
+        # Test 2: Mixed case WE-ID reference
+        task3_data = MOCK_TASK_DATA.copy()
+        task3_data['id'] = 'task-003'
+        # Mix case: "We" instead of "WE", uppercase suffix
+        mixed_case = f"We-{we1.we_id.split('-')[1]}-{we1.we_id.split('-')[2].upper()}"
+        task3_data['content'] = f'Backend work {mixed_case}'
+        task3 = plugin._convert_to_external_task(task3_data)
+        we3 = plugin.create_work_effort(task3)
+
+        assert we3.linked_to_existing, "Should link despite mixed case WE-ID"
+        assert we3.we_id == we1.we_id, "Should normalize to correct WE-ID"
+        print(f"✓ Linked successfully with mixed case: {mixed_case}")
+
+        return True
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def test_subtasks_to_tickets_workflow():
+    """Test Phase 4: Complete workflow with subtasks → tickets"""
+    print_test_header("Test 12: Subtasks → Tickets Workflow (Phase 4)")
+
+    temp_dir = tempfile.mkdtemp()
+    test_config = MOCK_CONFIG.copy()
+    test_config['work_efforts_dir'] = temp_dir
+
+    try:
+        plugin = TodoistPlugin(test_config)
+
+        # Create task with subtasks
+        task_data = MOCK_TASK_DATA.copy()
+        task_data['description'] = """Build authentication system
+
+- [ ] Create login form
+- [ ] Add password reset
+- [ ] Implement OAuth"""
+
+        task = plugin._convert_to_external_task(task_data)
+
+        # Create work effort (should parse subtasks and create tickets)
+        we = plugin.create_work_effort(task)
+
+        # Verify tickets were created
+        assert len(we.created_tickets) == 3, f"Expected 3 tickets, got {len(we.created_tickets)}"
+        print(f"✓ Created {len(we.created_tickets)} tickets from subtasks")
+
+        # Verify ticket files exist
+        for ticket_path in we.created_tickets:
+            assert ticket_path.exists(), f"Ticket {ticket_path.name} should exist"
+        print(f"✓ All ticket files exist")
+
+        # Verify ticket content
+        ticket_names = [t.name for t in we.created_tickets]
+        assert any('create_login_form' in name for name in ticket_names)
+        assert any('add_password_reset' in name for name in ticket_names)
+        assert any('implement_oauth' in name for name in ticket_names)
+        print(f"✓ Ticket names match subtask titles")
+
+        return True
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+def test_enhanced_feedback():
+    """Test Phase 4: Enhanced feedback messages"""
+    print_test_header("Test 13: Enhanced Feedback (Phase 4)")
+
+    plugin = TodoistPlugin(MOCK_CONFIG)
+
+    # Test feedback for new WE with tickets
+    mock_we_with_tickets = WorkEffort(
+        we_id='WE-260102-auth',
+        folder_path=Path('_work_efforts/WE-260102-auth_authentication'),
+        index_path=Path('_work_efforts/WE-260102-auth_authentication/WE-260102-auth_index.md'),
+        tickets_dir=Path('_work_efforts/WE-260102-auth_authentication/tickets'),
+        source_task=None,
+        created_tickets=[
+            Path('tickets/TKT-auth-001_create_login_form.md'),
+            Path('tickets/TKT-auth-002_add_password_reset.md'),
+        ],
+        linked_to_existing=False
+    )
+
+    message = plugin._format_feedback_message(mock_we_with_tickets)
+
+    assert 'Work Effort Created: WE-260102-auth' in message
+    assert 'Tickets Created' in message and '(2)' in message
+    assert 'TKT-auth-001' in message
+    assert 'TKT-auth-002' in message
+    print(f"✓ Enhanced feedback includes ticket list")
+
+    # Test feedback for linked WE
+    mock_we_linked = WorkEffort(
+        we_id='WE-260102-auth',
+        folder_path=Path('_work_efforts/WE-260102-auth_authentication'),
+        index_path=Path('_work_efforts/WE-260102-auth_authentication/WE-260102-auth_index.md'),
+        tickets_dir=Path('_work_efforts/WE-260102-auth_authentication/tickets'),
+        source_task=None,
+        created_tickets=[],
+        linked_to_existing=True
+    )
+
+    linked_message = plugin._format_feedback_message(mock_we_linked)
+
+    assert 'Linked to Existing Work Effort: WE-260102-auth' in linked_message
+    print(f"✓ Linked WE shows correct header")
+
+    return True
+
+
 def test_mocked_workflow():
     """Test complete workflow with mocked API"""
-    print_test_header("Test 8: Mocked Workflow")
+    print_test_header("Test 14: Mocked Workflow")
 
     temp_dir = tempfile.mkdtemp()
     test_config = MOCK_CONFIG.copy()
@@ -321,10 +658,11 @@ def test_mocked_workflow():
 def run_all_tests():
     """Run all tests and report results"""
     print("="*60)
-    print("Todoist Plugin Tests")
+    print("Todoist Plugin Tests (Phase 3 + Phase 4)")
     print("="*60)
 
     tests = [
+        # Phase 3 tests
         ("API Client", test_api_client),
         ("Plugin Initialization", test_plugin_initialization),
         ("Configuration Validation", test_config_validation),
@@ -332,6 +670,15 @@ def run_all_tests():
         ("Work Effort Creation", test_work_effort_creation),
         ("Feedback Message Formatting", test_feedback_message_formatting),
         ("Event System", test_event_system),
+        # Phase 4 tests
+        ("Parse Subtasks", test_parse_subtasks),
+        ("Find Work Effort", test_find_work_effort),
+        ("Ticket Creation", test_ticket_creation),
+        ("WE Linking", test_we_linking),
+        ("Case-Insensitive WE Linking", test_case_insensitive_we_linking),
+        ("Subtasks → Tickets Workflow", test_subtasks_to_tickets_workflow),
+        ("Enhanced Feedback", test_enhanced_feedback),
+        # Integration test
         ("Mocked Workflow", test_mocked_workflow),
     ]
 
