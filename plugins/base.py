@@ -33,6 +33,13 @@ class WorkEffort:
     index_path: Path
     tickets_dir: Path
     source_task: ExternalTask
+    created_tickets: List[Path] = None  # Paths to created ticket files (Phase 4)
+    linked_to_existing: bool = False  # Whether this was linked to existing WE (Phase 4)
+
+    def __post_init__(self):
+        """Initialize created_tickets as empty list if None"""
+        if self.created_tickets is None:
+            self.created_tickets = []
 
 
 class BasePlugin(ABC):
