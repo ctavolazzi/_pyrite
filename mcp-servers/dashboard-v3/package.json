@@ -6,7 +6,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node tests/test-runner.js",
+    "test:verbose": "node tests/test-runner.js --verbose",
+    "test:data-flow": "node tests/test-runner.js tests/data-flow/**/*.test.js",
+    "test:raw": "node --test"
   },
   "dependencies": {
     "chalk": "^5.6.2",
