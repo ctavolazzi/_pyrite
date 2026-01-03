@@ -181,22 +181,32 @@ test('Integration Flow: File Change → UI Update Path', async (t) => {
   await fs.writeFile(indexPath, content);
 
   // Wait for update (with timeout)
-  await new Promise((resolve, reject) => {
+  await new Promise((resolve) => {
     const timeout = setTimeout(() => {
       // If update not received, still resolve (test will fail assertion)
       resolve();
-    }, 1000);
+    }, 2000); // Increased timeout for debounce + throttle
 
     // Check if update already received
     if (updateReceived) {
       clearTimeout(timeout);
       resolve();
     } else {
-      // Wait a bit more
+      // Poll for update (debounce is 100ms, throttle is 2s, so wait up to 2.5s)
+      const checkInterval = setInterval(() => {
+        if (updateReceived) {
+          clearTimeout(timeout);
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+
+      // Ensure cleanup after max wait
       setTimeout(() => {
         clearTimeout(timeout);
+        clearInterval(checkInterval);
         resolve();
-      }, 300);
+      }, 2500);
     }
   });
 
@@ -205,7 +215,12 @@ test('Integration Flow: File Change → UI Update Path', async (t) => {
   assert.ok(updatedState, 'State updated');
   assert.strictEqual(updatedState.workEfforts[0].status, 'completed', 'Status change propagated');
 
-  await watcher.close();
+  // Always close watcher, even if test fails
+  try {
+    await watcher.close();
+  } catch (error) {
+    // Ignore close errors
+  }
   await fs.rm(testRepoPath, { recursive: true, force: true });
 });
 
