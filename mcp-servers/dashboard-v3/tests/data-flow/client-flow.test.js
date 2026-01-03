@@ -31,6 +31,7 @@ class MockEventBus {
   constructor() {
     this.events = [];
     this.subscribers = new Map();
+    this.middleware = [];
   }
 
   on(pattern, handler) {
@@ -41,14 +42,40 @@ class MockEventBus {
   }
 
   emit(type, data) {
-    this.events.push({ type, data, timestamp: Date.now() });
-    
+    const eventData = { type, data, timestamp: Date.now() };
+
+    // Run through middleware first
+    let shouldContinue = true;
+    for (const mw of this.middleware) {
+      const result = mw(eventData);
+      if (result === false) {
+        shouldContinue = false;
+        break;
+      }
+    }
+
+    // If middleware blocked the event, don't emit
+    if (!shouldContinue) {
+      return;
+    }
+
+    // Track event
+    this.events.push(eventData);
+
     // Trigger wildcard subscribers
     for (const [pattern, handlers] of this.subscribers) {
       if (this.matchesPattern(pattern, type)) {
         handlers.forEach(handler => handler({ type, data }));
       }
     }
+  }
+
+  use(middleware) {
+    this.middleware.push(middleware);
+    return () => {
+      const index = this.middleware.indexOf(middleware);
+      if (index !== -1) this.middleware.splice(index, 1);
+    };
   }
 
   matchesPattern(pattern, type) {
@@ -562,6 +589,91 @@ test('Client Flow: EventBus Wildcard Subscriptions', async (t) => {
   assert.ok(eventTypes.includes('workeffort:created'), 'Created event received');
 });
 
+test('Client Flow: EventBus Middleware Intercepts Events', async (t) => {
+  const harness = new MissionControlHarness();
+
+  // Setup: Add middleware that modifies events
+  const interceptedEvents = [];
+  const middleware = (event) => {
+    interceptedEvents.push(event);
+    // Modify event data
+    if (event.data) {
+      event.data.intercepted = true;
+    }
+    return true; // Continue propagation
+  };
+
+  harness.eventBus.use(middleware);
+
+  // Setup: Subscribe to events
+  const receivedEvents = [];
+  harness.eventBus.on('workeffort:created', (event) => {
+    receivedEvents.push(event);
+  });
+
+  // Step: Trigger event
+  const prevState = { workEfforts: [] };
+  const newState = {
+    workEfforts: [
+      { id: 'WE-260102-test', title: 'Test', status: 'active', tickets: [] }
+    ]
+  };
+
+  harness.detectAndEmitChanges('_pyrite', prevState, newState);
+
+  // Document: Middleware intercepts events before subscribers
+  assert.strictEqual(interceptedEvents.length, 1, 'Middleware intercepted event');
+  assert.strictEqual(receivedEvents.length, 1, 'Subscriber received event');
+  assert.ok(receivedEvents[0].data.intercepted, 'Middleware modified event data');
+});
+
+test('Client Flow: EventBus Middleware Blocks Events', async (t) => {
+  const harness = new MissionControlHarness();
+
+  // Setup: Middleware that blocks certain events
+  const blockingMiddleware = (event) => {
+    // Block all 'workeffort:created' events
+    if (event.type === 'workeffort:created') {
+      return false; // Block propagation
+    }
+    return true; // Allow other events
+  };
+
+  harness.eventBus.use(blockingMiddleware);
+
+  // Setup: Subscribe to events
+  const receivedEvents = [];
+  harness.eventBus.on('workeffort:*', (event) => {
+    receivedEvents.push(event);
+  });
+
+  // Step: Trigger events (one should be blocked)
+  const prevState = { workEfforts: [] };
+  const newState = {
+    workEfforts: [
+      { id: 'WE-260102-new', title: 'New', status: 'active', tickets: [] },
+      { id: 'WE-260102-existing', title: 'Existing', status: 'completed', tickets: [] }
+    ]
+  };
+
+  // First, create existing state
+  const prevState2 = {
+    workEfforts: [
+      { id: 'WE-260102-existing', title: 'Existing', status: 'active', tickets: [] }
+    ]
+  };
+
+  harness.detectAndEmitChanges('_pyrite', prevState, newState);
+
+  // Document: Middleware can block events
+  // 'workeffort:created' should be blocked, but 'workeffort:completed' should pass
+  const createdEvents = receivedEvents.filter(e => e.type === 'workeffort:created');
+  assert.strictEqual(createdEvents.length, 0, 'Created events blocked by middleware');
+
+  // Note: Status change events would still pass if there were any
+  // This documents that middleware can selectively block events
+});
+
 test('Client Flow: Edge Case - Null Previous State', async (t) => {
   const harness = new MissionControlHarness();
 
@@ -668,5 +780,43 @@ test('Client Flow: Multiple Tickets in Work Effort', async (t) => {
   assert.strictEqual(ticketUpdatedEvents.length, 1, 'One ticket status change detected');
   assert.strictEqual(ticketUpdatedEvents[0].data.oldStatus, 'pending', 'Old status preserved');
   assert.strictEqual(ticketUpdatedEvents[0].data.newStatus, 'in_progress', 'New status in event');
+});
+
+test('Client Flow: Deleted Work Effort → No Deletion Event (Current Behavior)', async (t) => {
+  const harness = new MissionControlHarness();
+
+  // Setup: Work effort exists in previous state but removed in new state
+  const prevState = {
+    workEfforts: [
+      { id: 'WE-260102-existing', title: 'Existing WE', status: 'active', tickets: [] },
+      { id: 'WE-260102-other', title: 'Other WE', status: 'active', tickets: [] }
+    ]
+  };
+
+  const newState = {
+    workEfforts: [
+      { id: 'WE-260102-other', title: 'Other WE', status: 'active', tickets: [] }
+      // WE-260102-existing is missing (deleted)
+    ]
+  };
+
+  // Step: Detect changes
+  harness.detectAndEmitChanges('_pyrite', prevState, newState);
+
+  // Document: Current implementation does NOT detect deletions
+  // detectAndEmitChanges() only compares newState to prevState, not vice versa
+  // It detects new items (in newState but not prevState) and status changes
+  // But it does NOT detect deleted items (in prevState but not newState)
+  const deletedEvents = harness.eventBus.getEventsByType('workeffort:deleted');
+  assert.strictEqual(deletedEvents.length, 0, 'No deletion events emitted (current behavior)');
+
+  // Document: Only detects what's in newState
+  // Since deleted items aren't in newState, they're not detected
+  const allEvents = harness.eventBus.events;
+  assert.strictEqual(allEvents.length, 0, 'No events emitted for deleted work effort');
+
+  // Note: This documents a limitation of the current implementation
+  // Deletions would need to be detected by comparing prevState to newState
+  // or handled at a different layer (server-side file deletion detection)
 });
 

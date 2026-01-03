@@ -134,7 +134,11 @@ Visual Change
 **Transformation Points:**
 1. **Message → Changes**: `detectAndEmitChanges()` compares old/new state
 2. **Changes → Events**: Specific event types emitted (`workeffort:created`, etc.)
-3. **Events → Middleware**: Middleware can intercept/modify events
+3. **Events → Middleware**: Middleware can intercept/modify/block events
+   - Middleware runs before subscribers receive events
+   - Return `false` from middleware to block event propagation
+   - Return `true` or `undefined` to continue propagation
+   - Middleware can modify event data before it reaches subscribers
 4. **Events → Subscribers**: Wildcard subscriptions (`workeffort:*`) receive events
 5. **Subscribers → Actions**: ToastManager, AnimationController react
 6. **Actions → DOM**: UI components update
@@ -199,6 +203,10 @@ UI Components Updated
 - **Status Changes**: Items with same ID but different status
 - **New Tickets**: Tickets in newState not present in prevState (by ID)
 - **Ticket Status Changes**: Tickets with same ID but different status
+- **Deleted Items**: NOT currently detected (limitation)
+  - `detectAndEmitChanges()` only compares newState to prevState
+  - Items in prevState but not in newState are not detected
+  - `workeffort:deleted` event type exists but is never emitted
 - **Event Type Mapping**:
   - `completed` → `workeffort:completed` / `ticket:completed`
   - `active`/`in_progress` → `workeffort:started`
