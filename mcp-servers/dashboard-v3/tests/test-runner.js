@@ -48,11 +48,16 @@ const colors = {
 
 // Progress bar helper
 function renderProgressBar(current, total, width = 40) {
-  const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
-  const filled = Math.round((current / total) * width);
-  const empty = width - filled;
+  // Guard against division by zero or invalid totals
+  if (!total || total <= 0 || !isFinite(total)) {
+    return `${colors.accent('░'.repeat(width))} 0%`;
+  }
 
-  const bar = '█'.repeat(filled) + '░'.repeat(empty);
+  const percentage = Math.round((current / total) * 100);
+  const filled = Math.round((current / total) * width);
+  const empty = Math.max(0, width - filled); // Ensure non-negative
+
+  const bar = '█'.repeat(Math.max(0, filled)) + '░'.repeat(empty);
   return `${colors.accent(bar)} ${percentage}%`;
 }
 
@@ -141,7 +146,8 @@ function runTests() {
             }
 
             // Show progress every 10 tests or at the end
-            if (testCount % 10 === 0 || testCount === stats.total) {
+            // Only render if we know the total, or if we're showing individual test results
+            if (stats.total > 0 && (testCount % 10 === 0 || testCount === stats.total)) {
               const progress = renderProgressBar(testCount, stats.total);
               process.stdout.write(`\r${progress} ${testCount}/${stats.total}`);
             }

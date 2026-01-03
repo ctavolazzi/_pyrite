@@ -139,6 +139,158 @@ Visual Change
 5. **Subscribers → Actions**: ToastManager, AnimationController react
 6. **Actions → DOM**: UI components update
 
+### Path 5: Client State Update
+**WebSocket Message → Client State → EventBus Events**
+
+```
+WebSocket Message (JSON)
+  ↓ [JSON.parse]
+Parsed Message Object
+  ↓ [handleMessage() switch statement]
+Message Type Determined
+  ↓ [Case: 'init']
+this.repos = message.repos
+  ↓ [Case: 'update']
+prevState = this.repos[message.repo]
+this.repos[message.repo] = { workEfforts, stats, error, lastUpdated }
+  ↓ [detectAndEmitChanges(repoName, prevState, newState)]
+State Comparison Logic
+  ↓ [Set operations: prevWEs vs newWEs]
+New Work Efforts Detected
+  ↓ [EventBus.emit('workeffort:created')]
+Created Event Emitted
+  ↓ [Map operations: prevWEMap vs newState]
+Status Changes Detected
+  ↓ [EventBus.emit('workeffort:completed'|'started'|'paused'|'updated')]
+Status Change Event Emitted
+  ↓ [Set operations: prevTicketIds vs newTickets]
+New Tickets Detected
+  ↓ [EventBus.emit('ticket:created')]
+Ticket Created Event Emitted
+  ↓ [Map operations: prevTicketMap vs newTickets]
+Ticket Status Changes Detected
+  ↓ [EventBus.emit('ticket:completed'|'blocked'|'updated')]
+Ticket Status Event Emitted
+  ↓ [EventBus subscribers receive]
+Subscribers Notified
+  ↓ [ToastManager.show() / AnimationController.animate()]
+UI Components Updated
+```
+
+**Transformation Points:**
+1. **Message → State**: `handleMessage()` updates `this.repos` based on message type
+2. **State → Comparison**: `detectAndEmitChanges()` receives prevState and newState
+3. **Comparison → Sets**: Previous IDs converted to Sets for O(1) lookup
+4. **Sets → New Items**: Filter new items not in previous Set
+5. **Comparison → Maps**: Previous items converted to Maps keyed by ID
+6. **Maps → Changes**: Compare Map entries to detect status changes
+7. **Changes → Events**: Specific event types emitted based on change type
+8. **Events → Subscribers**: Wildcard subscriptions (`workeffort:*`) receive matching events
+9. **Subscribers → UI**: ToastManager and AnimationController react to events
+
+**State Update Logic:**
+- **Init Message**: Replaces entire `this.repos` object with message data
+- **Update Message**: Updates specific repo in `this.repos`, preserves other repos
+- **Repo Change Message**: Adds/removes repos from `this.repos`
+- **Error Message**: Emits error event, doesn't modify state
+
+**Change Detection Logic:**
+- **New Work Efforts**: Items in newState not present in prevState (by ID)
+- **Status Changes**: Items with same ID but different status
+- **New Tickets**: Tickets in newState not present in prevState (by ID)
+- **Ticket Status Changes**: Tickets with same ID but different status
+- **Event Type Mapping**:
+  - `completed` → `workeffort:completed` / `ticket:completed`
+  - `active`/`in_progress` → `workeffort:started`
+  - `paused` → `workeffort:paused`
+  - `blocked` → `ticket:blocked`
+  - Other changes → `workeffort:updated` / `ticket:updated`
+
+## Data Structures
+
+### Client State Object Shape
+```javascript
+{
+  repos: {
+    [repoName]: {
+      workEfforts: WorkEffort[],
+      stats: RepoStats,
+      error: string | null,
+      lastUpdated: string  // ISO timestamp
+    }
+  },
+  selectedItem: {
+    type: 'workeffort' | 'ticket',
+    id: string,
+    repo: string
+  } | null,
+  currentFilter: 'all' | 'active' | 'pending' | 'completed',
+  searchQuery: string
+}
+```
+
+### Event Payload Shapes
+
+**WorkEffort Created Event:**
+```javascript
+{
+  type: 'workeffort:created',
+  data: {
+    id: string,
+    title: string,
+    status: string,
+    repo: string,
+    we: WorkEffort  // Full work effort object
+  }
+}
+```
+
+**WorkEffort Status Change Event:**
+```javascript
+{
+  type: 'workeffort:completed' | 'workeffort:started' | 'workeffort:paused' | 'workeffort:updated',
+  data: {
+    id: string,
+    title: string,
+    oldStatus: string,
+    newStatus: string,
+    repo: string,
+    we: WorkEffort  // Full work effort object
+  }
+}
+```
+
+**Ticket Created Event:**
+```javascript
+{
+  type: 'ticket:created',
+  data: {
+    id: string,
+    title: string,
+    status: string,
+    weId: string,
+    weTitle: string,
+    repo: string
+  }
+}
+```
+
+**Ticket Status Change Event:**
+```javascript
+{
+  type: 'ticket:completed' | 'ticket:blocked' | 'ticket:updated',
+  data: {
+    id: string,
+    title: string,
+    oldStatus: string,
+    newStatus: string,
+    weId: string,
+    weTitle: string,
+    repo: string
+  }
+}
+```
+
 ## Data Structures
 
 ### WorkEffort Object Shape
@@ -249,9 +401,24 @@ Visual Change
 - `broadcast()`: Sends WebSocket message to all clients
 
 ### Client Layer
-- `handleMessage()`: Processes incoming WebSocket messages
-- `detectAndEmitChanges()`: Compares old/new state, emits events
+- `handleMessage(message)`: Processes incoming WebSocket messages
+  - Switches on message.type ('init', 'update', 'repo_change', 'error')
+  - Updates `this.repos` state based on message type
+  - Calls `detectAndEmitChanges()` for update messages
+  - Emits system events (system:connected, system:error)
+- `detectAndEmitChanges(repoName, prevState, newState)`: Compares old/new state, emits events
+  - Converts previous work efforts to Set for O(1) lookup
+  - Filters new work efforts not in previous Set
+  - Converts previous work efforts to Map keyed by ID
+  - Compares status changes and emits specific event types
+  - Detects new tickets and ticket status changes
+  - Emits appropriate events for each change type
 - `render*()`: Updates DOM based on state
+  - `render()`: Main render method, calls all sub-renderers
+  - `renderTree()`: Updates sidebar tree navigation
+  - `renderStats()`: Updates statistics cards
+  - `renderQueue()`: Updates work effort queue view
+  - `renderDetail()`: Updates detail view if open
 
 ### Event Layer
 - `EventBus.emit()`: Publishes events to subscribers

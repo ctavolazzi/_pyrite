@@ -2,7 +2,7 @@
 id: TKT-t2z2-006
 parent: WE-260102-t2z2
 title: "Document data transformation points"
-status: in_progress
+status: completed
 created: 2026-01-02T13:53:07.858Z
 created_by: ctavolazzi
 assigned_to: null

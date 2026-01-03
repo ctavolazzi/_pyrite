@@ -4,7 +4,7 @@
 
 ### 12:34 - GitHub Health Check Tool - Work Effort Created
 
-**Work Effort:** `[[WE-251231-25qq]]` - GitHub Health Check Tool - Foundation
+**Work Effort:** `[[_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index|WE-251231-25qq]]` - GitHub Health Check Tool - Foundation
 
 **Context:** This is the first serious tool for the _pyrite ecosystem. The larger vision:
 - _pyrite becomes a forkable cross-chat AI context management platform
@@ -17,12 +17,12 @@
 - Foundation for multi-repo management coming later
 
 **Tickets:**
-1. [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure
-2. [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks
-3. [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]]: Add security layer for token handling
-4. [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]]: Create CLI interface for manual runs
-5. [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]]: Add MCP server integration for AI tools
-6. [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]]: Write documentation for forkers
+1. [[TKT-251231-001_define_tool_architecture_and_file_structure|TKT-001]]: Define tool architecture and file structure
+2. [[TKT-251231-002_implement_core_github_api_health_checks|TKT-002]]: Implement core GitHub API health checks
+3. [[TKT-251231-003_add_security_layer_for_token_handling|TKT-003]]: Add security layer for token handling
+4. [[TKT-251231-004_create_cli_interface_for_manual_runs|TKT-004]]: Create CLI interface for manual runs
+5. [[TKT-251231-005_add_mcp_server_integration_for_ai_tools|TKT-005]]: Add MCP server integration for AI tools
+6. [[TKT-251231-006_write_documentation_for_forkers|TKT-006]]: Write documentation for forkers
 
 **Cross-Chat Coordination:**
 - Cursor (local): Architecture decisions, review, testing
@@ -44,13 +44,13 @@
 - Updated main README.md
 
 **Tickets Completed:**
-- ✅ [[TKT-25qq-001_define_tool_architecture_and_file_structure|TKT-25qq-001]]: Define tool architecture and file structure
-- ✅ [[TKT-25qq-002_implement_core_github_api_health_checks|TKT-25qq-002]]: Implement core GitHub API health checks
-- ✅ [[TKT-25qq-003_add_security_layer_for_token_handling|TKT-25qq-003]]: Add security layer for token handling
-- ✅ [[TKT-25qq-004_create_cli_interface_for_manual_runs|TKT-25qq-004]]: Create CLI interface for manual runs
-- ⏳ [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]]: MCP server integration (partial - Claude skills done)
-- ✅ [[TKT-25qq-006_write_documentation_for_forkers|TKT-25qq-006]]: Write documentation for forkers
-- 📋 [[TKT-25qq-007_refactor_to_modular_structure_future_enhancement|TKT-25qq-007]]: Refactor to modular structure (future, low priority)
+- ✅ [[TKT-251231-001_define_tool_architecture_and_file_structure|TKT-001]]: Define tool architecture and file structure
+- ✅ [[TKT-251231-002_implement_core_github_api_health_checks|TKT-002]]: Implement core GitHub API health checks
+- ✅ [[TKT-251231-003_add_security_layer_for_token_handling|TKT-003]]: Add security layer for token handling
+- ✅ [[TKT-251231-004_create_cli_interface_for_manual_runs|TKT-004]]: Create CLI interface for manual runs
+- ⏳ [[TKT-251231-005_add_mcp_server_integration_for_ai_tools|TKT-005]]: MCP server integration (partial - Claude skills done)
+- ✅ [[TKT-251231-006_write_documentation_for_forkers|TKT-006]]: Write documentation for forkers
+- 📋 [[TKT-251231-007_refactor_to_modular_structure_future_enhancement|TKT-007]]: Refactor to modular structure (future, low priority)
 
 **Cross-Chat Coordination Success:**
 - Cursor created work effort and architectural plan
@@ -61,7 +61,7 @@
 **Testing Note:** Local SSL certificate issue on macOS (Python urllib). Tool correctly reports the error. `gh auth status` confirms authentication works.
 
 **Next Steps:**
-1. Complete [[TKT-25qq-005_add_mcp_server_integration_for_ai_tools|TKT-25qq-005]] (full MCP server integration)
+1. Complete [[TKT-251231-005_add_mcp_server_integration_for_ai_tools|TKT-005]] (full MCP server integration)
 2. Test in fresh Claude Code session
 3. Document the forker setup workflow
 
@@ -345,7 +345,7 @@
 **Task:** Demonstrate real-time WebSocket updates in dashboard
 
 **Actions:**
-1. ✅ Created work effort [[WE-251227-1gku]] via MCP tools
+1. ✅ Created work effort [[_work_efforts/WE-251227-1gku_mission_control_dashboard/WE-251227-1gku_index|WE-251227-1gku]] via MCP tools
 2. ✅ Fixed folder placement (moved to correct `_work_efforts/`)
 3. ✅ Dashboard updated in real-time (4→5 WEs, 0→4 TKTs)
 4. ✅ Updated ticket statuses (3 completed, 1 in_progress)
@@ -364,7 +364,7 @@
 - Expandable ticket views ✅
 - Status badges with color coding ✅
 
-**Work Effort:** [[WE-251227-1gku]] - Mission Control Dashboard
+**Work Effort:** [[_work_efforts/WE-251227-1gku_mission_control_dashboard/WE-251227-1gku_index|WE-251227-1gku]] - Mission Control Dashboard
 **Status:** ✅ Complete
 
 ### 13:30 - Mission Control V2 Command Center
@@ -396,7 +396,7 @@
 - `.playwright-mcp/search-results.png` - Search with highlighting
 - `.playwright-mcp/mission-control-final.png` - All completed
 
-**Work Effort:** [[WE-251227-hldk]] - Mission Control V2 Command Center
+**Work Effort:** [[_work_efforts/WE-251227-hldk_mission_control_v2_command_center/WE-251227-hldk_index|WE-251227-hldk]] - Mission Control V2 Command Center
 **Status:** ✅ All 7 tickets complete
 
 ### 14:15 - Notification Center with Activity Tracking
@@ -434,7 +434,7 @@ shouldUseNotificationCenter() {
 - `.playwright-mcp/notification-with-badge.png` - Badge with count
 - `.playwright-mcp/notification-center-working.png` - Multiple notifications
 
-**Work Effort:** [[WE-251227-g6nh]] - Notification Center Feature
+**Work Effort:** [[_work_efforts/WE-251227-g6nh_notification_center_feature/WE-251227-g6nh_index|WE-251227-g6nh]] - Notification Center Feature
 **Status:** ✅ All 3 tickets complete
 
 ### 15:00 - Repository Browser & Multi-Repo Support
@@ -465,7 +465,7 @@ shouldUseNotificationCenter() {
 
 **Task:** Build robust event management system with animations and type-based toast durations
 
-**Work Effort:** [[WE-251227-8w5z]] - Bulletproof Event System & Toast Notifications
+**Work Effort:** [[_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/WE-251227-8w5z_index|WE-251227-8w5z]] - Bulletproof Event System & Toast Notifications
 
 **Architecture:**
 ```
@@ -535,7 +535,7 @@ smartNotify() [routes based on activity]
 **Status:** ✅ All 6 tickets complete
 
 **Using the System to Build the System:** ✅ Yes!
-- Created work effort [[WE-251227-8w5z]]
+- Created work effort [[_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/WE-251227-8w5z_index|WE-251227-8w5z]]
 - 6 tickets tracked and completed
 - Fixed MCP server bug (line 418 still had `_work_efforts_`)
 
@@ -691,8 +691,8 @@ mcp-servers/dashboard/
 - `mcp-servers/dashboard/public/docs/index.html`
 - `mcp-servers/dashboard/public/styles.css`
 
-**Work Effort:** [[WE-251227-fwmv]] - Mission Control Responsive & Interactive Features
-**Ticket:** [[TKT-fwmv-001_responsive_css_framework_and_breakpoints|TKT-fwmv-001]] - Responsive CSS framework and breakpoints
+**Work Effort:** [[_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/WE-251227-fwmv_index|WE-251227-fwmv]] - Mission Control Responsive & Interactive Features
+**Ticket:** [[TKT-251227-001_responsive_css_framework_and_breakpoints|TKT-001]] - Responsive CSS framework and breakpoints
 
 **Status:** ✅ Complete
 
@@ -830,7 +830,7 @@ All feature branches deleted. Only main remains.
 
 [2026-01-01 02:53:24] ## Mission Control V3 - Responsive Rewrite Phase 1 Complete
 
-**Work Effort:** WE-251231-un7r
+**Work Effort:** [[_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/WE-251231-un7r_index|WE-251231-un7r]]
 **Tickets Completed:** 17/17
 
 ### What Was Built
@@ -877,7 +877,7 @@ All feature branches deleted. Only main remains.
 ### Changes Made
 - Updated hero ASCII art from "PYRITE MC" to "_pyrite"
 - Updated mobile fallback text to "◈ _pyrite"
-- Created new work effort: **WE-251231-sdc6** (Phase 2 Component Migration)
+- Created new work effort: **[[_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/WE-251231-sdc6_index|WE-251231-sdc6]]** (Phase 2 Component Migration)
 
 ### New Work Effort Tickets (9 total)
 1. Migrate form components (search, filters, buttons)
@@ -903,7 +903,7 @@ All feature branches deleted. Only main remains.
 
 ### Changes Committed
 - Mission Control V3 foundation (mcp-servers/dashboard-v3/)
-- Work efforts WE-251231-un7r and WE-251231-sdc6
+- Work efforts [[_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/WE-251231-un7r_index|WE-251231-un7r]] and [[_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/WE-251231-sdc6_index|WE-251231-sdc6]]
 - Modular CSS architecture
 - Responsive JavaScript system
 - Updated ASCII banner to "_pyrite"
@@ -948,7 +948,7 @@ Refactored sidebar tree to use VS Code file explorer style:
 
 ### Version Alignment
 - Aligned all version numbers to 0.6.2 (JSDoc comments, UI badges, package.json)
-- Updated work effort progress notes for WE-251231-un7r and WE-251231-sdc6
+- Updated work effort progress notes for [[_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/WE-251231-un7r_index|WE-251231-un7r]] and [[_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/WE-251231-sdc6_index|WE-251231-sdc6]]
 
 ### Files Changed
 - `public/styles/layout.css` - Sidebar height adjustment
@@ -958,3 +958,60 @@ Refactored sidebar tree to use VS Code file explorer style:
 - `public/components/footer.js` - Version constant
 - `public/app.js`, `server.js`, `events.js`, `lib/parser.js` - JSDoc versions
 - `package.json` - Package version
+
+[2026-01-01 18:04:04] ## Phase 1 Complete: PR #26 Synced
+
+### Actions Taken
+1. Committed local work: `docs: Add naming linter task specification` (3d3bf5f)
+2. Pulled PR #26 merged changes from origin/main
+3. Pushed merge commit to origin (17ba2b6)
+
+### What Was Synced (from PR #26)
+- `TODOIST_INTEGRATION_MVP.md` - v0.9.0 Todoist integration requirements (569 lines)
+- `tools/work-effort-migrator/` - Migration utility for legacy work efforts
+- Migrated work effort files in `_work_efforts/`
+- `_work_efforts_backup_20260101_173549/` - Backup of pre-migration state
+
+### Current State
+- Local main: Synced with origin/main
+- Dashboard-v3: Running on localhost:3848 (HTTP 200)
+- Version: v0.6.2 (unchanged)
+
+### Next Phase (Pending)
+- PR #27 will contain v0.9.0 plugin system implementation
+- Feature branch exists with continuation prompt
+- Awaiting next Claude Code session for implementation
+
+[2026-01-03 04:35:52] ## Client-Side Data Flow Tests Complete
+
+**Work Effort:** WE-260102-t2z2 - Dashboard Data Flow Testing & Analysis
+
+**Completed:**
+- ✅ TKT-t2z2-005: Created comprehensive client-side state update tests (13 tests)
+- ✅ TKT-t2z2-006: Documented all client-side data transformation points
+
+**What Was Built:**
+
+1. **Client Flow Test Suite** (`client-flow.test.js`):
+   - 13 comprehensive tests covering all client-side data flow paths
+   - Tests WebSocket message handling → state updates → EventBus events
+   - Covers init, update, repo_change, and error message types
+   - Tests change detection logic (new work efforts, status changes, tickets)
+   - Includes edge cases (null prevState, empty arrays, invalid messages)
+   - Uses test harness with MockEventBus to isolate state management logic
+
+2. **Data Flow Documentation** (`DATA_FLOW_MAP.md`):
+   - Added Path 5: Client State Update section
+   - Documented client state object shapes
+   - Documented event payload structures
+   - Enhanced Key Transformation Functions section with client layer details
+
+**Test Results:**
+- All 13 client flow tests passing
+- Total data flow test suite: ~25+ tests across all paths
+
+**Files Created/Modified:**
+- `mcp-servers/dashboard-v3/tests/data-flow/client-flow.test.js` (NEW - 13 tests)
+- `mcp-servers/dashboard-v3/tests/data-flow/DATA_FLOW_MAP.md` (UPDATED - Path 5 added)
+
+**Status:** ✅ All 7 tickets complete, work effort completed
