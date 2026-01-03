@@ -2,7 +2,7 @@
 id: TKT-t2z2-005
 parent: WE-260102-t2z2
 title: "Create client-side state update tests"
-status: in_progress
+status: completed
 created: 2026-01-02T13:53:07.857Z
 created_by: ctavolazzi
 assigned_to: null

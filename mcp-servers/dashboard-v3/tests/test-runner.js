@@ -13,13 +13,28 @@ import { spawn } from 'child_process';
 import chalk from 'chalk';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Parse command line arguments
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose') || args.includes('-v');
-const testPattern = args.find(arg => !arg.startsWith('--') && !arg.startsWith('-')) || 'tests/**/*.test.js';
+let testPattern = args.find(arg => !arg.startsWith('--') && !arg.startsWith('-')) || 'tests/**/*.test.js';
+
+// If pattern is a directory (no wildcards and ends with no extension), expand to glob
+if (!testPattern.includes('*') && !testPattern.endsWith('.js') && !testPattern.endsWith('.mjs')) {
+  // Check if it's a directory path
+  const fullPath = path.join(__dirname, '..', testPattern);
+  try {
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      testPattern = `${testPattern}/**/*.test.js`;
+    }
+  } catch {
+    // Path doesn't exist, assume it's already a pattern
+  }
+}
 
 // Statistics
 let stats = {
@@ -48,11 +63,16 @@ const colors = {
 
 // Progress bar helper
 function renderProgressBar(current, total, width = 40) {
-  const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
-  const filled = Math.round((current / total) * width);
-  const empty = width - filled;
+  // Guard against division by zero or invalid totals
+  if (!total || total <= 0 || !isFinite(total)) {
+    return `${colors.accent('░'.repeat(width))} 0%`;
+  }
 
-  const bar = '█'.repeat(filled) + '░'.repeat(empty);
+  const percentage = Math.round((current / total) * 100);
+  const filled = Math.round((current / total) * width);
+  const empty = Math.max(0, width - filled); // Ensure non-negative
+
+  const bar = '█'.repeat(Math.max(0, filled)) + '░'.repeat(empty);
   return `${colors.accent(bar)} ${percentage}%`;
 }
 
@@ -141,7 +161,8 @@ function runTests() {
             }
 
             // Show progress every 10 tests or at the end
-            if (testCount % 10 === 0 || testCount === stats.total) {
+            // Only render if we know the total, or if we're showing individual test results
+            if (stats.total > 0 && (testCount % 10 === 0 || testCount === stats.total)) {
               const progress = renderProgressBar(testCount, stats.total);
               process.stdout.write(`\r${progress} ${testCount}/${stats.total}`);
             }
@@ -168,14 +189,18 @@ function runTests() {
     }
   });
 
-  // Set a maximum timeout for tests
-  const maxDuration = 30000; // 30 seconds
+  // Set a maximum timeout for tests (longer for integration/watcher tests)
+  const maxDuration = 60000; // 60 seconds (watcher tests need more time)
   const timeout = setTimeout(() => {
     console.log(colors.fail('\n\n⏱️  Test timeout exceeded!'));
     proc.kill('SIGTERM');
-    stats.duration = Date.now() - startTime;
-    showSummary();
-    process.exit(1);
+    // Give it a moment, then force kill
+    setTimeout(() => {
+      proc.kill('SIGKILL');
+      stats.duration = Date.now() - startTime;
+      showSummary();
+      process.exit(1);
+    }, 2000);
   }, maxDuration);
 
   function showSummary() {
