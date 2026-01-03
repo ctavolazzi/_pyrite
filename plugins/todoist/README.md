@@ -226,6 +226,8 @@ Description: Build login UI components
 
 #### Workflow 2: Subtasks → Tickets
 
+> **Note**: This feature parses **markdown checklists from the task description**. Todoist's native subtasks (created via the UI with parent-child relationships) are not currently supported. To use this feature, manually type markdown checkboxes (`- [ ] Item`) in the task description field.
+
 Add subtasks to your Todoist task using markdown checkboxes:
 
 **In Todoist:**

@@ -462,6 +462,56 @@ def test_we_linking():
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def test_case_insensitive_we_linking():
+    """Test Phase 4: Case-insensitive WE-ID linking (Bug Fix)"""
+    print_test_header("Test 11b: Case-Insensitive WE Linking (Bug Fix)")
+
+    temp_dir = tempfile.mkdtemp()
+    test_config = MOCK_CONFIG.copy()
+    test_config['work_efforts_dir'] = temp_dir
+
+    try:
+        plugin = TodoistPlugin(test_config)
+
+        # Create initial work effort with uppercase WE-ID
+        task1_data = MOCK_TASK_DATA.copy()
+        task1_data['id'] = 'task-001'
+        task1_data['content'] = 'Build Auth System'
+        task1 = plugin._convert_to_external_task(task1_data)
+        we1 = plugin.create_work_effort(task1)
+
+        print(f"✓ Created work effort: {we1.we_id}")
+
+        # Test 1: Lowercase WE-ID reference
+        task2_data = MOCK_TASK_DATA.copy()
+        task2_data['id'] = 'task-002'
+        task2_data['content'] = f'Frontend work {we1.we_id.lower()}'  # lowercase!
+        task2 = plugin._convert_to_external_task(task2_data)
+        we2 = plugin.create_work_effort(task2)
+
+        assert we2.linked_to_existing, "Should link despite lowercase WE-ID"
+        assert we2.we_id == we1.we_id, "Should normalize to correct WE-ID"
+        print(f"✓ Linked successfully with lowercase: {we1.we_id.lower()}")
+
+        # Test 2: Mixed case WE-ID reference
+        task3_data = MOCK_TASK_DATA.copy()
+        task3_data['id'] = 'task-003'
+        # Mix case: "We" instead of "WE", uppercase suffix
+        mixed_case = f"We-{we1.we_id.split('-')[1]}-{we1.we_id.split('-')[2].upper()}"
+        task3_data['content'] = f'Backend work {mixed_case}'
+        task3 = plugin._convert_to_external_task(task3_data)
+        we3 = plugin.create_work_effort(task3)
+
+        assert we3.linked_to_existing, "Should link despite mixed case WE-ID"
+        assert we3.we_id == we1.we_id, "Should normalize to correct WE-ID"
+        print(f"✓ Linked successfully with mixed case: {mixed_case}")
+
+        return True
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 def test_subtasks_to_tickets_workflow():
     """Test Phase 4: Complete workflow with subtasks → tickets"""
     print_test_header("Test 12: Subtasks → Tickets Workflow (Phase 4)")
@@ -625,6 +675,7 @@ def run_all_tests():
         ("Find Work Effort", test_find_work_effort),
         ("Ticket Creation", test_ticket_creation),
         ("WE Linking", test_we_linking),
+        ("Case-Insensitive WE Linking", test_case_insensitive_we_linking),
         ("Subtasks → Tickets Workflow", test_subtasks_to_tickets_workflow),
         ("Enhanced Feedback", test_enhanced_feedback),
         # Integration test

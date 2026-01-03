@@ -187,8 +187,10 @@ class TodoistPlugin(BasePlugin):
 
             if we_match:
                 # Found WE-ID reference - try to link to existing WE
-                # Keep original case from the match
-                we_id = we_match.group(0)
+                # Normalize case: WE-YYMMDD-xxxx (uppercase WE-, lowercase suffix)
+                we_id_raw = we_match.group(0)
+                parts = we_id_raw.split('-')
+                we_id = f'WE-{parts[1]}-{parts[2].lower()}'
                 we_path = self.find_work_effort(we_id)
 
                 if we_path:
