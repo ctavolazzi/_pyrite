@@ -15,6 +15,7 @@ This creates a seamless bridge between Todoist task tracking and the local _pyri
 
 ## Features
 
+### Phase 3 (Core Integration)
 - ✅ Automatic work effort creation from labeled tasks
 - ✅ Feedback comments posted to Todoist
 - ✅ Label-based triggering (customizable)
@@ -22,6 +23,12 @@ This creates a seamless bridge between Todoist task tracking and the local _pyri
 - ✅ Polling script for continuous monitoring
 - ✅ Full validation using naming linter
 - ✅ Comprehensive error handling
+
+### Phase 4 (Enhancements)
+- ✅ **Work Effort Linking** - Reference existing WE-IDs instead of always creating new
+- ✅ **Subtask Parsing** - Automatically convert Todoist subtasks into tickets
+- ✅ **Multi-Task WE** - Multiple Todoist tasks can contribute to the same work effort
+- ✅ **Enhanced Feedback** - Detailed feedback showing created tickets and linking status
 
 ## Prerequisites
 
@@ -139,9 +146,11 @@ python plugins/todoist/poll.py --config todoist_config.json
 | `work_efforts_dir` | string | `'_work_efforts'` | Directory for work efforts |
 | `poll_interval` | int | `300` | Polling interval in seconds |
 
-## Usage Workflow
+## Usage Workflows
 
-### Step 1: Label a Task in Todoist
+### Basic Workflow (Phase 3)
+
+#### Step 1: Label a Task in Todoist
 
 In Todoist, add the `pyrite` label to any task you want to convert to a work effort:
 
@@ -151,7 +160,7 @@ Labels: pyrite, backend, urgent
 Description: Implement login and signup functionality
 ```
 
-### Step 2: Run the Plugin
+#### Step 2: Run the Plugin
 
 **Option A: Manual (one-time)**
 ```bash
@@ -163,34 +172,136 @@ python plugins/todoist/poll.py --once
 python plugins/todoist/poll.py --interval 300
 ```
 
-### Step 3: Work Effort Created
+#### Step 3: Work Effort Created
 
 The plugin creates:
 
 ```
 _work_efforts/
-└── WE-260101-abcd_build_user_authentication_system/
-    ├── WE-260101-abcd_index.md    # Task metadata
+└── WE-260103-abcd_build_user_authentication_system/
+    ├── WE-260103-abcd_index.md    # Task metadata
     └── tickets/                    # Directory for tickets
 ```
 
-### Step 4: Feedback Posted to Todoist
+#### Step 4: Feedback Posted to Todoist
 
 The task receives a comment:
 
 ```markdown
-✅ **Work Effort Created!**
+✅ **Work Effort Created: WE-260103-abcd**
 
-📁 **Folder**: `WE-260101-abcd_build_user_authentication_system`
-📋 **Index**: `WE-260101-abcd_index.md`
-🎫 **Tickets**: `tickets/`
+📁 **Folder**: `WE-260103-abcd_build_user_authentication_system`
+📋 **Index**: `WE-260103-abcd_index.md`
 
-The work effort has been created in the _pyrite system. You can now create tickets and track progress.
+🎫 **Tickets**: `tickets/` (ready for tickets)
+
+You can now track progress in the _pyrite system!
 ```
 
-### Step 5: Label Removed
+#### Step 5: Label Removed
 
 The `pyrite` label is automatically removed from the task.
+
+---
+
+### Advanced Workflows (Phase 4)
+
+#### Workflow 1: Link to Existing Work Effort
+
+Instead of creating a new work effort, reference an existing one:
+
+**In Todoist:**
+```
+Task: "Frontend for Auth System WE-260103-abcd"
+Labels: pyrite
+Description: Build login UI components
+```
+
+**Result:**
+- Plugin finds existing `WE-260103-abcd`
+- Links to that work effort instead of creating new
+- Feedback shows: "✅ **Linked to Existing Work Effort: WE-260103-abcd**"
+
+**Use Case:** Multiple tasks contributing to the same project
+
+#### Workflow 2: Subtasks → Tickets
+
+Add subtasks to your Todoist task using markdown checkboxes:
+
+**In Todoist:**
+```
+Task: "Build Auth System WE-260103-auth"
+Labels: pyrite
+Description:
+Build authentication system
+
+- [ ] Create login form
+- [ ] Add password reset
+- [ ] Implement OAuth
+- [ ] Setup JWT middleware
+```
+
+**Result:**
+```
+_work_efforts/WE-260103-auth_build_auth_system/
+├── WE-260103-auth_index.md
+└── tickets/
+    ├── TKT-auth-001_create_login_form.md
+    ├── TKT-auth-002_add_password_reset.md
+    ├── TKT-auth-003_implement_oauth.md
+    └── TKT-auth-004_setup_jwt_middleware.md
+```
+
+**Enhanced Feedback:**
+```markdown
+✅ **Linked to Existing Work Effort: WE-260103-auth**
+
+📁 **Folder**: `WE-260103-auth_build_auth_system`
+📋 **Index**: `WE-260103-auth_index.md`
+
+🎫 **Tickets Created** (4):
+- `TKT-auth-001`: Create Login Form
+- `TKT-auth-002`: Add Password Reset
+- `TKT-auth-003`: Implement OAuth
+- `TKT-auth-004`: Setup Jwt Middleware
+
+You can now track progress in the _pyrite system!
+```
+
+#### Workflow 3: Multi-Task Work Effort
+
+Multiple Todoist tasks can contribute to the same work effort:
+
+**Task 1 (Todoist):**
+```
+Task: "Auth Frontend WE-260103-auth"
+Labels: pyrite
+Description:
+- [ ] Login form UI
+- [ ] Signup form UI
+```
+
+**Task 2 (Todoist):**
+```
+Task: "Auth Backend WE-260103-auth"
+Labels: pyrite
+Description:
+- [ ] JWT middleware
+- [ ] Password hashing
+```
+
+**Result:**
+Both tasks add tickets to the same `WE-260103-auth` work effort:
+```
+_work_efforts/WE-260103-auth_auth_frontend/
+└── tickets/
+    ├── TKT-auth-001_login_form_ui.md          (from Task 1)
+    ├── TKT-auth-002_signup_form_ui.md         (from Task 1)
+    ├── TKT-auth-003_jwt_middleware.md         (from Task 2)
+    └── TKT-auth-004_password_hashing.md       (from Task 2)
+```
+
+**Use Case:** Breaking down a large project into multiple Todoist tasks while keeping everything organized under one work effort
 
 ## File Structure
 
@@ -268,11 +379,16 @@ tasks = plugin.fetch_tasks()
 
 ### Event Types
 
+#### Phase 3 Events
 - `plugin.task.fetched` - Task fetched from Todoist
 - `plugin.work_effort.created` - Work effort created
 - `plugin.feedback.posted` - Feedback posted to Todoist
 - `plugin.cleanup.completed` - Label removed
 - `plugin.error` - Error occurred
+
+#### Phase 4 Events
+- `plugin.work_effort.linked` - Linked to existing work effort
+- `plugin.ticket.created` - Ticket created from subtask
 
 ### Event Structure
 

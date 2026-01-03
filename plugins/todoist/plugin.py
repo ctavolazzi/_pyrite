@@ -15,12 +15,16 @@ from plugins.helpers import (
     sanitize_title,
     validate_folder_name,
     create_work_effort_structure,
-    format_index_file
+    format_index_file,
+    find_work_effort_by_id,
+    generate_ticket_id,
+    create_ticket_file
 )
 from plugins.todoist.api import TodoistAPI, TodoistAPIError
 from typing import List, Dict, Optional
 from datetime import datetime
 from pathlib import Path
+import re
 
 
 class TodoistPlugin(BasePlugin):
@@ -151,58 +155,137 @@ class TodoistPlugin(BasePlugin):
 
     def create_work_effort(self, task: ExternalTask) -> WorkEffort:
         """
-        Create work effort from Todoist task
+        Create work effort from Todoist task (or link to existing WE)
+
+        Phase 4 enhancements:
+        - Checks for WE-ID in task title/description
+        - Links to existing WE if found (instead of creating new)
+        - Parses subtasks from description
+        - Creates tickets for each subtask
 
         Args:
             task: ExternalTask to convert
 
         Returns:
-            WorkEffort object with paths
+            WorkEffort object with paths and created tickets
 
         Raises:
             ValueError: If work effort creation fails validation
         """
         try:
-            # Generate WE ID
-            we_id = generate_we_id()
-
-            # Create folder structure (validates with naming linter)
             base_path = Path(self.config['work_efforts_dir'])
-            folder_path, index_path, tickets_dir = create_work_effort_structure(
-                base_path=base_path,
-                we_id=we_id,
-                title=task.title,
-                validate=True
-            )
+            linked_to_existing = False
+            created_tickets = []
 
-            # Create index file
-            content = format_index_file(
-                we_id=we_id,
-                title=task.title,
-                description=task.description,
-                source=self.name,
-                source_url=task.url,
-                labels=task.labels,
-                created=task.created
-            )
-            index_path.write_text(content)
+            # Phase 4: Check for WE-ID in task title or description
+            # Pattern: WE-YYMMDD-xxxx
+            we_id_pattern = r'WE-\d{6}-[a-z0-9]{4}'
 
-            # Create WorkEffort object
+            # Search in title first, then description
+            search_text = f"{task.title}\n{task.description or ''}"
+            we_match = re.search(we_id_pattern, search_text, re.IGNORECASE)
+
+            if we_match:
+                # Found WE-ID reference - try to link to existing WE
+                # Keep original case from the match
+                we_id = we_match.group(0)
+                we_path = self.find_work_effort(we_id)
+
+                if we_path:
+                    # Link to existing work effort
+                    linked_to_existing = True
+                    folder_path = we_path
+                    index_path = we_path / f"{we_id}_index.md"
+                    tickets_dir = we_path / "tickets"
+
+                    # Emit event
+                    self.emit_event('plugin.work_effort.linked', {
+                        'task_id': task.id,
+                        'we_id': we_id,
+                        'folder_path': str(folder_path)
+                    })
+                else:
+                    # WE-ID referenced but doesn't exist - create new with that ID
+                    folder_path, index_path, tickets_dir = create_work_effort_structure(
+                        base_path=base_path,
+                        we_id=we_id,
+                        title=task.title,
+                        validate=True
+                    )
+
+                    # Create index file
+                    content = format_index_file(
+                        we_id=we_id,
+                        title=task.title,
+                        description=task.description,
+                        source=self.name,
+                        source_url=task.url,
+                        labels=task.labels,
+                        created=task.created
+                    )
+                    index_path.write_text(content)
+
+                    # Emit event
+                    self.emit_event('plugin.work_effort.created', {
+                        'task_id': task.id,
+                        'we_id': we_id,
+                        'folder_path': str(folder_path),
+                        'index_path': str(index_path)
+                    })
+            else:
+                # No WE-ID found - create new WE (original behavior)
+                we_id = generate_we_id()
+
+                folder_path, index_path, tickets_dir = create_work_effort_structure(
+                    base_path=base_path,
+                    we_id=we_id,
+                    title=task.title,
+                    validate=True
+                )
+
+                # Create index file
+                content = format_index_file(
+                    we_id=we_id,
+                    title=task.title,
+                    description=task.description,
+                    source=self.name,
+                    source_url=task.url,
+                    labels=task.labels,
+                    created=task.created
+                )
+                index_path.write_text(content)
+
+                # Emit event
+                self.emit_event('plugin.work_effort.created', {
+                    'task_id': task.id,
+                    'we_id': we_id,
+                    'folder_path': str(folder_path),
+                    'index_path': str(index_path)
+                })
+
+            # Phase 4: Parse subtasks and create tickets
+            subtasks = self.parse_subtasks(task)
+            for subtask_title in subtasks:
+                ticket_path = self.create_ticket(
+                    we_path=folder_path,
+                    we_id=we_id,
+                    title=subtask_title,
+                    description=f"From Todoist task: {task.title}",
+                    source_task_id=task.id,
+                    source_url=task.url
+                )
+                created_tickets.append(ticket_path)
+
+            # Create WorkEffort object with Phase 4 enhancements
             work_effort = WorkEffort(
                 we_id=we_id,
                 folder_path=folder_path,
                 index_path=index_path,
                 tickets_dir=tickets_dir,
-                source_task=task
+                source_task=task,
+                created_tickets=created_tickets,
+                linked_to_existing=linked_to_existing
             )
-
-            # Emit event
-            self.emit_event('plugin.work_effort.created', {
-                'task_id': task.id,
-                'we_id': we_id,
-                'folder_path': str(folder_path),
-                'index_path': str(index_path)
-            })
 
             return work_effort
 
@@ -280,6 +363,105 @@ class TodoistPlugin(BasePlugin):
             })
             return False
 
+    # Phase 4: WE Lookup and Subtask Methods
+
+    def find_work_effort(self, we_id: str) -> Optional[Path]:
+        """
+        Find an existing work effort by WE-ID
+
+        Args:
+            we_id: Work effort ID to search for (e.g., 'WE-260102-auth')
+
+        Returns:
+            Path to work effort folder if found, None otherwise
+        """
+        base_path = Path(self.config['work_efforts_dir'])
+        return find_work_effort_by_id(base_path, we_id)
+
+    def parse_subtasks(self, task: ExternalTask) -> List[str]:
+        """
+        Parse subtasks from Todoist task description
+
+        Extracts markdown checklist items from the task description:
+        - [ ] Subtask 1
+        - [ ] Subtask 2
+
+        Args:
+            task: ExternalTask to parse
+
+        Returns:
+            List of subtask titles (without checkbox formatting)
+        """
+        if not task.description:
+            return []
+
+        subtasks = []
+        lines = task.description.split('\n')
+
+        for line in lines:
+            # Match markdown checklist: - [ ] Title or - [x] Title
+            match = re.match(r'^\s*-\s*\[[ xX]\]\s*(.+)$', line.strip())
+            if match:
+                subtask_title = match.group(1).strip()
+                if subtask_title:
+                    subtasks.append(subtask_title)
+
+        return subtasks
+
+    def create_ticket(
+        self,
+        we_path: Path,
+        we_id: str,
+        title: str,
+        description: str = "",
+        source_task_id: str = None,
+        source_url: str = None
+    ) -> Path:
+        """
+        Create a ticket file in the work effort's tickets directory
+
+        Args:
+            we_path: Path to work effort folder
+            we_id: Work effort ID (for generating ticket ID)
+            title: Ticket title
+            description: Ticket description (optional)
+            source_task_id: Todoist task ID (optional)
+            source_url: URL to Todoist task (optional)
+
+        Returns:
+            Path to created ticket file
+        """
+        tickets_dir = we_path / "tickets"
+        tickets_dir.mkdir(exist_ok=True)
+
+        # Count existing tickets to determine sequence number
+        existing_tickets = list(tickets_dir.glob('TKT-*.md'))
+        sequence = len(existing_tickets) + 1
+
+        # Generate ticket ID
+        ticket_id = generate_ticket_id(we_id, sequence)
+
+        # Create ticket file
+        ticket_path = create_ticket_file(
+            tickets_dir=tickets_dir,
+            ticket_id=ticket_id,
+            title=title,
+            description=description,
+            source_task_id=source_task_id,
+            source_url=source_url,
+            labels=['todoist']
+        )
+
+        # Emit event
+        self.emit_event('plugin.ticket.created', {
+            'ticket_id': ticket_id,
+            'title': title,
+            'we_id': we_id,
+            'path': str(ticket_path)
+        })
+
+        return ticket_path
+
     # Helper methods
 
     def _convert_to_external_task(self, task_data: Dict) -> ExternalTask:
@@ -319,20 +501,39 @@ class TodoistPlugin(BasePlugin):
 
     def _format_feedback_message(self, work_effort: WorkEffort) -> str:
         """
-        Format feedback message for Todoist comment
+        Format feedback message for Todoist comment (Phase 4 enhanced)
 
         Args:
-            work_effort: Created work effort
+            work_effort: Created/linked work effort
 
         Returns:
-            Markdown-formatted message
+            Markdown-formatted message with ticket details
         """
-        message = f"""✅ **Work Effort Created!**
+        # Phase 4: Enhanced feedback with WE linking and ticket info
+        if work_effort.linked_to_existing:
+            header = f"✅ **Linked to Existing Work Effort: {work_effort.we_id}**"
+        else:
+            header = f"✅ **Work Effort Created: {work_effort.we_id}**"
+
+        message = f"""{header}
 
 📁 **Folder**: `{work_effort.folder_path.name}`
 📋 **Index**: `{work_effort.index_path.name}`
-🎫 **Tickets**: `{work_effort.tickets_dir.name}/`
-
-The work effort has been created in the _pyrite system. You can now create tickets and track progress.
 """
+
+        # Add ticket information if any were created
+        if work_effort.created_tickets:
+            message += f"\n🎫 **Tickets Created** ({len(work_effort.created_tickets)}):\n"
+            for ticket_path in work_effort.created_tickets:
+                ticket_name = ticket_path.stem  # Filename without .md extension
+                # Extract ticket ID and title from filename (TKT-xxxx-NNN_title)
+                parts = ticket_name.split('_', 1)
+                ticket_id = parts[0] if parts else ticket_name
+                ticket_title = parts[1].replace('_', ' ').title() if len(parts) > 1 else ''
+                message += f"- `{ticket_id}`: {ticket_title}\n"
+        else:
+            message += f"\n🎫 **Tickets**: `{work_effort.tickets_dir.name}/` (ready for tickets)\n"
+
+        message += "\nYou can now track progress in the _pyrite system!\n"
+
         return message
