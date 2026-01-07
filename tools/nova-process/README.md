@@ -1,7 +1,7 @@
 # NovaProcess - Multi-Persona Cognitive Architecture
 
-**Version:** 1.0.0
-**Status:** ✅ Working (placeholder LLM integration)
+**Version:** 1.1.0
+**Status:** ✅ Production Ready (flexible LLM backends)
 **Part of:** _pyrite Unified Cognitive Architecture
 
 ---
@@ -403,54 +403,94 @@ This will:
 
 ---
 
-## LLM Integration (TODO)
+## LLM Integration
 
-**Current State:** Placeholder responses (no real LLM calls)
+**Current State:** ✅ Flexible backend system supporting multiple providers
 
-**To Enable Real LLM:**
+NovaProcess supports multiple LLM backends:
 
-1. Choose LLM provider:
-   - **Claude API** (Anthropic) - Recommended
-   - **OpenAI API** (GPT-4)
-   - **Local model** (Ollama, LM Studio)
+### Option 1: Ollama (Recommended - Open Source)
 
-2. Update `Persona.speak()` method:
+**Install Ollama:**
+```bash
+# macOS/Linux
+curl -fsSL https://ollama.ai/install.sh | sh
 
-```python
-def speak(self, context: str, turn: int) -> ConversationTurn:
-    """Generate response using LLM."""
-
-    # Build full prompt
-    full_prompt = f"{self.prompt}\n\n## Context\n{context}"
-
-    # Call LLM API
-    response = anthropic.Client(api_key=os.getenv("ANTHROPIC_API_KEY")).messages.create(
-        model="claude-sonnet-4",
-        max_tokens=2000,
-        messages=[{
-            "role": "user",
-            "content": full_prompt
-        }]
-    )
-
-    response_text = response.content[0].text
-
-    # Parse epistemic state from YAML frontmatter
-    epistemic = self._parse_epistemic(response_text)
-
-    return ConversationTurn(...)
+# Or download from https://ollama.ai
 ```
 
-3. Set API key:
-
+**Pull a model:**
 ```bash
-export ANTHROPIC_API_KEY="your-key-here"
+ollama pull llama2      # 7B parameter model
+ollama pull llama3      # Latest Llama 3
+ollama pull mistral     # Mistral 7B
+ollama pull mixtral     # Mixtral 8x7B (47B total)
 ```
 
-4. Run:
-
+**Create config file:**
 ```bash
-python tools/nova-process/orchestrate.py "Your question"
+cp tools/nova-process/nova-config.example.yaml tools/nova-process/nova-config.yaml
+```
+
+**Edit `nova-config.yaml`:**
+```yaml
+llm:
+  backend: ollama
+  model: llama2
+  api_url: http://localhost:11434/api/generate
+```
+
+**Run NovaProcess:**
+```bash
+./pyrite nova "Should we implement caching?" --config tools/nova-process/nova-config.yaml
+```
+
+### Option 2: OpenAI-Compatible API
+
+Works with vLLM, LocalAI, text-generation-webui, and other OpenAI-compatible servers.
+
+**Configuration:**
+```yaml
+llm:
+  backend: openai-compatible
+  model: your-model-name
+  api_url: http://localhost:8000/v1/chat/completions
+  api_key: ""  # Optional
+```
+
+**Examples:**
+
+**vLLM:**
+```yaml
+llm:
+  backend: openai-compatible
+  model: meta-llama/Llama-2-7b-chat-hf
+  api_url: http://localhost:8000/v1/chat/completions
+```
+
+**LocalAI:**
+```yaml
+llm:
+  backend: openai-compatible
+  model: gpt-3.5-turbo  # LocalAI model alias
+  api_url: http://localhost:8080/v1/chat/completions
+```
+
+**text-generation-webui:**
+```yaml
+llm:
+  backend: openai-compatible
+  model: your-model-name
+  api_url: http://localhost:5000/v1/chat/completions
+```
+
+### Option 3: Placeholder (Testing Only)
+
+For testing the orchestrator without an LLM:
+
+```yaml
+llm:
+  backend: placeholder
 ```
 
 ---
@@ -536,23 +576,26 @@ This means:
 - [x] CHECK gate logic
 - [x] CAE verdict handling
 
-### Phase 2: LLM Integration 🔄
-- [ ] Claude API integration
-- [ ] Response parsing (extract epistemic state from YAML)
-- [ ] Error handling (API failures, rate limits)
-- [ ] Streaming responses (for UI)
+### Phase 2: LLM Integration ✅
+- [x] Flexible backend system
+- [x] Ollama support (local open source models)
+- [x] OpenAI-compatible API support (vLLM, LocalAI, etc.)
+- [x] Response parsing (extract epistemic state from YAML)
+- [x] Error handling (API failures, graceful fallback)
+- [x] Configuration system (YAML config files)
 
-### Phase 3: pyrite CLI Integration 🔜
-- [ ] `pyrite nova process` command
+### Phase 3: pyrite CLI Integration ✅
+- [x] `pyrite nova` command
 - [ ] Work effort context loading
 - [ ] Decision persistence (save to WE)
 - [ ] Dashboard integration (show agent activity)
 
-### Phase 4: Advanced Features 🔮
-- [ ] Multi-model support (Claude, GPT-4, local models)
+### Phase 4: Advanced Features 🔜
+- [ ] Streaming responses (for UI)
 - [ ] Parallel expert processing (async)
 - [ ] Loop-back for revisions (CAE → DCE → Experts)
 - [ ] Tool-calling (personas can run `pyrite` commands)
+- [ ] Session management (save/resume conversations)
 
 ---
 

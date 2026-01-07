@@ -22,9 +22,18 @@ License: MIT
 import sys
 import json
 import yaml
+import os
+import re
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
+
+# Try importing various LLM backends
+try:
+    import requests
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    REQUESTS_AVAILABLE = False
 
 
 @dataclass
@@ -71,16 +80,128 @@ class ConversationTurn:
         }
 
 
+class LLMBackend:
+    """
+    Flexible LLM backend supporting multiple providers.
+
+    Supported backends:
+    - ollama: Local Ollama server (http://localhost:11434)
+    - openai-compatible: Any OpenAI-compatible API
+    - custom: Custom HTTP endpoint
+    """
+
+    def __init__(self, backend_type: str = "placeholder", config: Optional[Dict] = None):
+        self.backend_type = backend_type
+        self.config = config or {}
+
+        # Set defaults based on backend type
+        if backend_type == "ollama":
+            self.api_url = self.config.get("api_url", "http://localhost:11434/api/generate")
+            self.model = self.config.get("model", "llama2")
+        elif backend_type == "openai-compatible":
+            self.api_url = self.config.get("api_url", "http://localhost:8000/v1/chat/completions")
+            self.model = self.config.get("model", "gpt-3.5-turbo")
+            self.api_key = self.config.get("api_key", "")
+        else:
+            self.api_url = None
+            self.model = None
+
+    def generate(self, prompt: str, max_tokens: int = 2000) -> str:
+        """Generate a response from the LLM."""
+
+        if self.backend_type == "placeholder":
+            return self._placeholder_response(prompt)
+
+        if not REQUESTS_AVAILABLE:
+            print("⚠️  Warning: requests library not available, using placeholder")
+            return self._placeholder_response(prompt)
+
+        try:
+            if self.backend_type == "ollama":
+                return self._call_ollama(prompt, max_tokens)
+            elif self.backend_type == "openai-compatible":
+                return self._call_openai_compatible(prompt, max_tokens)
+            else:
+                return self._placeholder_response(prompt)
+        except Exception as e:
+            print(f"⚠️  Warning: LLM call failed ({e}), using placeholder")
+            return self._placeholder_response(prompt)
+
+    def _call_ollama(self, prompt: str, max_tokens: int) -> str:
+        """Call Ollama API."""
+        response = requests.post(
+            self.api_url,
+            json={
+                "model": self.model,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "num_predict": max_tokens
+                }
+            },
+            timeout=120
+        )
+        response.raise_for_status()
+        return response.json()["response"]
+
+    def _call_openai_compatible(self, prompt: str, max_tokens: int) -> str:
+        """Call OpenAI-compatible API."""
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        response = requests.post(
+            self.api_url,
+            headers=headers,
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens
+            },
+            timeout=120
+        )
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
+
+    def _placeholder_response(self, prompt: str) -> str:
+        """Placeholder response when no backend is configured."""
+        return f"""[PLACEHOLDER RESPONSE]
+
+To enable real LLM responses, configure a backend:
+
+**Option 1: Ollama (Recommended for Open Source)**
+1. Install Ollama: https://ollama.ai
+2. Run: `ollama pull llama2`
+3. Create config file with:
+   ```yaml
+   llm:
+     backend: ollama
+     model: llama2
+   ```
+
+**Option 2: OpenAI-Compatible API**
+Configure any OpenAI-compatible server (vLLM, LocalAI, text-generation-webui):
+```yaml
+llm:
+  backend: openai-compatible
+  api_url: http://localhost:8000/v1/chat/completions
+  model: your-model-name
+```
+
+Prompt received: {prompt[:100]}..."""
+
+
 class Persona:
     """A conversational agent with specific expertise defined by a markdown prompt."""
 
-    def __init__(self, name: str, prompt_file: Path):
+    def __init__(self, name: str, prompt_file: Path, llm_backend: Optional[LLMBackend] = None):
         self.name = name
         self.prompt_file = prompt_file
         self.frontmatter, self.prompt = self._load_prompt()
         self.role = self.frontmatter.get("role", name)
         self.short_name = self.frontmatter.get("short_name", name.lower())
         self.expertise = self.frontmatter.get("expertise", [])
+        self.llm_backend = llm_backend or LLMBackend("placeholder")
 
     def _load_prompt(self) -> tuple[Dict[str, Any], str]:
         """Load markdown file with YAML frontmatter."""
@@ -101,10 +222,7 @@ class Persona:
 
     def speak(self, context: str, turn: int) -> ConversationTurn:
         """
-        Generate response from this persona.
-
-        For now, this is a placeholder that returns a structured response.
-        In production, this would call an LLM API (Claude, GPT, local model, etc.)
+        Generate response from this persona using the configured LLM backend.
         """
 
         # Build full prompt
@@ -120,49 +238,75 @@ class Persona:
 You are **{self.name}** (role: {self.role}) on turn {turn}.
 Respond following your persona's guidelines and output format.
 
-Include epistemic self-assessment in YAML frontmatter.
+Include epistemic self-assessment in YAML frontmatter like:
+---
+know: 0.7
+uncertainty: 0.3
+coherence: 0.8
+context: 0.9
+---
 """
 
-        # TODO: Call LLM API here
-        # response = call_llm_api(full_prompt)
+        # Call LLM backend
+        response_text = self.llm_backend.generate(full_prompt, max_tokens=2000)
 
-        # For now, return a placeholder
-        response = self._placeholder_response(context, turn)
-
-        return response
-
-    def _placeholder_response(self, context: str, turn: int) -> ConversationTurn:
-        """Placeholder response until LLM integration is added."""
-
-        epistemic = EpistemicState(
-            know=0.6,
-            uncertainty=0.4,
-            coherence=0.7,
-            context=0.8
-        )
-
-        response_text = f"""
-[PLACEHOLDER: {self.name} would analyze the context and respond here]
-
-This is a placeholder response. To enable real responses:
-1. Add LLM API integration (Claude API, OpenAI, local model)
-2. Update the speak() method to call the API
-3. Parse epistemic state from response
-
-Persona: {self.name}
-Role: {self.role}
-Turn: {turn}
-"""
+        # Parse epistemic state from response
+        epistemic = self._parse_epistemic_state(response_text)
 
         return ConversationTurn(
             turn_number=turn,
             persona_name=self.name,
             persona_role=self.role,
             input_context=context,
-            response=response_text.strip(),
+            response=response_text,
             epistemic=epistemic,
-            metadata={"placeholder": True}
+            metadata={"backend": self.llm_backend.backend_type}
         )
+
+    def _parse_epistemic_state(self, response: str) -> EpistemicState:
+        """
+        Parse epistemic state from response YAML frontmatter.
+
+        Expected format:
+        ---
+        know: 0.7
+        uncertainty: 0.3
+        coherence: 0.8
+        context: 0.9
+        ---
+        """
+        # Default values if parsing fails
+        default_state = EpistemicState(
+            know=0.5,
+            uncertainty=0.5,
+            coherence=0.5,
+            context=0.5
+        )
+
+        # Try to extract YAML frontmatter
+        if not response.startswith("---"):
+            return default_state
+
+        try:
+            # Split frontmatter from content
+            parts = response.split("---", 2)
+            if len(parts) < 3:
+                return default_state
+
+            # Parse YAML frontmatter
+            frontmatter = yaml.safe_load(parts[1]) or {}
+
+            # Extract epistemic values (with defaults)
+            return EpistemicState(
+                know=float(frontmatter.get("know", 0.5)),
+                uncertainty=float(frontmatter.get("uncertainty", 0.5)),
+                coherence=float(frontmatter.get("coherence", 0.5)),
+                context=float(frontmatter.get("context", 0.5))
+            )
+        except Exception as e:
+            print(f"⚠️  Warning: Failed to parse epistemic state ({e}), using defaults")
+            return default_state
+
 
 
 class NovaProcess:
@@ -182,9 +326,19 @@ class NovaProcess:
         self.personas_dir = personas_dir
         self.config = config or self._default_config()
 
-        # Load core personas
-        self.dce = Persona("DCE", personas_dir / "core" / "DCE.md")
-        self.cae = Persona("CAE", personas_dir / "core" / "CAE.md")
+        # Initialize LLM backend
+        llm_config = self.config.get("llm", {})
+        backend_type = llm_config.get("backend", "placeholder")
+        self.llm_backend = LLMBackend(backend_type, llm_config)
+
+        print(f"🤖 LLM Backend: {backend_type}")
+        if backend_type != "placeholder":
+            print(f"   Model: {self.llm_backend.model}")
+            print(f"   API: {self.llm_backend.api_url}")
+
+        # Load core personas with LLM backend
+        self.dce = Persona("DCE", personas_dir / "core" / "DCE.md", self.llm_backend)
+        self.cae = Persona("CAE", personas_dir / "core" / "CAE.md", self.llm_backend)
 
         # Load domain experts
         self.experts = self._load_experts()
@@ -214,7 +368,7 @@ class NovaProcess:
         for expert_file in sorted(experts_dir.glob("*.md")):
             name = expert_file.stem.title() + " Expert"
             try:
-                expert = Persona(name, expert_file)
+                expert = Persona(name, expert_file, self.llm_backend)
                 experts.append(expert)
             except Exception as e:
                 print(f"Warning: Failed to load expert {expert_file}: {e}")

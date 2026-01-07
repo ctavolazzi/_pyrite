@@ -1,0 +1,106 @@
+# NovaProcess Configuration Example
+# Copy this file to nova-config.yaml and customize for your setup
+
+# ==============================================================================
+# LLM Backend Configuration
+# ==============================================================================
+
+# Option 1: Ollama (Recommended for Open Source)
+# Install Ollama from https://ollama.ai
+# Then run: ollama pull llama2  (or llama3, mistral, etc.)
+
+llm:
+  backend: ollama
+  model: llama2                        # Or: llama3, mistral, mixtral, etc.
+  api_url: http://localhost:11434/api/generate  # Default Ollama endpoint
+
+# Option 2: OpenAI-Compatible API (vLLM, LocalAI, text-generation-webui, etc.)
+# llm:
+#   backend: openai-compatible
+#   model: your-model-name
+#   api_url: http://localhost:8000/v1/chat/completions
+#   api_key: ""  # Optional, if your server requires auth
+
+# Option 3: Placeholder (no LLM, just testing)
+# llm:
+#   backend: placeholder
+
+# ==============================================================================
+# NovaProcess Settings
+# ==============================================================================
+
+# Maximum conversation rounds before termination
+max_rounds: 5
+
+# Uncertainty threshold for CHECK gate (0.0-1.0)
+# If synthesis uncertainty > threshold, process returns "INVESTIGATE_MORE"
+check_gate_threshold: 0.35
+
+# Maximum number of domain experts to consult per round
+expert_limit: 3
+
+# Enable/disable CHECK gate (epistemic validation)
+enable_check_gate: true
+
+# Require CAE approval before finalizing decision
+require_cae_approval: true
+
+# ==============================================================================
+# Example Configurations for Different Backends
+# ==============================================================================
+
+# --- Ollama with Llama 3 ---
+# llm:
+#   backend: ollama
+#   model: llama3
+#   api_url: http://localhost:11434/api/generate
+
+# --- Ollama with Mistral ---
+# llm:
+#   backend: ollama
+#   model: mistral
+#   api_url: http://localhost:11434/api/generate
+
+# --- vLLM Server ---
+# llm:
+#   backend: openai-compatible
+#   model: meta-llama/Llama-2-7b-chat-hf
+#   api_url: http://localhost:8000/v1/chat/completions
+
+# --- LocalAI ---
+# llm:
+#   backend: openai-compatible
+#   model: gpt-3.5-turbo  # LocalAI model alias
+#   api_url: http://localhost:8080/v1/chat/completions
+
+# --- text-generation-webui (oobabooga) ---
+# llm:
+#   backend: openai-compatible
+#   model: your-model-name
+#   api_url: http://localhost:5000/v1/chat/completions
+#   api_key: ""  # Usually not needed for local servers
+
+# ==============================================================================
+# Notes
+# ==============================================================================
+
+# 1. Ollama is the easiest to set up for local open source models
+#    - Install: https://ollama.ai
+#    - Pull models: ollama pull llama2
+#    - Start server: ollama serve (starts automatically on install)
+#
+# 2. For vLLM, LocalAI, or other OpenAI-compatible servers:
+#    - Set backend: openai-compatible
+#    - Point api_url to your server's chat completions endpoint
+#    - Set model to match your server's model name/alias
+#
+# 3. The placeholder backend is useful for:
+#    - Testing the orchestrator without an LLM
+#    - Understanding the conversation flow
+#    - Developing new personas
+#
+# 4. Recommended models for NovaProcess:
+#    - Llama 3 (70B or 8B)
+#    - Mistral (7B)
+#    - Mixtral (8x7B)
+#    - Qwen 2.5 (7B or 14B)

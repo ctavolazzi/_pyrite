@@ -9,11 +9,13 @@ Commands:
     lint       Run Obsidian markdown linter
     health     Check GitHub integration health
     structure  Verify repository structure
+    nova       Run NovaProcess multi-agent decision-making
 
 Examples:
     pyrite lint --scope _work_efforts --fix
     pyrite health
     pyrite structure --fix
+    pyrite nova "Should we refactor this module?"
     pyrite --version
 """
 
@@ -60,6 +62,13 @@ def cmd_structure(args):
     return run_tool(script, args)
 
 
+def cmd_nova(args):
+    """Run NovaProcess orchestrator."""
+    repo_root = get_repo_root()
+    script = repo_root / "tools" / "nova-process" / "orchestrate.py"
+    return run_tool(script, args)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='pyrite',
@@ -70,11 +79,13 @@ Commands:
   lint       Run Obsidian markdown linter
   health     Check GitHub integration health
   structure  Verify repository structure
+  nova       Run NovaProcess multi-agent decision-making
 
 Examples:
   pyrite lint --scope _work_efforts --fix
   pyrite health
   pyrite structure --fix
+  pyrite nova "Should we refactor this module?"
   pyrite --version
 
 For command-specific help:
@@ -112,6 +123,13 @@ For command-specific help:
         add_help=False
     )
 
+    # Nova command
+    nova_parser = subparsers.add_parser(
+        'nova',
+        help='Run NovaProcess multi-agent decision-making',
+        add_help=False
+    )
+
     # Parse known args to allow forwarding unknowns to subcommands
     args, unknown = parser.parse_known_args()
 
@@ -125,6 +143,7 @@ For command-specific help:
         'lint': cmd_lint,
         'health': cmd_health,
         'structure': cmd_structure,
+        'nova': cmd_nova,
     }
 
     handler = handlers.get(args.command)
