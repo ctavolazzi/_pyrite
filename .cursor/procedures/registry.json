@@ -1,0 +1,59 @@
+{
+  "procedures": [
+    {
+      "id": "CMD-002",
+      "shortcode": "create-work-effort",
+      "title": "Create Work Effort with Tool Bag",
+      "category": "Command Operations",
+      "description": "Standardized procedure for creating a new work effort with automatic tool bag setup",
+      "file": "CMD-002_create_work_effort_with_tools.md",
+      "version": "1.0",
+      "status": "active",
+      "created": "2026-01-10",
+      "updated": "2026-01-10"
+    }
+  ],
+  "categories": {
+    "Command Operations": {
+      "description": "Procedures for command and system operations",
+      "prefix": "CMD"
+    },
+    "Engineering": {
+      "description": "Engineering and development workflows",
+      "prefix": "ENG"
+    },
+    "Orchestration": {
+      "description": "Comprehensive orchestration workflows",
+      "prefix": "ORC"
+    },
+    "Analysis": {
+      "description": "Analysis and investigation procedures",
+      "prefix": "ANL"
+    },
+    "Verification": {
+      "description": "Quality verification and testing",
+      "prefix": "VER"
+    },
+    "Documentation": {
+      "description": "Documentation and knowledge management",
+      "prefix": "DOC"
+    },
+    "Testing": {
+      "description": "Testing and quality assurance",
+      "prefix": "TST"
+    },
+    "Deployment": {
+      "description": "Deployment and release procedures",
+      "prefix": "DEP"
+    },
+    "Debug": {
+      "description": "Debugging and troubleshooting",
+      "prefix": "DBG"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2026-01-10",
+    "total_procedures": 1
+  }
+}
