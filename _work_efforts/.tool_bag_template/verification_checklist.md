@@ -1,9 +1,34 @@
+---
+id: [WORK_EFFORT_ID]-verification
+title: Verification Checklist - [WORK_EFFORT_ID]
+type: checklist
+status: pending
+project: [WORK_EFFORT_ID]
+created: [DATE]
+verified: [DATE]
+verifier: [Name/AI/Team]
+tags:
+  - verification
+  - quality
+  - checklist
+  - work-effort/[WORK_EFFORT_ID]
+completion: 0%
+---
+
 # Verification Checklist
 
-**Work Effort**: [WORK_EFFORT_ID]
-**Description**: [DESCRIPTION]
-**Verified**: [DATE]
-**Verifier**: [Name/AI/Team]
+> [!success] Quality Gate
+> **Work Effort**: `[WORK_EFFORT_ID]`
+> **Description**: [DESCRIPTION]
+> **Verified**: [DATE]
+> **Verifier**: [Name/AI/Team]
+> **Completion**: 0%
+
+## Quick Nav
+- [[README|Tool Bag Home]]
+- [[work_effort_tracker|Progress Tracker]]
+- [[#Final Checks]]
+- [[#Sign-Off]]
 
 ---
 
@@ -162,5 +187,63 @@ If verification reveals issues, document them here:
 
 ---
 
+## Completion Tracking
+
+> [!example] Auto-Calculate Completion
+> Update completion percentage in frontmatter based on checked items
+
+**Progress**: `0/100 items` (0%)
+
+**Category Breakdown**:
+- Code Quality: 0/12 (0%)
+- Documentation: 0/8 (0%)
+- Integration: 0/8 (0%)
+- Version Control: 0/8 (0%)
+- Security & Safety: 0/8 (0%)
+- Deployment: 0/8 (0%)
+- Custom Criteria: 0/X (0%)
+- Final Checks: 0/4 (0%)
+
+> [!tip] Update Frontmatter
+> When complete, update `completion: X%` and `status: verified` in frontmatter
+
+---
+
+## Dataview Queries
+
+> [!tip] Obsidian Dataview Examples
+> Track verification progress across all work efforts
+
+```dataview
+TABLE completion, status, verified
+FROM #verification
+WHERE contains(file.path, "work_efforts")
+SORT completion DESC
+```
+
+```dataview
+TASK
+FROM #work-effort/[WORK_EFFORT_ID]
+WHERE contains(file.name, "verification")
+AND !completed
+```
+
+---
+
+## Related Checklists
+
+### Prerequisites
+- [[work_effort_tracker|Progress Tracker]] - Ensure all tasks complete
+- [[../../.cursor/procedures/VER-001_verification_workflow|VER-001]] - Verification procedure
+
+### Follow-Up
+- Create deployment checklist if needed
+- Link to PR/issue for tracking
+- Schedule post-deployment review
+
+---
+
 **Verification Version**: 1.0
 **Last Updated**: [DATE]
+
+#verification #quality #checklist #work-effort/[WORK_EFFORT_ID]

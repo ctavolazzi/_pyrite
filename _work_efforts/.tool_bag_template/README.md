@@ -1,8 +1,40 @@
+---
+id: [WORK_EFFORT_ID]
+title: Work Effort Tool Bag - [WORK_EFFORT_ID]
+type: tool-bag
+status: active
+created: [DATE]
+updated: [DATE]
+tags:
+  - tools
+  - work-effort
+  - productivity
+aliases:
+  - "[WORK_EFFORT_ID] Tools"
+  - "Tool Bag [WORK_EFFORT_ID]"
+---
+
 # Work Effort Tool Bag
 
-**Work Effort**: [WORK_EFFORT_ID]
-**Description**: [DESCRIPTION]
-**Created**: [DATE]
+> [!info] Work Effort Details
+> **ID**: `[WORK_EFFORT_ID]`
+> **Description**: [DESCRIPTION]
+> **Created**: [DATE]
+> **Status**: 🚧 Active
+
+## Quick Links
+
+**Related Pages**:
+- [[../../README|Project Root]]
+- [[../WORK_EFFORT_TOOL_BAG_STANDARD|Tool Bag Standard]]
+- [[../WORK_EFFORT_CREATION_GUIDE|Creation Guide]]
+- [[work_effort_tracker|Progress Tracker]]
+- [[verification_checklist|Verification Checklist]]
+
+**Jump To**:
+- [[#Essential Tools]]
+- [[#Optional Tools]]
+- [[#Quick Actions]]
 
 ---
 
@@ -113,13 +145,87 @@ When updating tools in the template (`_work_efforts/.tool_bag_template/`), exist
 
 ---
 
+---
+
+## Quick Actions
+
+> [!tip] GTD-Style Quick Capture
+> Use these one-liners to quickly update your work effort
+
+### 🎯 Next Actions
+```bash
+# Update tracker with next action
+echo "- [ ] [Your next action] @context #tag" >> work_effort_tracker.md
+
+# Mark task complete
+# (Edit work_effort_tracker.md and change [ ] to [x])
+
+# Add a quick note
+echo "### $(date '+%Y-%m-%d %H:%M') - Quick Note" >> work_effort_tracker.md
+echo "[Your note here]" >> work_effort_tracker.md
+```
+
+### 📊 Status Updates
+```bash
+# Quick status check
+grep "Status:" work_effort_tracker.md
+
+# Update progress percentage
+# (Edit work_effort_tracker.md and update **Progress** field)
+```
+
+### 🔗 Link to Other Work
+```bash
+# Reference another work effort (use wikilinks)
+# [[WE-YYMMDD-xxxx|Description]]
+
+# Reference a procedure
+# [[../../.cursor/procedures/CMD-002_create_work_effort_with_tools|CMD-002]]
+
+# Tag related concepts
+# #feature #bug #refactor #docs
+```
+
+---
+
+## Backlinks
+
+> [!note] Related Work Efforts
+> This section shows other work efforts that reference this one.
+> (Obsidian will automatically populate this if you use wikilinks)
+
+- (Add links here manually or let Obsidian populate automatically)
+
+---
+
+## Metadata Summary
+
+**ID System**: Johnny Decimal inspired (WE-YYMMDD-xxxx)
+- `WE` = Work Effort category
+- `YYMMDD` = Date created
+- `xxxx` = Description slug
+
+**Organization**: #tools/[WORK_EFFORT_ID]
+**Context**: Use `@home`, `@computer`, `@quick`, `@deep-work` for GTD contexts
+
+---
+
 ## Questions?
 
-- See: `_work_efforts/WORK_EFFORT_TOOL_BAG_STANDARD.md` for complete standard
-- See: `_work_efforts/WORK_EFFORT_CREATION_GUIDE.md` for quick start
-- Run: `python scripts/setup_work_effort_tools.py --help` for script usage
+**Documentation**:
+- [[../WORK_EFFORT_TOOL_BAG_STANDARD|Complete Standard]]
+- [[../WORK_EFFORT_CREATION_GUIDE|Quick Start Guide]]
+- `python scripts/setup_work_effort_tools.py --help`
+
+**Procedures**:
+- [[../../.cursor/procedures/CMD-002_create_work_effort_with_tools|CMD-002: Create Work Effort]]
+
+**Commands**:
+- `/create-work-effort` - Create new work effort with tools
 
 ---
 
 **Tool Bag Version**: 1.0
 **Last Updated**: [DATE]
+
+#tools #work-effort #productivity

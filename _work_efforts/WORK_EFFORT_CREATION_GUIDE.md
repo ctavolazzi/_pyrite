@@ -2,6 +2,14 @@
 
 **Quick reference for creating work efforts with tool bags**
 
+> [!info] Enhanced Features Available!
+> Work efforts now include Obsidian markdown, Zettelkasten linking, GTD workflows, and Johnny Decimal organization!
+>
+> **Quick References**:
+> - [[QUICK_REFERENCE|One-Page Cheatsheet]] ⚡
+> - [[OBSIDIAN_FEATURES_GUIDE|Full Features Guide]]
+> - [[WORK_EFFORT_TOOL_BAG_STANDARD|Complete Standard]]
+
 ---
 
 ## Quick Start

@@ -1,14 +1,26 @@
 # Work Effort Tool Bag Standard
 
-**Version**: 1.0
+**Version**: 2.0
 **Status**: Active
-**Last Updated**: 2026-01-10
+**Last Updated**: 2026-01-11
 
 ---
 
 ## Overview
 
 This document defines the standard tool bag system for work efforts. All new work efforts must include a `tools/` folder with essential tracking and verification tools.
+
+**Enhanced Features**: Now includes Obsidian markdown, Zettelkasten linking, GTD workflows, and Johnny Decimal organization! See [[OBSIDIAN_FEATURES_GUIDE|Obsidian Features Guide]] for details.
+
+---
+
+## Quick Links
+
+- [[OBSIDIAN_FEATURES_GUIDE|Obsidian Features Guide]] - Full feature documentation
+- [[WORK_EFFORT_CREATION_GUIDE|Creation Guide]] - Quick start
+- [[#Standard Structure]]
+- [[#Essential Tools]]
+- [[#Enhanced Features]]
 
 ---
 
@@ -110,6 +122,108 @@ These tools can be added based on work effort needs:
 **Source**: Create new or copy from other work efforts
 **Purpose**: Project-specific needs
 **When to use**: Standard tools don't cover specific needs
+
+---
+
+## Enhanced Features
+
+> [!info] Version 2.0 Enhancements
+> Work effort tools now include Obsidian markdown features, Zettelkasten principles, GTD workflows, and Johnny Decimal organization!
+
+### Obsidian Features
+
+**YAML Frontmatter**: Rich metadata for every tool
+```yaml
+---
+id: WE-260111-example
+title: Work Effort Example
+status: in-progress
+priority: high
+tags:
+  - work-effort
+  - tracker
+---
+```
+
+**Wikilinks**: Connect work efforts bidirectionally
+```markdown
+[[WE-260110-order66|Order 66]]
+[[../../.cursor/procedures/CMD-002_create_work_effort_with_tools|CMD-002]]
+```
+
+**Callouts**: Highlight important information
+```markdown
+> [!warning] Critical Blocker
+> Database migration required before proceeding
+```
+
+**Tags**: Hierarchical organization
+```markdown
+#work-effort/WE-260111-example
+#priority/high
+#context/computer
+```
+
+**Dataview Queries**: Query across all work efforts
+```dataview
+TABLE status, completion, priority
+FROM #work-effort
+WHERE status = "in-progress"
+```
+
+### Zettelkasten Principles
+
+- **Atomic Notes**: Each tool is self-contained
+- **Unique IDs**: Johnny Decimal-inspired (`WE-YYMMDD-xxxx`)
+- **Bidirectional Links**: Automatic backlinks
+- **Knowledge Graph**: Visualize connections
+
+### GTD Integration
+
+**Next Actions**: Context-aware task lists
+```markdown
+- [ ] Fix auth bug @computer #priority-high ~30min
+- [ ] Review PR @quick #priority-medium ~10min
+```
+
+**Contexts**: Filter by where/when you can do work
+- `@computer` - Need computer
+- `@deep-work` - Need focused time
+- `@quick` - Quick wins (<15min)
+- `@research` - Reading/investigation
+
+**Time Estimates**: `~5min`, `~30min`, `~1hr`
+
+**Priority Levels**: `#priority-high`, `#priority-medium`, `#priority-low`
+
+### Johnny Decimal Organization
+
+**Structured IDs**:
+```
+WE-YYMMDD-xxxx
+│  │      │
+│  │      └─ Description slug
+│  └─ Date created (YYMMDD)
+└─ Category (Work Effort)
+```
+
+**Procedure Categories**: `CMD-###`, `ENG-###`, `VER-###`
+
+### Convenience Features
+
+**Quick Nav**: Jump to sections instantly
+**One-Liners**: Update tools from command line
+**Auto-Templates**: Templates auto-populated with work effort info
+**Search & Filter**: Find anything quickly
+
+### Learn More
+
+See [[OBSIDIAN_FEATURES_GUIDE|Obsidian Features Guide]] for:
+- Complete feature documentation
+- Usage examples
+- Best practices
+- Dataview query examples
+- Plugin recommendations
 
 ---
 

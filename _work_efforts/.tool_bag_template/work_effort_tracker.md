@@ -1,10 +1,37 @@
+---
+id: [WORK_EFFORT_ID]-tracker
+title: Progress Tracker - [WORK_EFFORT_ID]
+type: tracker
+status: in-progress
+project: [WORK_EFFORT_ID]
+created: [DATE]
+updated: [DATE]
+tags:
+  - tracker
+  - progress
+  - gtd
+  - work-effort/[WORK_EFFORT_ID]
+contexts:
+  - "@computer"
+priority: medium
+energy: medium
+---
+
 # Work Effort Progress Tracker
 
-**Work Effort**: [WORK_EFFORT_ID]
-**Description**: [DESCRIPTION]
-**Status**: 🚧 In Progress
-**Started**: [DATE]
-**Updated**: [DATE]
+> [!info] Work Effort Summary
+> **ID**: `[WORK_EFFORT_ID]`
+> **Description**: [DESCRIPTION]
+> **Status**: 🚧 In Progress
+> **Started**: [DATE]
+> **Updated**: [DATE]
+
+## Quick Nav
+- [[README|Tool Bag Home]]
+- [[verification_checklist|Verification]]
+- [[#Next Actions]] ⚡
+- [[#Tasks]]
+- [[#Decisions]]
 
 ---
 
@@ -16,6 +43,33 @@
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
 - [ ] [Criterion 3]
+
+---
+
+## Next Actions ⚡
+
+> [!warning] GTD: What Can I Do Right Now?
+> Focus on actionable, context-specific next steps
+
+### Immediate (Do Now)
+- [ ] [Next action 1] `@computer` `#priority-high` `~5min`
+- [ ] [Next action 2] `@deep-work` `#priority-high` `~30min`
+
+### Soon (This Session)
+- [ ] [Next action 3] `@quick` `#priority-medium` `~10min`
+- [ ] [Next action 4] `@computer` `#priority-medium` `~20min`
+
+### Later (Backlog)
+- [ ] [Next action 5] `@research` `#priority-low` `~1hr`
+
+**Context Legend**:
+- `@computer` - Need computer
+- `@deep-work` - Need focused time
+- `@quick` - Quick wins (<15min)
+- `@research` - Research/reading
+- `@review` - Review/decision needed
+
+**Time Estimates**: `~Xmin` or `~Xhr`
 
 ---
 
@@ -140,5 +194,64 @@
 
 ---
 
+## Related Work Efforts
+
+> [!note] Zettelkasten: Linked Knowledge
+> Connect this work to other efforts, creating a knowledge graph
+
+### Dependencies
+- [[WE-YYMMDD-dependency1|Dependency Description]] - Status: ✅/🚧/⏳
+- [[WE-YYMMDD-dependency2|Dependency Description]] - Status: ✅/🚧/⏳
+
+### Related Efforts
+- [[WE-YYMMDD-related1|Related Work]] - Connection: [How they're related]
+- [[WE-YYMMDD-related2|Related Work]] - Connection: [How they're related]
+
+### Follow-Ups
+- [[WE-YYMMDD-followup1|Follow-Up Work]] - Spawned from this effort
+- [[WE-YYMMDD-followup2|Follow-Up Work]] - Next phase
+
+---
+
+## Reference Links
+
+### Procedures Used
+- [[../../.cursor/procedures/CMD-002_create_work_effort_with_tools|CMD-002]] - Work effort creation
+- [[../../.cursor/procedures/ENG-001_engineering_workflow|ENG-001]] - Engineering workflow (if used)
+
+### Commands Used
+- `/create-work-effort` - Initial setup
+- `/verify` - Verification workflow
+- `/checkpoint` - Progress snapshots
+
+### External Resources
+- [External Link 1](url) - Description
+- [External Link 2](url) - Description
+
+---
+
+## Dataview Queries
+
+> [!tip] Obsidian Dataview Examples
+> Use these if you have Dataview plugin installed
+
+```dataview
+TABLE status, priority, energy
+FROM #work-effort
+WHERE contains(file.path, "[WORK_EFFORT_ID]")
+SORT priority DESC
+```
+
+```dataview
+TASK
+FROM #work-effort/[WORK_EFFORT_ID]
+WHERE contains(text, "@computer")
+AND !completed
+```
+
+---
+
 **Last Updated**: [DATE]
 **Next Review**: [DATE]
+
+#tracker #progress #gtd #work-effort/[WORK_EFFORT_ID]
