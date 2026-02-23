@@ -1,7 +1,7 @@
 ---
 id: WE-260102-ph4e
 title: "Todoist Plugin Enhancements: Linking & Subtasks (Phase 4)"
-status: in_progress
+status: paused
 created: 2026-01-03T00:00:00Z
 source: manual
 labels: [plugin-system, v0.9.0, phase-4, todoist, enhancements]

@@ -12,8 +12,8 @@ updated: '2026-01-03T05:00:00Z'
 
 # Core Data Structures and Algorithms
 
-**Last Updated:** 2026-01-03  
-**Status:** Analysis Document  
+**Last Updated:** 2026-01-03
+**Status:** Analysis Document
 **Related:** [[architecture.01_event_bus_pattern_implementation]]
 
 ## Executive Summary
@@ -98,22 +98,22 @@ interface WorkEffort {
   // Identity
   id: string;                    // "WE-260102-t2z2"
   format: 'mcp' | 'jd';         // Format type
-  
+
   // Metadata
   title: string;
   status: 'active' | 'paused' | 'completed';
   created: string;               // ISO 8601 timestamp
   last_updated?: string;
   created_by?: string;
-  
+
   // Relationships
   branch?: string;               // "feature/WE-260102-t2z2-slug"
   repository?: string;           // Repository name
   tickets?: Ticket[];            // Child tickets (MCP only)
-  
+
   // File System
   path: string;                  // Absolute path to directory
-  
+
   // Legacy (Johnny Decimal)
   category?: string;            // JD format only
 }
@@ -149,21 +149,21 @@ interface Ticket {
   // Identity
   id: string;                    // "TKT-t2z2-001"
   parent: string;                // "WE-260102-t2z2"
-  
+
   // Metadata
   title: string;
   status: 'pending' | 'in_progress' | 'completed' | 'blocked';
   created?: string;
   created_by?: string;
   assigned_to?: string;
-  
+
   // Content
   description?: string;
   acceptance_criteria?: string[];
   files_changed?: string[];
   notes?: string;
   commits?: string[];
-  
+
   // File System
   path: string;                  // Absolute path to file
 }
@@ -194,14 +194,14 @@ created_by: ctavolazzi
    Input:  File path (string)
    Output: Raw bytes
    └─> fs.readFile(path, 'utf-8')
-   
+
 2. TEXT PARSING (Parse Layer)
    Input:  UTF-8 string
    Output: { frontmatter: Object, content: string }
    └─> gray-matter.parse(content)
        - Extracts YAML frontmatter
        - Separates metadata from markdown body
-   
+
 3. DOMAIN ENTITY (Domain Layer)
    Input:  Parsed object
    Output: WorkEffort/Ticket entity
@@ -209,7 +209,7 @@ created_by: ctavolazzi
        - Validates required fields
        - Normalizes data types
        - Adds computed properties
-   
+
 4. COLLECTION (Repository Layer)
    Input:  Single entity
    Output: Array of entities
@@ -217,7 +217,7 @@ created_by: ctavolazzi
        - Scans directory structure
        - Parses all work efforts
        - Filters by criteria
-   
+
 5. DTO (Application Layer)
    Input:  Domain entity
    Output: Data Transfer Object
@@ -225,12 +225,12 @@ created_by: ctavolazzi
        - Removes internal fields
        - Adds UI-specific fields
        - Formats dates/timestamps
-   
+
 6. API RESPONSE (Transport Layer)
    Input:  DTO
    Output: JSON over HTTP
    └─> res.json(dto)
-   
+
 7. CLIENT STATE (UI Layer)
    Input:  JSON
    Output: JavaScript object
@@ -245,7 +245,7 @@ created_by: ctavolazzi
 
 **Purpose**: Convert markdown file to WorkEffort entity
 
-**Input**: 
+**Input**:
 - `filePath`: string (absolute path to index file)
 - `dirName`: string (directory name)
 
@@ -258,21 +258,21 @@ async function parseMCPWorkEffort(dirPath, dirName) {
   const files = await fs.readdir(dirPath);
   const indexFile = files.find(f => f.endsWith('_index.md'));
   if (!indexFile) return null;
-  
+
   // 2. Read file content
   const indexPath = path.join(dirPath, indexFile);
   const content = await fs.readFile(indexPath, 'utf-8');
-  
+
   // 3. Parse frontmatter
   const { data: frontmatter, content: body } = matter(content);
-  
+
   // 4. Extract ID
   const idMatch = dirName.match(/^(WE-\d{6}-[a-z0-9]{4})/);
   const id = frontmatter.id || (idMatch ? idMatch[1] : dirName);
-  
+
   // 5. Parse child tickets
   const tickets = await parseMCPTickets(dirPath, id);
-  
+
   // 6. Construct entity
   return {
     id,
@@ -327,7 +327,7 @@ function generateSuffix() {
 
 **Purpose**: Discover all work efforts in a repository
 
-**Input**: 
+**Input**:
 - `repoPath`: string (repository root path)
 
 **Output**: `WorkEffort[]`
@@ -336,7 +336,7 @@ function generateSuffix() {
 ```javascript
 async function parseRepo(repoPath) {
   const workEfforts = [];
-  
+
   // 1. Find _work_efforts directory
   let workEffortsDir = null;
   for (const dirName of ['_work_efforts', '_work_efforts_']) {
@@ -347,19 +347,19 @@ async function parseRepo(repoPath) {
       break;
     } catch { /* try next */ }
   }
-  
+
   if (!workEffortsDir) return { workEfforts: [] };
-  
+
   // 2. Read directory entries
   const entries = await fs.readdir(workEffortsDir, { withFileTypes: true });
-  
+
   // 3. Parse each directory
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    
+
     const dirName = entry.name;
     const dirPath = path.join(workEffortsDir, dirName);
-    
+
     if (dirName.startsWith('WE-')) {
       // MCP format
       const we = await parseMCPWorkEffort(dirPath, dirName);
@@ -370,7 +370,7 @@ async function parseRepo(repoPath) {
       workEfforts.push(...jdWorkEfforts);
     }
   }
-  
+
   return { workEfforts };
 }
 ```
@@ -390,7 +390,7 @@ async function parseRepo(repoPath) {
    ```bash
    # User creates WE
    mcp_work-efforts_create_work_effort(...)
-   
+
    # System could automatically:
    git checkout develop
    git checkout -b feature/WE-260102-xxxx-slug
@@ -400,7 +400,7 @@ async function parseRepo(repoPath) {
    ```bash
    # User updates ticket status
    mcp_work-efforts_update_ticket(...)
-   
+
    # System could automatically:
    git add _work_efforts/WE-260102-xxxx/
    git commit -m "WE-260102-xxxx/TKT-xxxx-001: Update status"
@@ -410,7 +410,7 @@ async function parseRepo(repoPath) {
    ```bash
    # User marks WE as completed
    mcp_work-efforts_update_work_effort(..., status: 'completed')
-   
+
    # System could automatically:
    git checkout develop
    git merge feature/WE-260102-xxxx-slug
@@ -530,36 +530,36 @@ function generateTicketId(parentId: string, ticketNumber: number): string
 1. HTTP Request
    POST /api/work-efforts
    Body: { title: "New Feature", objective: "Build X", tickets: [...] }
-   
+
 2. Validation
    └─> validateInput(request.body)
    └─> Check repository exists
    └─> Verify permissions
-   
+
 3. Generate ID
    └─> we_id = generateWorkEffortId()  // "WE-260103-abc1"
-   
+
 4. Create Structure
    └─> Create directory: _work_efforts/WE-260103-abc1_new_feature/
    └─> Create tickets/ subdirectory
    └─> Generate ticket IDs: TKT-abc1-001, TKT-abc1-002, ...
-   
+
 5. Write Files
    └─> Write index.md with frontmatter
    └─> Write ticket files
-   
+
 6. Git Operations (if enabled)
    └─> git checkout develop
    └─> git checkout -b feature/WE-260103-abc1-new_feature
    └─> git add _work_efforts/WE-260103-abc1_new_feature/
    └─> git commit -m "WE-260103-abc1: New Feature"
-   
+
 7. Parse Back (for response)
    └─> we = await parseWorkEffort(indexPath)
-   
+
 8. Transform to DTO
    └─> dto = toWorkEffortDTO(we)
-   
+
 9. HTTP Response
    Status: 201 Created
    Body: { we_id, title, status, path, branch, tickets: [...] }
@@ -777,5 +777,5 @@ function generateTicketId(parentId: string, ticketNumber: number): string
 
 ---
 
-**Status**: ✅ Analysis Complete  
+**Status**: ✅ Analysis Complete
 **Next Iteration**: API Design Specification

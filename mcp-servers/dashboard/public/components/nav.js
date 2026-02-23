@@ -13,6 +13,7 @@
   const currentPath = window.location.pathname;
   const isDocsPage = currentPath.includes('/docs');
   const isDashboard = currentPath === '/' || currentPath === '/index.html';
+  const isSystemPage = currentPath.includes('/system-visualization');
 
   // Render navigation HTML
   function render() {
@@ -31,6 +32,9 @@
           </li>
           <li>
             <a href="/docs/" class="site-nav-link ${isDocsPage ? 'site-nav-link-active' : ''}">Docs</a>
+          </li>
+          <li>
+            <a href="/system-visualization/" class="site-nav-link ${isSystemPage ? 'site-nav-link-active' : ''}">Counter System</a>
           </li>
           <li class="site-nav-status">
             <span class="site-nav-status-dot" id="apiStatusDot"></span>

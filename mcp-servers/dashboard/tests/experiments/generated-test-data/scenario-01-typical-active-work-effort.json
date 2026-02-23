@@ -1,0 +1,133 @@
+{
+  "name": "Typical Active Work Effort",
+  "description": "Single active work effort with 2-3 tickets",
+  "data": {
+    "repos": {
+      "_pyrite": {
+        "workEfforts": [
+          {
+            "id": "WE-260102-test01",
+            "title": "Test Work Effort 1",
+            "status": "active",
+            "format": "mcp",
+            "created": "2026-01-04T14:11:00.440Z",
+            "branch": "feature/WE-260102-test01-slug",
+            "repository": "_pyrite",
+            "tickets": [
+              {
+                "id": "TKT-test01-001",
+                "title": "Ticket 1 for WE 1",
+                "status": "completed",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.438Z",
+                "lastUpdated": "2026-01-04T14:11:00.439Z"
+              },
+              {
+                "id": "TKT-test01-002",
+                "title": "Ticket 2 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.439Z",
+                "lastUpdated": "2026-01-04T14:11:00.439Z"
+              }
+            ],
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          }
+        ],
+        "stats": {
+          "totalWorkEfforts": 1,
+          "activeWorkEfforts": 1,
+          "totalTickets": 2,
+          "completedTickets": 1,
+          "pendingTickets": 1
+        },
+        "error": null,
+        "lastUpdated": "2026-01-04T14:11:00.440Z"
+      }
+    },
+    "workEfforts": [
+      {
+        "id": "WE-260102-test01",
+        "title": "Test Work Effort 1",
+        "status": "active",
+        "format": "mcp",
+        "created": "2026-01-04T14:11:00.440Z",
+        "branch": "feature/WE-260102-test01-slug",
+        "repository": "_pyrite",
+        "tickets": [
+          {
+            "id": "TKT-test01-001",
+            "title": "Ticket 1 for WE 1",
+            "status": "completed",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.438Z",
+            "lastUpdated": "2026-01-04T14:11:00.439Z"
+          },
+          {
+            "id": "TKT-test01-002",
+            "title": "Ticket 2 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.439Z",
+            "lastUpdated": "2026-01-04T14:11:00.439Z"
+          }
+        ],
+        "lastUpdated": "2026-01-04T14:11:00.440Z"
+      }
+    ],
+    "stats": {
+      "totalWorkEfforts": 1,
+      "activeWorkEfforts": 1,
+      "totalTickets": 2,
+      "completedTickets": 1,
+      "pendingTickets": 1
+    },
+    "initMessage": {
+      "type": "init",
+      "repos": {
+        "_pyrite": {
+          "workEfforts": [
+            {
+              "id": "WE-260102-test01",
+              "title": "Test Work Effort 1",
+              "status": "active",
+              "format": "mcp",
+              "created": "2026-01-04T14:11:00.440Z",
+              "branch": "feature/WE-260102-test01-slug",
+              "repository": "_pyrite",
+              "tickets": [
+                {
+                  "id": "TKT-test01-001",
+                  "title": "Ticket 1 for WE 1",
+                  "status": "completed",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.438Z",
+                  "lastUpdated": "2026-01-04T14:11:00.439Z"
+                },
+                {
+                  "id": "TKT-test01-002",
+                  "title": "Ticket 2 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.439Z",
+                  "lastUpdated": "2026-01-04T14:11:00.439Z"
+                }
+              ],
+              "lastUpdated": "2026-01-04T14:11:00.440Z"
+            }
+          ],
+          "stats": {
+            "totalWorkEfforts": 1,
+            "activeWorkEfforts": 1,
+            "totalTickets": 2,
+            "completedTickets": 1,
+            "pendingTickets": 1
+          },
+          "error": null,
+          "lastUpdated": "2026-01-04T14:11:00.440Z"
+        }
+      },
+      "timestamp": "2026-01-04T14:11:00.440Z"
+    }
+  }
+}

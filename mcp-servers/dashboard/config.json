@@ -1,5 +1,5 @@
 {
-  "port": 3847,
+  "port": 3848,
   "repos": [
     {
       "name": "_pyrite",
@@ -8,6 +8,10 @@
     {
       "name": "fogsift",
       "path": "/Users/ctavolazzi/Code/fogsift"
+    },
+    {
+      "name": "waft",
+      "path": "/Users/ctavolazzi/Code/active/waft"
     }
   ],
   "debounceMs": 300

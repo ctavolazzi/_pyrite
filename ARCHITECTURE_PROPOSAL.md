@@ -704,7 +704,7 @@ window.addEventListener('DOMContentLoaded', () => {
 ## File Structure
 
 ```
-mcp-servers/dashboard-v3/
+mcp-servers/dashboard/
 ├── public/
 │   ├── app.js                    # Bootstrap (~250 lines)
 │   ├── index.html

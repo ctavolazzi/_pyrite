@@ -37,7 +37,7 @@ The current demo feature is a hardcoded 10-step walkthrough that demonstrates Mi
 
 **New Files:**
 ```
-mcp-servers/dashboard-v3/services/
+mcp-servers/dashboard/services/
 ├── DemoOrchestrator.js       # Main demo coordination service
 ├── DemoScenarioLoader.js     # Loads and validates demo scenarios
 ├── DemoStateManager.js       # Manages demo state and persistence
@@ -56,7 +56,7 @@ mcp-servers/dashboard-v3/services/
 
 **Demo Scenarios Directory:**
 ```
-mcp-servers/dashboard-v3/demos/
+mcp-servers/dashboard/demos/
 ├── scenarios/
 │   ├── quick-tour.json           # 5-minute overview (default)
 │   ├── full-walkthrough.json     # Current 10-step demo

@@ -8,8 +8,96 @@
  * activity tracking, and interactive visualizations.
  *
  * @author _pyrite
- * @version 0.2.0
+ * @version 0.6.2
  */
+
+// ============================================================================
+// Event Handler Registry - Prevents duplicate handler conflicts
+// ============================================================================
+
+/**
+ * Global registry to track event handlers and prevent conflicts.
+ * Each entry: { elementId: { eventType: { owner: string, count: number } } }
+ */
+const EventHandlerRegistry = {
+  handlers: new Map(),
+
+  /**
+   * Register an event handler attachment
+   * @param {string} elementId - ID of the element
+   * @param {string} eventType - Type of event (e.g., 'click')
+   * @param {string} owner - Name of the system/module attaching the handler
+   * @returns {boolean} true if safe to attach, false if conflict detected
+   */
+  register(elementId, eventType, owner) {
+    const key = `${elementId}:${eventType}`;
+    const existing = this.handlers.get(key);
+
+    if (existing) {
+      console.warn(
+        `[EventHandlerRegistry] CONFLICT DETECTED: ` +
+        `Element "${elementId}" already has a "${eventType}" handler from "${existing.owner}". ` +
+        `Attempted to attach another from "${owner}". ` +
+        `This will cause conflicts!`
+      );
+      return false;
+    }
+
+    this.handlers.set(key, { owner, count: 1 });
+    console.log(`[EventHandlerRegistry] Registered: ${key} → ${owner}`);
+    return true;
+  },
+
+  /**
+   * Check if a handler is already registered
+   * @param {string} elementId - ID of the element
+   * @param {string} eventType - Type of event
+   * @returns {Object|null} Registration info or null if not registered
+   */
+  check(elementId, eventType) {
+    const key = `${elementId}:${eventType}`;
+    return this.handlers.get(key) || null;
+  },
+
+  /**
+   * Get all handlers for an element
+   * @param {string} elementId - ID of the element
+   * @returns {Array} Array of registered handlers
+   */
+  getHandlersForElement(elementId) {
+    const results = [];
+    for (const [key, value] of this.handlers.entries()) {
+      if (key.startsWith(`${elementId}:`)) {
+        results.push({ key, ...value });
+      }
+    }
+    return results;
+  },
+
+  /**
+   * Safely attach an event handler with conflict detection
+   * @param {HTMLElement} element - DOM element
+   * @param {string} eventType - Type of event
+   * @param {Function} handler - Event handler function
+   * @param {string} owner - Name of the module attaching the handler
+   * @returns {boolean} true if handler was attached, false if conflict prevented it
+   */
+  safeAttach(element, eventType, handler, owner) {
+    if (!element || !element.id) {
+      console.warn(`[EventHandlerRegistry] Element must have an ID to use safeAttach`);
+      return false;
+    }
+
+    if (this.register(element.id, eventType, owner)) {
+      element.addEventListener(eventType, handler);
+      return true;
+    }
+    return false;
+  }
+};
+
+// Make registry available globally for other modules
+window.EventHandlerRegistry = EventHandlerRegistry;
 
 /**
  * Main application class for Mission Control dashboard.
@@ -88,8 +176,17 @@ class MissionControl {
     /** @type {Object} DOM element references */
     this.elements = {};
 
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:179',message:'constructor: starting initialization',data:{documentReady:document.readyState},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     this.bindElements();
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:182',message:'constructor: bindElements completed',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     this.bindEvents();
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:185',message:'constructor: bindEvents completed',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     this.initEventSystem();
     this.connect();
     this.startActivityTracking();
@@ -340,7 +437,13 @@ class MissionControl {
     this.elements.activityText = this.elements.activityIndicator?.querySelector('.activity-text');
 
     // Repo Browser
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:431',message:'bindElements: checking for addRepoBtn',data:{documentReady:document.readyState},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     this.elements.addRepoBtn = document.getElementById('addRepoBtn');
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:432',message:'bindElements: addRepoBtn element result',data:{found:!!this.elements.addRepoBtn,elementId:this.elements.addRepoBtn?.id,elementTag:this.elements.addRepoBtn?.tagName},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
     this.elements.addRepoOverlay = document.getElementById('addRepoOverlay');
     this.elements.addRepoClose = document.getElementById('addRepoClose');
     this.elements.addRepoCancel = document.getElementById('addRepoCancel');
@@ -376,8 +479,25 @@ class MissionControl {
 
   bindEvents() {
     // Sidebar toggle
-    this.elements.sidebarToggle?.addEventListener('click', () => this.toggleSidebar());
-    this.elements.mobileMenuBtn?.addEventListener('click', () => this.toggleMobileSidebar());
+    if (this.elements.sidebarToggle) {
+      if (EventHandlerRegistry.register('sidebarToggle', 'click', 'app.js')) {
+        this.elements.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+      }
+    }
+
+    // Mobile menu button - OWNED BY responsive.js (drawer system)
+    // DO NOT attach handlers here - responsive.js manages this element
+    if (this.elements.mobileMenuBtn) {
+      const existing = EventHandlerRegistry.check('mobileMenuBtn', 'click');
+      if (existing) {
+        console.log(`[app.js] mobileMenuBtn click handler already registered by ${existing.owner} - skipping`);
+      } else {
+        console.warn(
+          `[app.js] WARNING: mobileMenuBtn should be handled by responsive.js. ` +
+          `If you see this, responsive.js may not be loaded or initialized.`
+        );
+      }
+    }
 
     // Search
     this.elements.searchInput?.addEventListener('input', (e) => this.handleSearch(e.target.value));
@@ -436,7 +556,36 @@ class MissionControl {
     });
 
     // Repo Browser
-    this.elements.addRepoBtn?.addEventListener('click', () => this.openRepoBrowser());
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:544',message:'bindEvents: attempting to attach click handler',data:{addRepoBtnExists:!!this.elements.addRepoBtn,addRepoBtnId:this.elements.addRepoBtn?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    if (this.elements.addRepoBtn) {
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:547',message:'bindEvents: attaching click handler',data:{success:true},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      this.elements.addRepoBtn.addEventListener('click', (e) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:550',message:'click event fired on addRepoBtn',data:{target:e.target.tagName,currentTarget:e.currentTarget.id,isInsideSidebar:!!e.target.closest('#sidebar')},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+        e.stopPropagation();
+        e.preventDefault();
+        // #region agent log
+        fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:554',message:'click event: stopPropagation and preventDefault called',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+        try {
+          this.openRepoBrowser();
+        } catch (error) {
+          // #region agent log
+          fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:559',message:'error in openRepoBrowser call',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+          // #endregion
+          throw error;
+        }
+      });
+    } else {
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:562',message:'bindEvents: addRepoBtn is null, cannot attach handler',data:{error:'Element not found'},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+    }
     this.elements.addRepoClose?.addEventListener('click', () => this.closeRepoBrowser());
     this.elements.addRepoCancel?.addEventListener('click', () => this.closeRepoBrowser());
     this.elements.addRepoConfirm?.addEventListener('click', () => this.confirmAddRepos());
@@ -1556,26 +1705,82 @@ class MissionControl {
 
   renderTimeTracking(we) {
     const timeCreated = document.getElementById('timeCreated');
+    const timeCreatedDetail = document.getElementById('timeCreatedDetail');
     const timeUpdated = document.getElementById('timeUpdated');
+    const timeUpdatedDetail = document.getElementById('timeUpdatedDetail');
     const timeDuration = document.getElementById('timeDuration');
+    const timeDurationDetail = document.getElementById('timeDurationDetail');
 
-    if (timeCreated) {
-      timeCreated.textContent = we.created ? this.formatRelativeTime(we.created) : '—';
-    }
-    if (timeUpdated) {
-      timeUpdated.textContent = (we.updated || we.lastModified) ? this.formatRelativeTime(we.updated || we.lastModified) : '—';
-    }
-    if (timeDuration) {
-      if (we.created) {
-        const created = new Date(we.created);
-        const now = new Date();
-        const diffMs = now - created;
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        timeDuration.textContent = diffDays > 0 ? `${diffDays}d ${diffHours}h` : `${diffHours}h`;
-      } else {
-        timeDuration.textContent = '—';
+    // Render created time
+    if (timeCreated && we.created) {
+      timeCreated.textContent = this.formatRelativeTime(we.created);
+      if (timeCreatedDetail) {
+        const createdDate = new Date(we.created);
+        timeCreatedDetail.textContent = createdDate.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
       }
+    } else if (timeCreated) {
+      timeCreated.textContent = '—';
+      if (timeCreatedDetail) timeCreatedDetail.textContent = '';
+    }
+
+    // Render updated time
+    const lastModified = we.updated || we.lastModified;
+    if (timeUpdated && lastModified) {
+      timeUpdated.textContent = this.formatRelativeTime(lastModified);
+      if (timeUpdatedDetail) {
+        const updatedDate = new Date(lastModified);
+        timeUpdatedDetail.textContent = updatedDate.toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } else if (timeUpdated) {
+      timeUpdated.textContent = '—';
+      if (timeUpdatedDetail) timeUpdatedDetail.textContent = '';
+    }
+
+    // Render duration
+    if (timeDuration && we.created) {
+      const created = new Date(we.created);
+      const now = new Date();
+      const diffMs = now - created;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+      // Main duration display
+      if (diffDays > 0) {
+        timeDuration.textContent = `${diffDays}d ${diffHours}h`;
+      } else if (diffHours > 0) {
+        timeDuration.textContent = `${diffHours}h ${diffMinutes}m`;
+      } else {
+        timeDuration.textContent = `${diffMinutes}m`;
+      }
+
+      // Detail display with full breakdown
+      if (timeDurationDetail) {
+        const parts = [];
+        if (diffDays > 0) parts.push(`${diffDays} day${diffDays !== 1 ? 's' : ''}`);
+        if (diffHours > 0) parts.push(`${diffHours} hour${diffHours !== 1 ? 's' : ''}`);
+        if (parts.length === 0 || (parts.length === 1 && diffMinutes > 0)) {
+          parts.push(`${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''}`);
+        }
+        timeDurationDetail.textContent = 'Active for ' + parts.join(', ');
+      }
+    } else if (timeDuration) {
+      timeDuration.textContent = '—';
+      if (timeDurationDetail) timeDurationDetail.textContent = '';
     }
   }
 
@@ -1591,23 +1796,40 @@ class MissionControl {
   }
 
   bindDetailEvents() {
-    // Tab switching
+    // Tab switching with proper ARIA attributes
     document.querySelectorAll('.detail-tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        // Remove active state from all tabs and panels
+        document.querySelectorAll('.detail-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.tab-pane').forEach(p => {
+          p.classList.remove('active');
+          p.setAttribute('hidden', '');
+        });
+
+        // Set active state for clicked tab and corresponding panel
         tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
         const pane = document.getElementById(`${tab.dataset.tab}Pane`);
-        if (pane) pane.classList.add('active');
+        if (pane) {
+          pane.classList.add('active');
+          pane.removeAttribute('hidden');
+        }
         this.activeTab = tab.dataset.tab;
       });
     });
 
-    // Ticket filter
+    // Ticket filter with aria-pressed
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
         btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
         this.ticketFilter = btn.dataset.filter;
         if (this.selectedItem) {
           this.renderTicketsTab(this.selectedItem.we, null);
@@ -1627,6 +1849,31 @@ class MissionControl {
     document.getElementById('quickStartBtn')?.addEventListener('click', () => this.changeStatus('active'));
     document.getElementById('quickPauseBtn')?.addEventListener('click', () => this.changeStatus('paused'));
     document.getElementById('quickCompleteBtn')?.addEventListener('click', () => this.changeStatus('completed'));
+
+    // Copy ID button
+    const copyIdBtn = document.getElementById('copyIdBtn');
+    const metaId = document.getElementById('metaId');
+    if (copyIdBtn && metaId) {
+      // Show copy button when there's an ID
+      if (metaId.textContent && metaId.textContent !== '—') {
+        copyIdBtn.style.display = 'inline-flex';
+      }
+
+      copyIdBtn.addEventListener('click', async () => {
+        const idText = metaId.textContent;
+        try {
+          await navigator.clipboard.writeText(idText);
+          this.showToast(`Copied ${idText} to clipboard`, 'success');
+          // Visual feedback
+          copyIdBtn.textContent = '✓';
+          setTimeout(() => {
+            copyIdBtn.innerHTML = '<span aria-hidden="true">📋</span>';
+          }, 1000);
+        } catch (err) {
+          this.showToast('Failed to copy ID', 'error');
+        }
+      });
+    }
 
     // Ticket card events
     this.bindTicketCardEvents();
@@ -2438,9 +2685,8 @@ class MissionControl {
     this.elements.sidebar?.classList.toggle('collapsed');
   }
 
-  toggleMobileSidebar() {
-    this.elements.sidebar?.classList.toggle('open');
-  }
+  // Removed toggleMobileSidebar() - now handled by responsive.js drawer system
+  // The responsive.js system uses data-state attributes, not CSS classes
 
   toggleView(view) {
     document.querySelectorAll('.view-btn').forEach(btn => {
@@ -2773,27 +3019,76 @@ class MissionControl {
   // ============================================================================
 
   async openRepoBrowser() {
-    this.elements.addRepoOverlay?.classList.remove('hidden');
-    this.selectedRepos = new Set();
-    this.updateAddRepoButton();
-    await this.browsePath(this.browserPath);
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:2977',message:'openRepoBrowser: entry',data:{overlayExists:!!this.elements.addRepoOverlay,browserPath:this.browserPath},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    try {
+      if (!this.elements.addRepoOverlay) {
+        // #region agent log
+        fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:2980',message:'openRepoBrowser: overlay element not found',data:{error:'addRepoOverlay is null'},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
+        return;
+      }
+      this.elements.addRepoOverlay.classList.remove('hidden');
+      // Explicitly set visibility and opacity to ensure modal is visible
+      this.elements.addRepoOverlay.style.visibility = 'visible';
+      this.elements.addRepoOverlay.style.opacity = '1';
+      this.elements.addRepoOverlay.style.zIndex = '1001';
+      // Check computed styles after removing hidden class
+      const computedStyle = window.getComputedStyle(this.elements.addRepoOverlay);
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:2991',message:'openRepoBrowser: overlay hidden class removed and styles set',data:{overlayHasHidden:this.elements.addRepoOverlay.classList.contains('hidden'),display:computedStyle.display,visibility:computedStyle.visibility,zIndex:computedStyle.zIndex,opacity:computedStyle.opacity,offsetWidth:this.elements.addRepoOverlay.offsetWidth,offsetHeight:this.elements.addRepoOverlay.offsetHeight},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      this.selectedRepos = new Set();
+      this.updateAddRepoButton();
+      await this.browsePath(this.browserPath);
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:2993',message:'openRepoBrowser: completed successfully',data:{timestamp:Date.now()},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+    } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:2996',message:'openRepoBrowser: error caught',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      throw error;
+    }
   }
 
   closeRepoBrowser() {
-    this.elements.addRepoOverlay?.classList.add('hidden');
+    if (this.elements.addRepoOverlay) {
+      this.elements.addRepoOverlay.classList.add('hidden');
+      // Reset inline styles when closing
+      this.elements.addRepoOverlay.style.visibility = '';
+      this.elements.addRepoOverlay.style.opacity = '';
+      this.elements.addRepoOverlay.style.zIndex = '';
+    }
     this.selectedRepos.clear();
   }
 
   async browsePath(dirPath) {
-    if (!this.elements.browserList) return;
+    // #region agent log
+    fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3067',message:'browsePath: entry',data:{dirPath,browserListExists:!!this.elements.browserList},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+    // #endregion
+    if (!this.elements.browserList) {
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3070',message:'browsePath: browserList element not found',data:{error:'browserList is null'},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      return;
+    }
 
     this.browserPath = dirPath;
     this.elements.browserPath.textContent = dirPath;
     this.elements.browserList.innerHTML = '<div class="browser-loading">Scanning directories...</div>';
 
     try {
-      const res = await fetch(`/api/browse?path=${encodeURIComponent(dirPath)}`);
+      const url = `/api/browse?path=${encodeURIComponent(dirPath)}`;
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3078',message:'browsePath: calling API',data:{url},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      const res = await fetch(url);
       const data = await res.json();
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3082',message:'browsePath: API response received',data:{ok:res.ok,status:res.status,itemsCount:data.items?.length,error:data.error},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
 
       if (!res.ok) {
         this.elements.browserList.innerHTML = `<div class="browser-loading">❌ ${data.error}</div>`;
@@ -2808,7 +3103,7 @@ class MissionControl {
         return;
       }
 
-      this.elements.browserList.innerHTML = data.items.map(item => `
+      const html = data.items.map(item => `
         <div class="browser-item ${item.hasWorkEfforts ? 'has-work-efforts' : ''} ${item.isAdded ? 'already-added' : ''} ${this.selectedRepos.has(item.path) ? 'selected' : ''}"
              data-path="${this.escapeHtml(item.path)}"
              data-selectable="${item.hasWorkEfforts && !item.isAdded}">
@@ -2833,25 +3128,73 @@ class MissionControl {
           </div>
         </div>
       `).join('');
+      this.elements.browserList.innerHTML = html;
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3095',message:'browsePath: rendered items',data:{itemsCount:data.items.length,htmlLength:html.length,browserListChildren:this.elements.browserList.children.length},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
 
       // Bind click events
       this.elements.browserList.querySelectorAll('.browser-item').forEach(item => {
         const checkbox = item.querySelector('.browser-checkbox');
         const itemPath = item.dataset.path;
         const isSelectable = item.dataset.selectable === 'true';
+        // #region agent log
+        fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3137',message:'browsePath: binding click handler to item',data:{itemPath,isSelectable,hasWorkEfforts:item.classList.contains('has-work-efforts'),isAdded:item.classList.contains('already-added')},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
 
+        // Single click - handle selection or navigation
         item.addEventListener('click', (e) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3145',message:'browser-item click fired',data:{target:e.target.tagName,isCheckbox:e.target === checkbox,isIcon:e.target.classList.contains('browser-item-icon'),isName:e.target.classList.contains('browser-item-name'),itemPath,isSelectable},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+          // #endregion
+
+          // If clicking checkbox, let it handle selection via change event
           if (e.target === checkbox) return;
 
-          // If it's a folder without work efforts, navigate into it
-          if (!isSelectable && !item.classList.contains('already-added')) {
+          // If clicking on folder icon or name, navigate into it (for any folder)
+          const clickedIcon = e.target.classList.contains('browser-item-icon') || e.target.closest('.browser-item-icon');
+          const clickedName = e.target.classList.contains('browser-item-name') || e.target.closest('.browser-item-name');
+          const clickedContent = e.target.closest('.browser-item-content');
+
+          if ((clickedIcon || clickedName || clickedContent) && !item.classList.contains('already-added')) {
+            // #region agent log
+            fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3153',message:'browser-item: navigating into folder (clicked icon/name)',data:{itemPath,clickedIcon:!!clickedIcon,clickedName:!!clickedName},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             this.browsePath(itemPath);
             return;
           }
 
-          // Toggle selection
-          if (isSelectable) {
+          // If it's a folder without work efforts, navigate into it on single click
+          if (!isSelectable && !item.classList.contains('already-added')) {
+            // #region agent log
+            fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3162',message:'browser-item: navigating into folder (single click)',data:{itemPath},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            this.browsePath(itemPath);
+            return;
+          }
+
+          // Toggle selection for selectable items (only if not clicking icon/name)
+          if (isSelectable && !clickedIcon && !clickedName && !clickedContent) {
+            // #region agent log
+            fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3171',message:'browser-item: toggling selection',data:{itemPath},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
             this.toggleRepoSelection(itemPath, item, checkbox);
+          }
+        });
+
+        // Double click - always navigate into folder (even if it has work efforts)
+        item.addEventListener('dblclick', (e) => {
+          // #region agent log
+          fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3168',message:'browser-item double-click fired',data:{target:e.target.tagName,itemPath},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+          // #endregion
+          e.preventDefault();
+          e.stopPropagation();
+          // Don't navigate if it's already added (can't navigate into added repos)
+          if (!item.classList.contains('already-added')) {
+            // #region agent log
+            fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3174',message:'browser-item: navigating into folder (double-click)',data:{itemPath},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            this.browsePath(itemPath);
           }
         });
 
@@ -2862,6 +3205,9 @@ class MissionControl {
         });
       });
     } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7247/ingest/3eca269e-8c7f-4a95-ae1b-36c3b83f56e7',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:3148',message:'browsePath: error caught',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       console.error('Browse error:', error);
       this.elements.browserList.innerHTML = '<div class="browser-loading">❌ Failed to load</div>';
     }
@@ -2916,6 +3262,18 @@ class MissionControl {
 
       if (data.added.length > 0) {
         this.notify('success', 'Repos Added', `Added ${data.added.length} repositories`);
+
+        // Refresh repo list and sidebar after adding repos
+        try {
+          const reposRes = await fetch('/api/repos');
+          const reposData = await reposRes.json();
+          if (reposData.repos) {
+            this.repos = reposData.repos;
+            this.render();
+          }
+        } catch (err) {
+          console.error('Failed to refresh repos:', err);
+        }
       }
 
       if (data.errors.length > 0) {

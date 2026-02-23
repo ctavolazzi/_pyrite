@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>_pyrite Mission Control</title>
+  <meta name="description" content="Real-time work effort monitoring and management dashboard for AI-assisted development">
+  <meta name="author" content="ctavolazzi">
+  <meta name="theme-color" content="#0a0806">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="has-sidebar">
+  <!-- Site Navigation (rendered by components/nav.js) -->
+  <div id="site-nav"></div>
+
+  <div class="app">
+    <!-- Sidebar - Tree Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-logo">
+            <span class="brand-gem">◈</span>
+            <div class="brand-glow"></div>
+          </div>
+          <div class="brand-text">
+            <span class="brand-prefix">_pyrite</span>
+            <span class="brand-name">MISSION CONTROL</span>
+          </div>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+          <span class="toggle-icon">◂</span>
+        </button>
+      </div>
+
+      <!-- Tagline -->
+      <div class="brand-tagline">
+        <span class="tagline-text">Work Effort Command Center</span>
+        <button class="info-btn" id="aboutBtn" title="About _pyrite">?</button>
+      </div>
+
+      <!-- Search -->
+      <div class="search-container">
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="searchInput" placeholder="Search work efforts..." autocomplete="off">
+          <button class="search-clear hidden" id="searchClear">×</button>
+        </div>
+        <div class="search-results hidden" id="searchResults"></div>
+      </div>
+
+      <!-- Tree Navigation -->
+      <nav class="tree-nav" id="treeNav">
+        <div class="tree-loading" id="treeLoading">
+          <div class="tree-skeleton"></div>
+          <div class="tree-skeleton"></div>
+          <div class="tree-skeleton"></div>
+        </div>
+        <div class="tree-container" id="treeContainer"></div>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="add-repo-btn" id="addRepoBtn" title="Add Repository">
+          <span class="add-icon">+</span>
+          <span class="add-text">Add Repository</span>
+        </button>
+        <div class="connection-status" id="connectionStatus">
+          <span class="status-indicator"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+        <div class="version-badge">v0.2.0</div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+          <nav class="breadcrumb" id="breadcrumb">
+            <span class="breadcrumb-item active">Command Center</span>
+          </nav>
+        </div>
+        <div class="topbar-right">
+          <!-- Notification Bell -->
+          <div class="notification-bell" id="notificationBell">
+            <button class="bell-btn" id="bellBtn" title="Notifications">
+              <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span class="bell-badge hidden" id="bellBadge">0</span>
+            </button>
+            <div class="notification-panel hidden" id="notificationPanel">
+              <div class="panel-header">
+                <span class="panel-title">Notifications</span>
+                <button class="panel-clear" id="clearAllNotifications">Clear All</button>
+              </div>
+              <div class="panel-body" id="notificationList">
+                <div class="panel-empty">No notifications</div>
+              </div>
+            </div>
+          </div>
+          <!-- Activity Indicator -->
+          <div class="activity-indicator" id="activityIndicator" title="Activity Status">
+            <span class="activity-dot active"></span>
+            <span class="activity-text">Active</span>
+          </div>
+          <div class="view-toggle">
+            <button class="view-btn active" data-view="dashboard" title="Dashboard View">◫</button>
+            <button class="view-btn" data-view="list" title="List View">☰</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard View -->
+      <div class="view dashboard-view active" id="dashboardView">
+        <!-- Hero Banner -->
+        <section class="hero-banner">
+          <div class="hero-content">
+            <div class="hero-ascii">
+╔══════════════════════════════════════════════════════════════════════════╗
+║  ██████╗ ██╗   ██╗██████╗ ██╗████████╗███████╗    ███╗   ███╗ ██████╗    ║
+║  ██╔══██╗╚██╗ ██╔╝██╔══██╗██║╚══██╔══╝██╔════╝    ████╗ ████║██╔════╝    ║
+║  ██████╔╝ ╚████╔╝ ██████╔╝██║   ██║   █████╗      ██╔████╔██║██║         ║
+║  ██╔═══╝   ╚██╔╝  ██╔══██╗██║   ██║   ██╔══╝      ██║╚██╔╝██║██║         ║
+║  ██║        ██║   ██║  ██║██║   ██║   ███████╗    ██║ ╚═╝ ██║╚██████╗    ║
+║  ╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚═╝     ╚═╝ ╚═════╝    ║
+╚══════════════════════════════════════════════════════════════════════════╝
+            </div>
+            <p class="hero-subtitle">Real-time monitoring • Multi-repo support • AI-assisted workflows</p>
+          </div>
+          <button class="hero-dismiss" id="heroDismiss" title="Dismiss">×</button>
+        </section>
+
+        <!-- Stats Overview -->
+        <section class="stats-section">
+          <div class="stat-card" data-stat="repos">
+            <div class="stat-icon">◇</div>
+            <div class="stat-content">
+              <span class="stat-value" id="statRepos">0</span>
+              <span class="stat-label">Repositories</span>
+            </div>
+          </div>
+          <div class="stat-card" data-stat="workEfforts">
+            <div class="stat-icon">◈</div>
+            <div class="stat-content">
+              <span class="stat-value" id="statWorkEfforts">0</span>
+              <span class="stat-label">Work Efforts</span>
+            </div>
+          </div>
+          <div class="stat-card" data-stat="tickets">
+            <div class="stat-icon">▣</div>
+            <div class="stat-content">
+              <span class="stat-value" id="statTickets">0</span>
+              <span class="stat-label">Tickets</span>
+            </div>
+          </div>
+          <div class="stat-card highlight" data-stat="active">
+            <div class="stat-icon pulsing">●</div>
+            <div class="stat-content">
+              <span class="stat-value" id="statActive">0</span>
+              <span class="stat-label">Active</span>
+            </div>
+          </div>
+          <!-- Test System Button -->
+          <div class="stat-card test-card" data-stat="test">
+            <button class="test-btn" id="testSystemBtn" title="Run System Test">
+              <span class="test-icon">⚡</span>
+              <span class="test-label">Test System</span>
+            </button>
+          </div>
+          <!-- Demo Button -->
+          <div class="stat-card demo-card" data-stat="demo">
+            <button class="demo-btn" id="demoBtn" title="Run Live Demo">
+              <span class="demo-icon">▶</span>
+              <span class="demo-label">Live Demo</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Queue Section -->
+        <section class="queue-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-icon">▤</span>
+              Work Queue
+            </h2>
+            <div class="queue-filters">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="active">Active</button>
+              <button class="filter-btn" data-filter="pending">Pending</button>
+              <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+          </div>
+          <div class="queue-container" id="queueContainer">
+            <div class="queue-empty hidden" id="queueEmpty">
+              <div class="empty-icon">◇</div>
+              <p>No work efforts match your filter</p>
+            </div>
+            <div class="queue-list" id="queueList"></div>
+          </div>
+        </section>
+
+        <!-- Footer (rendered by components/footer.js) -->
+        <div id="site-footer"></div>
+      </div>
+
+      <!-- Detail View (shown when clicking a work effort) -->
+      <div class="view detail-view" id="detailView">
+        <!-- Detail Header -->
+        <div class="detail-header">
+          <div class="detail-header-left">
+            <button class="back-btn" id="backBtn">← Back</button>
+            <div class="detail-title-area">
+              <h1 class="detail-title" id="detailTitle">Work Effort</h1>
+              <div class="detail-meta" id="detailMeta">
+                <!-- ID, repo, format badges -->
+              </div>
+            </div>
+          </div>
+          <div class="detail-header-right">
+            <div class="detail-progress-mini" id="detailProgressMini">
+              <span class="progress-text">0/0</span>
+              <div class="progress-bar-mini"><div class="progress-fill-mini"></div></div>
+            </div>
+            <div class="detail-status-controls" id="detailStatusControls">
+              <button class="status-btn pending" data-status="pending" title="Set Pending">○ Pending</button>
+              <button class="status-btn active" data-status="active" title="Set Active">▶ Active</button>
+              <button class="status-btn paused" data-status="paused" title="Set Paused">‖ Paused</button>
+              <button class="status-btn completed" data-status="completed" title="Set Completed">✓ Done</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Body - Three Column Layout -->
+        <div class="detail-body">
+          <!-- Left Panel: Stats Dashboard -->
+          <aside class="detail-panel detail-panel-left" id="detailPanelLeft">
+            <!-- Progress Ring -->
+            <div class="panel-section stat-highlight">
+              <div class="progress-ring-container" id="progressRingContainer">
+                <!-- Chart.js renders here -->
+              </div>
+              <div class="stat-row">
+                <div class="mini-stat">
+                  <span class="mini-stat-value" id="ticketsCompleted">0</span>
+                  <span class="mini-stat-label">Done</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-value" id="ticketsInProgress">0</span>
+                  <span class="mini-stat-label">Active</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-value" id="ticketsPending">0</span>
+                  <span class="mini-stat-label">Queue</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ticket Distribution Chart -->
+            <div class="panel-section">
+              <h3 class="panel-title">▣ Ticket Distribution</h3>
+              <div class="chart-container" id="ticketDistributionChart">
+                <!-- Donut chart renders here -->
+              </div>
+            </div>
+
+            <!-- Metadata -->
+            <div class="panel-section">
+              <h3 class="panel-title">◈ Details</h3>
+              <div class="metadata-grid" id="metadataGrid">
+                <div class="metadata-item">
+                  <span class="meta-label">ID</span>
+                  <span class="meta-value" id="metaId">—</span>
+                </div>
+                <div class="metadata-item">
+                  <span class="meta-label">Repository</span>
+                  <span class="meta-value" id="metaRepo">—</span>
+                </div>
+                <div class="metadata-item">
+                  <span class="meta-label">Format</span>
+                  <span class="meta-value" id="metaFormat">—</span>
+                </div>
+                <div class="metadata-item">
+                  <span class="meta-label">Branch</span>
+                  <span class="meta-value" id="metaBranch">—</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Velocity Stats -->
+            <div class="panel-section">
+              <h3 class="panel-title">⚡ Velocity</h3>
+              <div class="velocity-stats">
+                <div class="velocity-item">
+                  <span class="velocity-value" id="velocityRate">—</span>
+                  <span class="velocity-label">tickets/day</span>
+                </div>
+                <div class="velocity-item">
+                  <span class="velocity-value" id="velocityEta">—</span>
+                  <span class="velocity-label">est. complete</span>
+                </div>
+              </div>
+              <div class="velocity-sparkline" id="velocitySparkline">
+                <!-- Sparkline renders here -->
+              </div>
+            </div>
+
+            <!-- Agent Control -->
+            <div class="panel-section">
+              <h3 class="panel-title">◎ Agent</h3>
+              <div class="agent-control" id="agentControl">
+                <div class="agent-status">
+                  <span class="agent-indicator idle"></span>
+                  <span class="agent-label">No agent assigned</span>
+                </div>
+                <button class="agent-btn" id="assignAgentBtn">Assign Agent</button>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Center Panel: Main Content -->
+          <main class="detail-panel detail-panel-center" id="detailPanelCenter">
+            <!-- Tabs -->
+            <div class="detail-tabs">
+              <button class="detail-tab active" data-tab="tickets">▣ Tickets</button>
+              <button class="detail-tab" data-tab="description">▤ Description</button>
+              <button class="detail-tab" data-tab="activity">▥ Activity</button>
+              <button class="detail-tab" data-tab="files">▦ Files</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="detail-tab-content">
+              <!-- Tickets Tab -->
+              <div class="tab-pane active" id="ticketsPane">
+                <div class="tickets-header">
+                  <div class="tickets-filter">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="in_progress">In Progress</button>
+                    <button class="filter-btn" data-filter="completed">Done</button>
+                    <button class="filter-btn" data-filter="blocked">Blocked</button>
+                  </div>
+                  <button class="add-ticket-btn" id="addTicketBtn" title="Add New Ticket">+ Add Ticket</button>
+                </div>
+                <div class="tickets-list" id="ticketsList">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Description Tab -->
+              <div class="tab-pane" id="descriptionPane">
+                <div class="description-content" id="descriptionContent">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Activity Tab -->
+              <div class="tab-pane" id="activityPane">
+                <div class="activity-timeline" id="activityTimeline">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+
+              <!-- Files Tab -->
+              <div class="tab-pane" id="filesPane">
+                <div class="files-list" id="filesList">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <!-- Right Panel: Actions, Stats & Insights -->
+          <aside class="detail-panel detail-panel-right" id="detailPanelRight">
+            <!-- Quick Actions -->
+            <div class="panel-section">
+              <h3 class="panel-title">⚡ Actions</h3>
+              <div class="action-grid">
+                <button class="action-btn-grid" id="quickStartBtn">
+                  <span class="action-icon">▶</span>
+                  <span class="action-text">Start</span>
+                </button>
+                <button class="action-btn-grid" id="quickPauseBtn">
+                  <span class="action-icon">‖</span>
+                  <span class="action-text">Pause</span>
+                </button>
+                <button class="action-btn-grid success" id="quickCompleteBtn">
+                  <span class="action-icon">✓</span>
+                  <span class="action-text">Done</span>
+                </button>
+                <button class="action-btn-grid warning" id="quickArchiveBtn">
+                  <span class="action-icon">◫</span>
+                  <span class="action-text">Archive</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Status Timeline Chart -->
+            <div class="panel-section">
+              <h3 class="panel-title">◇ Progress Over Time</h3>
+              <div class="chart-container chart-line-container" id="progressLineChart">
+                <!-- Line chart renders here -->
+              </div>
+            </div>
+
+            <!-- Time Stats -->
+            <div class="panel-section">
+              <h3 class="panel-title">◷ Time</h3>
+              <div class="time-grid">
+                <div class="time-card">
+                  <span class="time-icon">◫</span>
+                  <div class="time-content">
+                    <span class="time-value" id="timeCreated">—</span>
+                    <span class="time-label">Created</span>
+                  </div>
+                </div>
+                <div class="time-card">
+                  <span class="time-icon">◰</span>
+                  <div class="time-content">
+                    <span class="time-value" id="timeUpdated">—</span>
+                    <span class="time-label">Updated</span>
+                  </div>
+                </div>
+                <div class="time-card highlight">
+                  <span class="time-icon">◷</span>
+                  <div class="time-content">
+                    <span class="time-value" id="timeDuration">—</span>
+                    <span class="time-label">Duration</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity Heatmap -->
+            <div class="panel-section">
+              <h3 class="panel-title">▧ Activity</h3>
+              <div class="chart-container" id="activityHeatmap">
+                <!-- Heatmap renders here -->
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="panel-section">
+              <h3 class="panel-title">▨ Tags</h3>
+              <div class="tags-list" id="tagsList">
+                <span class="tag">work-effort</span>
+                <button class="tag-add" title="Add Tag">+</button>
+              </div>
+            </div>
+
+            <!-- Related Work -->
+            <div class="panel-section">
+              <h3 class="panel-title">◇ Related</h3>
+              <div class="related-list" id="relatedList">
+                <p class="panel-empty">No related work efforts</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Demo Progress Panel -->
+    <div class="demo-panel hidden" id="demoPanel">
+      <div class="demo-panel-header">
+        <span class="demo-panel-title">▶ Live Demo in Progress</span>
+        <button class="demo-panel-close" id="demoPanelClose">×</button>
+      </div>
+      <div class="demo-panel-steps" id="demoPanelSteps">
+        <!-- Steps will be inserted here -->
+      </div>
+      <div class="demo-panel-footer" id="demoPanelFooter">
+        <span class="demo-status">Initializing...</span>
+      </div>
+    </div>
+
+    <!-- Test Results Panel -->
+    <div class="test-results hidden" id="testResults">
+      <div class="test-results-header">
+        <span class="test-results-title">⚡ System Test Results</span>
+        <button class="test-results-close" id="testResultsClose">×</button>
+      </div>
+      <div class="test-results-body" id="testResultsBody">
+        <!-- Test items will be inserted here -->
+      </div>
+      <div class="test-results-summary" id="testResultsSummary">
+        <span class="test-summary-text">Running tests...</span>
+        <span class="test-summary-result"></span>
+      </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal-overlay hidden" id="aboutOverlay">
+      <div class="modal about-modal">
+        <div class="modal-header">
+          <h3 class="modal-title">◈ About _pyrite Mission Control</h3>
+          <button class="modal-close" id="aboutClose">×</button>
+        </div>
+        <div class="modal-body about-body">
+          <div class="about-logo">
+            <span class="about-gem">◈</span>
+            <div class="about-gem-glow"></div>
+          </div>
+          <h2 class="about-name">_pyrite</h2>
+          <p class="about-meaning">"Fool's gold" — shiny, promising, experimental.</p>
+          <p class="about-meaning">Not everything will pan out, and that's okay.</p>
+
+          <div class="about-section">
+            <h4>What is this?</h4>
+            <p>A real-time command center for monitoring and managing AI-assisted development workflows across multiple repositories.</p>
+          </div>
+
+          <div class="about-section">
+            <h4>Features</h4>
+            <ul class="about-features">
+              <li>◈ Real-time WebSocket updates</li>
+              <li>◇ Tree navigation across repos</li>
+              <li>◉ Smart notification routing</li>
+              <li>◆ Event-driven animations</li>
+              <li>◫ Multi-repository support</li>
+              <li>◎ Global search</li>
+            </ul>
+          </div>
+
+          <div class="about-section">
+            <h4>Work Effort Formats Supported</h4>
+            <ul class="about-features">
+              <li><code>WE-YYMMDD-xxxx</code> — MCP v0.3.0</li>
+              <li><code>XX-XX_category</code> — Johnny Decimal</li>
+            </ul>
+          </div>
+
+          <div class="about-footer">
+            <span class="about-version">Version 0.2.0</span>
+            <span class="about-author">Built with ◈ by ctavolazzi</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modalTitle">Work Effort</h3>
+          <button class="modal-close" id="modalClose">×</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer">
+          <button class="modal-btn secondary" id="modalDismiss">Dismiss</button>
+          <button class="modal-btn primary" id="modalOpen">Open Full View</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Repo Modal -->
+    <div class="modal-overlay hidden" id="addRepoOverlay">
+      <div class="modal repo-form-modal">
+        <div class="modal-header">
+          <h3 class="modal-title">◫ Add Repository</h3>
+          <button class="modal-close" id="addRepoClose">×</button>
+        </div>
+        <div class="modal-body">
+          <form id="addRepoForm">
+            <div class="form-group">
+              <label for="repoName">Repository Name</label>
+              <input
+                type="text"
+                id="repoName"
+                name="name"
+                placeholder="e.g., waft"
+                required
+                autocomplete="off">
+              <small class="form-hint">Display name for this repository</small>
+            </div>
+            <div class="form-group">
+              <label for="repoPath">Repository Path</label>
+              <div class="path-input-group">
+                <input
+                  type="text"
+                  id="repoPath"
+                  name="path"
+                  placeholder="/Users/ctavolazzi/Code/active/waft"
+                  required
+                  autocomplete="off"
+                  readonly>
+                <button type="button" class="browse-btn" id="browsePathBtn">Browse...</button>
+              </div>
+              <small class="form-hint">Click "Browse..." to select a directory, or enter path manually</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn secondary" id="addRepoCancel">Cancel</button>
+          <button class="modal-btn primary" id="addRepoConfirm" type="submit" form="addRepoForm">Add Repository</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Components -->
+  <script src="components/nav.js"></script>
+  <script src="components/footer.js"></script>
+
+  <!-- App Scripts -->
+  <script src="datastore.js"></script>
+  <script src="charts.js"></script>
+  <script src="events.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+{
+  "timestamp": "2026-01-04T14:11:21.306Z",
+  "steps": [
+    {
+      "step": 1,
+      "name": "File System → Parser",
+      "input": {
+        "type": "file_system",
+        "path": "/Users/ctavolazzi/Code/active/_pyrite"
+      },
+      "output": {
+        "type": "parse_result",
+        "workEffortCount": 26,
+        "error": null
+      },
+      "dataSample": [
+        {
+          "id": "WE-251221-0b46",
+          "title": "Stage 2 Testing Infrastructure",
+          "status": "completed",
+          "ticketCount": 5
+        },
+        {
+          "id": "WE-251221-2829",
+          "title": "Update System User Documentation",
+          "status": "completed",
+          "ticketCount": 4
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "name": "Parser → Stats",
+      "input": {
+        "type": "work_efforts",
+        "count": 26
+      },
+      "output": {
+        "type": "repo_stats",
+        "stats": {
+          "total": 26,
+          "byFormat": {
+            "mcp": 26,
+            "jd": 0
+          },
+          "byStatus": {
+            "completed": 17,
+            "active": 8,
+            "in_progress": 1
+          },
+          "totalTickets": 207,
+          "ticketsByStatus": {
+            "completed": 108,
+            "pending": 98,
+            "in_progress": 1
+          }
+        }
+      }
+    },
+    {
+      "step": 3,
+      "name": "Stats → Server State",
+      "input": {
+        "type": "work_efforts_and_stats",
+        "workEffortCount": 26
+      },
+      "output": {
+        "type": "server_state",
+        "repoName": "_pyrite",
+        "workEffortCount": 26,
+        "stats": {
+          "total": 26,
+          "byFormat": {
+            "mcp": 26,
+            "jd": 0
+          },
+          "byStatus": {
+            "completed": 17,
+            "active": 8,
+            "in_progress": 1
+          },
+          "totalTickets": 207,
+          "ticketsByStatus": {
+            "completed": 108,
+            "pending": 98,
+            "in_progress": 1
+          }
+        }
+      }
+    },
+    {
+      "step": 4,
+      "name": "Server State → WebSocket Message",
+      "input": {
+        "type": "server_state",
+        "workEffortCount": 26
+      },
+      "output": {
+        "type": "websocket_message",
+        "messageType": "init",
+        "repoCount": 1,
+        "serializedSize": 67139
+      }
+    },
+    {
+      "step": 5,
+      "name": "WebSocket → Client State",
+      "input": {
+        "type": "websocket_message",
+        "messageType": "init"
+      },
+      "output": {
+        "type": "client_state",
+        "repoName": "_pyrite",
+        "workEffortCount": 26,
+        "stats": {
+          "total": 26,
+          "byFormat": {
+            "mcp": 26,
+            "jd": 0
+          },
+          "byStatus": {
+            "completed": 17,
+            "active": 8,
+            "in_progress": 1
+          },
+          "totalTickets": 207,
+          "ticketsByStatus": {
+            "completed": 108,
+            "pending": 98,
+            "in_progress": 1
+          }
+        }
+      }
+    },
+    {
+      "step": 6,
+      "name": "Client State → Events",
+      "input": {
+        "type": "client_state",
+        "workEffortCount": 26
+      },
+      "output": {
+        "type": "events",
+        "eventCount": 1,
+        "eventTypes": [
+          "system:connected"
+        ]
+      }
+    },
+    {
+      "step": 7,
+      "name": "Update Flow",
+      "input": {
+        "type": "update_message",
+        "workEffortCount": 1
+      },
+      "output": {
+        "type": "update_events",
+        "eventCount": 0,
+        "eventTypes": []
+      }
+    }
+  ]
+}

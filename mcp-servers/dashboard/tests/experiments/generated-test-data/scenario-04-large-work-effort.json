@@ -1,0 +1,901 @@
+{
+  "name": "Large Work Effort",
+  "description": "Work effort with 34 tickets (matching real max)",
+  "data": {
+    "repos": {
+      "_pyrite": {
+        "workEfforts": [
+          {
+            "id": "WE-260102-test01",
+            "title": "Test Work Effort 1",
+            "status": "active",
+            "format": "mcp",
+            "created": "2026-01-04T14:11:00.440Z",
+            "branch": "feature/WE-260102-test01-slug",
+            "repository": "_pyrite",
+            "tickets": [
+              {
+                "id": "TKT-test01-001",
+                "title": "Ticket 1 for WE 1",
+                "status": "completed",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-002",
+                "title": "Ticket 2 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-003",
+                "title": "Ticket 3 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-004",
+                "title": "Ticket 4 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-005",
+                "title": "Ticket 5 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-006",
+                "title": "Ticket 6 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-007",
+                "title": "Ticket 7 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-008",
+                "title": "Ticket 8 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-009",
+                "title": "Ticket 9 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-010",
+                "title": "Ticket 10 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-011",
+                "title": "Ticket 11 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-012",
+                "title": "Ticket 12 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-013",
+                "title": "Ticket 13 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-014",
+                "title": "Ticket 14 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-015",
+                "title": "Ticket 15 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-016",
+                "title": "Ticket 16 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-017",
+                "title": "Ticket 17 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-018",
+                "title": "Ticket 18 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-019",
+                "title": "Ticket 19 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-020",
+                "title": "Ticket 20 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-021",
+                "title": "Ticket 21 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-022",
+                "title": "Ticket 22 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-023",
+                "title": "Ticket 23 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-024",
+                "title": "Ticket 24 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-025",
+                "title": "Ticket 25 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-026",
+                "title": "Ticket 26 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-027",
+                "title": "Ticket 27 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-028",
+                "title": "Ticket 28 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-029",
+                "title": "Ticket 29 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-030",
+                "title": "Ticket 30 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-031",
+                "title": "Ticket 31 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-032",
+                "title": "Ticket 32 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-033",
+                "title": "Ticket 33 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              },
+              {
+                "id": "TKT-test01-034",
+                "title": "Ticket 34 for WE 1",
+                "status": "pending",
+                "workEffortId": "WE-260102-test01",
+                "created": "2026-01-04T14:11:00.440Z",
+                "lastUpdated": "2026-01-04T14:11:00.440Z"
+              }
+            ],
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          }
+        ],
+        "stats": {
+          "totalWorkEfforts": 1,
+          "activeWorkEfforts": 1,
+          "totalTickets": 34,
+          "completedTickets": 1,
+          "pendingTickets": 33
+        },
+        "error": null,
+        "lastUpdated": "2026-01-04T14:11:00.441Z"
+      }
+    },
+    "workEfforts": [
+      {
+        "id": "WE-260102-test01",
+        "title": "Test Work Effort 1",
+        "status": "active",
+        "format": "mcp",
+        "created": "2026-01-04T14:11:00.440Z",
+        "branch": "feature/WE-260102-test01-slug",
+        "repository": "_pyrite",
+        "tickets": [
+          {
+            "id": "TKT-test01-001",
+            "title": "Ticket 1 for WE 1",
+            "status": "completed",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-002",
+            "title": "Ticket 2 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-003",
+            "title": "Ticket 3 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-004",
+            "title": "Ticket 4 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-005",
+            "title": "Ticket 5 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-006",
+            "title": "Ticket 6 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-007",
+            "title": "Ticket 7 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-008",
+            "title": "Ticket 8 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-009",
+            "title": "Ticket 9 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-010",
+            "title": "Ticket 10 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-011",
+            "title": "Ticket 11 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-012",
+            "title": "Ticket 12 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-013",
+            "title": "Ticket 13 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-014",
+            "title": "Ticket 14 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-015",
+            "title": "Ticket 15 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-016",
+            "title": "Ticket 16 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-017",
+            "title": "Ticket 17 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-018",
+            "title": "Ticket 18 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-019",
+            "title": "Ticket 19 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-020",
+            "title": "Ticket 20 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-021",
+            "title": "Ticket 21 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-022",
+            "title": "Ticket 22 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-023",
+            "title": "Ticket 23 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-024",
+            "title": "Ticket 24 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-025",
+            "title": "Ticket 25 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-026",
+            "title": "Ticket 26 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-027",
+            "title": "Ticket 27 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-028",
+            "title": "Ticket 28 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-029",
+            "title": "Ticket 29 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-030",
+            "title": "Ticket 30 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-031",
+            "title": "Ticket 31 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-032",
+            "title": "Ticket 32 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-033",
+            "title": "Ticket 33 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          },
+          {
+            "id": "TKT-test01-034",
+            "title": "Ticket 34 for WE 1",
+            "status": "pending",
+            "workEffortId": "WE-260102-test01",
+            "created": "2026-01-04T14:11:00.440Z",
+            "lastUpdated": "2026-01-04T14:11:00.440Z"
+          }
+        ],
+        "lastUpdated": "2026-01-04T14:11:00.440Z"
+      }
+    ],
+    "stats": {
+      "totalWorkEfforts": 1,
+      "activeWorkEfforts": 1,
+      "totalTickets": 34,
+      "completedTickets": 1,
+      "pendingTickets": 33
+    },
+    "initMessage": {
+      "type": "init",
+      "repos": {
+        "_pyrite": {
+          "workEfforts": [
+            {
+              "id": "WE-260102-test01",
+              "title": "Test Work Effort 1",
+              "status": "active",
+              "format": "mcp",
+              "created": "2026-01-04T14:11:00.440Z",
+              "branch": "feature/WE-260102-test01-slug",
+              "repository": "_pyrite",
+              "tickets": [
+                {
+                  "id": "TKT-test01-001",
+                  "title": "Ticket 1 for WE 1",
+                  "status": "completed",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-002",
+                  "title": "Ticket 2 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-003",
+                  "title": "Ticket 3 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-004",
+                  "title": "Ticket 4 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-005",
+                  "title": "Ticket 5 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-006",
+                  "title": "Ticket 6 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-007",
+                  "title": "Ticket 7 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-008",
+                  "title": "Ticket 8 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-009",
+                  "title": "Ticket 9 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-010",
+                  "title": "Ticket 10 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-011",
+                  "title": "Ticket 11 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-012",
+                  "title": "Ticket 12 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-013",
+                  "title": "Ticket 13 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-014",
+                  "title": "Ticket 14 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-015",
+                  "title": "Ticket 15 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-016",
+                  "title": "Ticket 16 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-017",
+                  "title": "Ticket 17 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-018",
+                  "title": "Ticket 18 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-019",
+                  "title": "Ticket 19 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-020",
+                  "title": "Ticket 20 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-021",
+                  "title": "Ticket 21 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-022",
+                  "title": "Ticket 22 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-023",
+                  "title": "Ticket 23 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-024",
+                  "title": "Ticket 24 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-025",
+                  "title": "Ticket 25 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-026",
+                  "title": "Ticket 26 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-027",
+                  "title": "Ticket 27 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-028",
+                  "title": "Ticket 28 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-029",
+                  "title": "Ticket 29 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-030",
+                  "title": "Ticket 30 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-031",
+                  "title": "Ticket 31 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-032",
+                  "title": "Ticket 32 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-033",
+                  "title": "Ticket 33 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                },
+                {
+                  "id": "TKT-test01-034",
+                  "title": "Ticket 34 for WE 1",
+                  "status": "pending",
+                  "workEffortId": "WE-260102-test01",
+                  "created": "2026-01-04T14:11:00.440Z",
+                  "lastUpdated": "2026-01-04T14:11:00.440Z"
+                }
+              ],
+              "lastUpdated": "2026-01-04T14:11:00.440Z"
+            }
+          ],
+          "stats": {
+            "totalWorkEfforts": 1,
+            "activeWorkEfforts": 1,
+            "totalTickets": 34,
+            "completedTickets": 1,
+            "pendingTickets": 33
+          },
+          "error": null,
+          "lastUpdated": "2026-01-04T14:11:00.441Z"
+        }
+      },
+      "timestamp": "2026-01-04T14:11:00.441Z"
+    }
+  }
+}

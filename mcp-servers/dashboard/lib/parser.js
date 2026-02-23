@@ -6,7 +6,7 @@
  * - Johnny Decimal: XX-XX_category/XX_subcategory/XX.XX_document.md
  *
  * @author _pyrite
- * @version 0.2.0
+ * @version 0.6.2
  */
 
 import fs from 'fs/promises';

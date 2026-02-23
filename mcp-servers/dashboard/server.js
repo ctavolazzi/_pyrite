@@ -7,7 +7,7 @@
  * (Johnny Decimal + MCP v0.3.0).
  *
  * @author _pyrite
- * @version 0.2.0
+ * @version 0.6.2
  */
 
 import express from 'express';
@@ -590,6 +590,135 @@ app.delete('/api/demo/cleanup', async (req, res) => {
     res.json({ success: true, cleaned });
   } catch (error) {
     logger.error({ err: error }, 'Error cleaning up demos');
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================================================
+// Counter System API
+// ============================================================================
+
+// Get counter system statistics
+app.get('/api/counter/stats', async (req, res) => {
+  try {
+    const { getCounterSystem } = await import('./lib/counter-system/index.js');
+    const counter = await getCounterSystem();
+    const stats = counter.getStatistics();
+    res.json(stats);
+  } catch (error) {
+    logger.error({ err: error }, 'Error fetching counter stats');
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get audit log
+app.get('/api/counter/audit', async (req, res) => {
+  try {
+    const { getCounterSystem } = await import('./lib/counter-system/index.js');
+    const counter = await getCounterSystem();
+    const limit = parseInt(req.query.limit) || 100;
+    const audit = counter.getAuditLog(limit);
+    res.json(audit);
+  } catch (error) {
+    logger.error({ err: error }, 'Error fetching audit log');
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Run validation
+app.get('/api/counter/validate', async (req, res) => {
+  try {
+    const { getCounterSystem } = await import('./lib/counter-system/index.js');
+    const CounterValidator = (await import('./lib/counter-system/validator.js')).default;
+
+    const counter = await getCounterSystem();
+    const repoPath = config.repos[0]?.path;
+
+    if (!repoPath) {
+      return res.status(400).json({ error: 'No repository configured' });
+    }
+
+    const workEffortsPath = path.join(repoPath, '_work_efforts');
+    const validator = new CounterValidator(counter, workEffortsPath);
+
+    const results = await validator.validate();
+    res.json(results);
+  } catch (error) {
+    logger.error({ err: error }, 'Error validating counters');
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Auto-repair counters
+app.post('/api/counter/repair', async (req, res) => {
+  try {
+    const { getCounterSystem } = await import('./lib/counter-system/index.js');
+    const CounterValidator = (await import('./lib/counter-system/validator.js')).default;
+
+    const counter = await getCounterSystem();
+    const repoPath = config.repos[0]?.path;
+
+    if (!repoPath) {
+      return res.status(400).json({ error: 'No repository configured' });
+    }
+
+    const workEffortsPath = path.join(repoPath, '_work_efforts');
+    const validator = new CounterValidator(counter, workEffortsPath);
+
+    const validationResults = req.body;
+    const repairs = await validator.autoRepair(validationResults);
+
+    res.json(repairs);
+  } catch (error) {
+    logger.error({ err: error }, 'Error repairing counters');
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Preview migration
+app.get('/api/counter/migrate/preview', async (req, res) => {
+  try {
+    const { getCounterSystem } = await import('./lib/counter-system/index.js');
+    const CounterMigrator = (await import('./lib/counter-system/migrator.js')).default;
+
+    const counter = await getCounterSystem();
+    const repoPath = config.repos[0]?.path;
+
+    if (!repoPath) {
+      return res.status(400).json({ error: 'No repository configured' });
+    }
+
+    const workEffortsPath = path.join(repoPath, '_work_efforts');
+    const migrator = new CounterMigrator(counter, workEffortsPath);
+
+    const preview = await migrator.previewMigration();
+    res.json(preview);
+  } catch (error) {
+    logger.error({ err: error }, 'Error previewing migration');
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Run migration
+app.post('/api/counter/migrate', async (req, res) => {
+  try {
+    const { getCounterSystem } = await import('./lib/counter-system/index.js');
+    const CounterMigrator = (await import('./lib/counter-system/migrator.js')).default;
+
+    const counter = await getCounterSystem();
+    const repoPath = config.repos[0]?.path;
+
+    if (!repoPath) {
+      return res.status(400).json({ error: 'No repository configured' });
+    }
+
+    const workEffortsPath = path.join(repoPath, '_work_efforts');
+    const migrator = new CounterMigrator(counter, workEffortsPath);
+
+    const results = await migrator.migrate();
+    res.json(results);
+  } catch (error) {
+    logger.error({ err: error }, 'Error running migration');
     res.status(500).json({ error: error.message });
   }
 });

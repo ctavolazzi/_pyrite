@@ -11,16 +11,29 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Legacy styles (loaded first, will be gradually removed) -->
   <link rel="stylesheet" href="styles.css">
+  <!-- V3 Modular CSS (loaded last to override legacy) -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- Detail View Improvements -->
+  <link rel="stylesheet" href="styles/detail-view-improvements.css">
 </head>
 <body class="has-sidebar">
+  <!-- Skip Link for Accessibility -->
+  <a href="#mainContent" class="skip-link">Skip to main content</a>
+
   <!-- Site Navigation (rendered by components/nav.js) -->
   <div id="site-nav"></div>
 
-  <div class="app">
+  <!-- Drawer Backdrop (mobile only) -->
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+
+  <div class="app" data-sidebar="expanded">
     <!-- Sidebar - Tree Navigation -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" data-state="expanded" aria-hidden="false" role="complementary" aria-label="Repository navigation">
       <div class="sidebar-header">
+        <!-- Mobile close button -->
+        <button class="sidebar-close" id="sidebarClose" title="Close sidebar" aria-label="Close sidebar">×</button>
         <div class="brand">
           <div class="brand-logo">
             <span class="brand-gem">◈</span>
@@ -31,7 +44,7 @@
             <span class="brand-name">MISSION CONTROL</span>
           </div>
         </div>
-        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+        <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar" aria-label="Toggle sidebar">
           <span class="toggle-icon">◂</span>
         </button>
       </div>
@@ -72,7 +85,7 @@
           <span class="status-indicator"></span>
           <span class="status-text">Connecting...</span>
         </div>
-        <div class="version-badge">v0.2.0</div>
+        <div class="version-badge">v0.6.2</div>
       </div>
     </aside>
 
@@ -123,15 +136,9 @@
         <!-- Hero Banner -->
         <section class="hero-banner">
           <div class="hero-content">
-            <div class="hero-ascii">
-╔══════════════════════════════════════════════════════════════════════════╗
-║  ██████╗ ██╗   ██╗██████╗ ██╗████████╗███████╗    ███╗   ███╗ ██████╗    ║
-║  ██╔══██╗╚██╗ ██╔╝██╔══██╗██║╚══██╔══╝██╔════╝    ████╗ ████║██╔════╝    ║
-║  ██████╔╝ ╚████╔╝ ██████╔╝██║   ██║   █████╗      ██╔████╔██║██║         ║
-║  ██╔═══╝   ╚██╔╝  ██╔══██╗██║   ██║   ██╔══╝      ██║╚██╔╝██║██║         ║
-║  ██║        ██║   ██║  ██║██║   ██║   ███████╗    ██║ ╚═╝ ██║╚██████╗    ║
-║  ╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚═╝     ╚═╝ ╚═════╝    ║
-╚══════════════════════════════════════════════════════════════════════════╝
+            <div class="hero-title">
+              <span class="hero-gem">◈</span>
+              <span class="hero-name">_pyrite</span>
             </div>
             <p class="hero-subtitle">Real-time monitoring • Multi-repo support • AI-assisted workflows</p>
           </div>
@@ -206,67 +213,103 @@
             <div class="queue-list" id="queueList"></div>
           </div>
         </section>
-
-        <!-- Footer (rendered by components/footer.js) -->
-        <div id="site-footer"></div>
       </div>
 
       <!-- Detail View (shown when clicking a work effort) -->
-      <div class="view detail-view" id="detailView">
+      <div class="view detail-view" id="detailView" role="main" aria-label="Work Effort Details">
         <!-- Detail Header -->
-        <div class="detail-header">
+        <header class="detail-header">
           <div class="detail-header-left">
-            <button class="back-btn" id="backBtn">← Back</button>
+            <button class="back-btn" id="backBtn" aria-label="Back to dashboard">
+              <span aria-hidden="true">←</span> Back
+            </button>
             <div class="detail-title-area">
               <h1 class="detail-title" id="detailTitle">Work Effort</h1>
-              <div class="detail-meta" id="detailMeta">
+              <div class="detail-meta" id="detailMeta" role="list" aria-label="Work effort metadata">
                 <!-- ID, repo, format badges -->
               </div>
             </div>
           </div>
           <div class="detail-header-right">
-            <div class="detail-progress-mini" id="detailProgressMini">
-              <span class="progress-text">0/0</span>
-              <div class="progress-bar-mini"><div class="progress-fill-mini"></div></div>
+            <div class="detail-progress-mini" id="detailProgressMini" role="status" aria-label="Progress summary">
+              <span class="progress-text" id="progressText">0/0</span>
+              <div class="progress-bar-mini" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-fill-mini"></div>
+              </div>
             </div>
-            <div class="detail-status-controls" id="detailStatusControls">
-              <button class="status-btn pending" data-status="pending" title="Set Pending">○ Pending</button>
-              <button class="status-btn active" data-status="active" title="Set Active">▶ Active</button>
-              <button class="status-btn paused" data-status="paused" title="Set Paused">‖ Paused</button>
-              <button class="status-btn completed" data-status="completed" title="Set Completed">✓ Done</button>
+            <div class="detail-status-controls" id="detailStatusControls" role="group" aria-label="Status controls">
+              <button class="status-btn pending" data-status="pending" aria-label="Set status to pending" title="Set Pending (Keyboard: P)">
+                <span class="status-icon" aria-hidden="true">○</span>
+                <span class="status-label">Pending</span>
+              </button>
+              <button class="status-btn active" data-status="active" aria-label="Set status to active" title="Set Active (Keyboard: A)">
+                <span class="status-icon" aria-hidden="true">▶</span>
+                <span class="status-label">Active</span>
+              </button>
+              <button class="status-btn paused" data-status="paused" aria-label="Set status to paused" title="Set Paused (Keyboard: Shift+P)">
+                <span class="status-icon" aria-hidden="true">‖</span>
+                <span class="status-label">Paused</span>
+              </button>
+              <button class="status-btn completed" data-status="completed" aria-label="Set status to completed" title="Set Completed (Keyboard: C)">
+                <span class="status-icon" aria-hidden="true">✓</span>
+                <span class="status-label">Done</span>
+              </button>
             </div>
           </div>
-        </div>
+        </header>
 
         <!-- Detail Body - Three Column Layout -->
         <div class="detail-body">
           <!-- Left Panel: Stats Dashboard -->
-          <aside class="detail-panel detail-panel-left" id="detailPanelLeft">
+          <aside class="detail-panel detail-panel-left" id="detailPanelLeft" role="complementary" aria-label="Statistics and metrics">
             <!-- Progress Ring -->
             <div class="panel-section stat-highlight">
-              <div class="progress-ring-container" id="progressRingContainer">
-                <!-- Chart.js renders here -->
+              <div class="progress-ring-container" id="progressRingContainer" role="img" aria-label="Overall progress">
+                <!-- Progress ring renders here -->
               </div>
-              <div class="stat-row">
-                <div class="mini-stat">
-                  <span class="mini-stat-value" id="ticketsCompleted">0</span>
+              <div class="stat-row" role="group" aria-label="Ticket status summary">
+                <div class="mini-stat" role="status">
+                  <span class="mini-stat-value" id="ticketsCompleted" aria-label="Completed tickets">0</span>
                   <span class="mini-stat-label">Done</span>
                 </div>
-                <div class="mini-stat">
-                  <span class="mini-stat-value" id="ticketsInProgress">0</span>
+                <div class="mini-stat" role="status">
+                  <span class="mini-stat-value" id="ticketsInProgress" aria-label="Active tickets">0</span>
                   <span class="mini-stat-label">Active</span>
                 </div>
-                <div class="mini-stat">
-                  <span class="mini-stat-value" id="ticketsPending">0</span>
+                <div class="mini-stat" role="status">
+                  <span class="mini-stat-value" id="ticketsPending" aria-label="Pending tickets">0</span>
                   <span class="mini-stat-label">Queue</span>
                 </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions (moved from right panel for better UX) -->
+            <div class="panel-section">
+              <h3 class="panel-title">⚡ Quick Actions</h3>
+              <div class="action-grid" role="group" aria-label="Quick action buttons">
+                <button class="action-btn-grid action-primary" id="quickStartBtn" aria-label="Start work effort" title="Start (Keyboard: S)">
+                  <span class="action-icon" aria-hidden="true">▶</span>
+                  <span class="action-text">Start</span>
+                </button>
+                <button class="action-btn-grid" id="quickPauseBtn" aria-label="Pause work effort" title="Pause (Keyboard: P)">
+                  <span class="action-icon" aria-hidden="true">‖</span>
+                  <span class="action-text">Pause</span>
+                </button>
+                <button class="action-btn-grid action-success" id="quickCompleteBtn" aria-label="Mark as completed" title="Done (Keyboard: D)">
+                  <span class="action-icon" aria-hidden="true">✓</span>
+                  <span class="action-text">Done</span>
+                </button>
+                <button class="action-btn-grid action-warning" id="quickArchiveBtn" aria-label="Archive work effort" title="Archive (Keyboard: Shift+A)">
+                  <span class="action-icon" aria-hidden="true">◫</span>
+                  <span class="action-text">Archive</span>
+                </button>
               </div>
             </div>
 
             <!-- Ticket Distribution Chart -->
             <div class="panel-section">
               <h3 class="panel-title">▣ Ticket Distribution</h3>
-              <div class="chart-container" id="ticketDistributionChart">
+              <div class="chart-container" id="ticketDistributionChart" role="img" aria-label="Ticket distribution by status">
                 <!-- Donut chart renders here -->
               </div>
             </div>
@@ -274,22 +317,25 @@
             <!-- Metadata -->
             <div class="panel-section">
               <h3 class="panel-title">◈ Details</h3>
-              <div class="metadata-grid" id="metadataGrid">
-                <div class="metadata-item">
+              <div class="metadata-grid" id="metadataGrid" role="list" aria-label="Work effort details">
+                <div class="metadata-item" role="listitem">
                   <span class="meta-label">ID</span>
-                  <span class="meta-value" id="metaId">—</span>
+                  <span class="meta-value" id="metaId" aria-label="Work effort ID">—</span>
+                  <button class="meta-copy-btn" id="copyIdBtn" aria-label="Copy ID" title="Copy ID" style="display:none;">
+                    <span aria-hidden="true">📋</span>
+                  </button>
                 </div>
-                <div class="metadata-item">
+                <div class="metadata-item" role="listitem">
                   <span class="meta-label">Repository</span>
-                  <span class="meta-value" id="metaRepo">—</span>
+                  <span class="meta-value" id="metaRepo" aria-label="Repository">—</span>
                 </div>
-                <div class="metadata-item">
+                <div class="metadata-item" role="listitem">
                   <span class="meta-label">Format</span>
-                  <span class="meta-value" id="metaFormat">—</span>
+                  <span class="meta-value" id="metaFormat" aria-label="Format">—</span>
                 </div>
-                <div class="metadata-item">
+                <div class="metadata-item" role="listitem">
                   <span class="meta-label">Branch</span>
-                  <span class="meta-value" id="metaBranch">—</span>
+                  <span class="meta-value" id="metaBranch" aria-label="Branch">—</span>
                 </div>
               </div>
             </div>
@@ -297,17 +343,17 @@
             <!-- Velocity Stats -->
             <div class="panel-section">
               <h3 class="panel-title">⚡ Velocity</h3>
-              <div class="velocity-stats">
-                <div class="velocity-item">
-                  <span class="velocity-value" id="velocityRate">—</span>
+              <div class="velocity-stats" role="group" aria-label="Velocity metrics">
+                <div class="velocity-item" role="status">
+                  <span class="velocity-value" id="velocityRate" aria-label="Velocity rate">—</span>
                   <span class="velocity-label">tickets/day</span>
                 </div>
-                <div class="velocity-item">
-                  <span class="velocity-value" id="velocityEta">—</span>
+                <div class="velocity-item" role="status">
+                  <span class="velocity-value" id="velocityEta" aria-label="Estimated completion">—</span>
                   <span class="velocity-label">est. complete</span>
                 </div>
               </div>
-              <div class="velocity-sparkline" id="velocitySparkline">
+              <div class="velocity-sparkline" id="velocitySparkline" role="img" aria-label="Velocity trend">
                 <!-- Sparkline renders here -->
               </div>
             </div>
@@ -316,123 +362,111 @@
             <div class="panel-section">
               <h3 class="panel-title">◎ Agent</h3>
               <div class="agent-control" id="agentControl">
-                <div class="agent-status">
-                  <span class="agent-indicator idle"></span>
+                <div class="agent-status" role="status" aria-live="polite">
+                  <span class="agent-indicator idle" aria-hidden="true"></span>
                   <span class="agent-label">No agent assigned</span>
                 </div>
-                <button class="agent-btn" id="assignAgentBtn">Assign Agent</button>
+                <button class="agent-btn" id="assignAgentBtn" aria-label="Assign an agent to this work effort">Assign Agent</button>
               </div>
             </div>
           </aside>
 
           <!-- Center Panel: Main Content -->
-          <main class="detail-panel detail-panel-center" id="detailPanelCenter">
+          <main class="detail-panel detail-panel-center" id="detailPanelCenter" role="region" aria-label="Work effort content">
             <!-- Tabs -->
-            <div class="detail-tabs">
-              <button class="detail-tab active" data-tab="tickets">▣ Tickets</button>
-              <button class="detail-tab" data-tab="description">▤ Description</button>
-              <button class="detail-tab" data-tab="activity">▥ Activity</button>
-              <button class="detail-tab" data-tab="files">▦ Files</button>
+            <div class="detail-tabs" role="tablist" aria-label="Work effort sections">
+              <button class="detail-tab active" role="tab" data-tab="tickets" aria-selected="true" aria-controls="ticketsPane" id="tabTickets">
+                <span aria-hidden="true">▣</span> Tickets
+              </button>
+              <button class="detail-tab" role="tab" data-tab="description" aria-selected="false" aria-controls="descriptionPane" id="tabDescription">
+                <span aria-hidden="true">▤</span> Description
+              </button>
+              <button class="detail-tab" role="tab" data-tab="activity" aria-selected="false" aria-controls="activityPane" id="tabActivity">
+                <span aria-hidden="true">▥</span> Activity
+              </button>
+              <button class="detail-tab" role="tab" data-tab="files" aria-selected="false" aria-controls="filesPane" id="tabFiles">
+                <span aria-hidden="true">▦</span> Files
+              </button>
             </div>
 
             <!-- Tab Content -->
             <div class="detail-tab-content">
               <!-- Tickets Tab -->
-              <div class="tab-pane active" id="ticketsPane">
+              <div class="tab-pane active" role="tabpanel" id="ticketsPane" aria-labelledby="tabTickets">
                 <div class="tickets-header">
-                  <div class="tickets-filter">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="pending">Pending</button>
-                    <button class="filter-btn" data-filter="in_progress">In Progress</button>
-                    <button class="filter-btn" data-filter="completed">Done</button>
-                    <button class="filter-btn" data-filter="blocked">Blocked</button>
+                  <div class="tickets-filter" role="group" aria-label="Filter tickets by status">
+                    <button class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+                    <button class="filter-btn" data-filter="pending" aria-pressed="false">Pending</button>
+                    <button class="filter-btn" data-filter="in_progress" aria-pressed="false">In Progress</button>
+                    <button class="filter-btn" data-filter="completed" aria-pressed="false">Done</button>
+                    <button class="filter-btn" data-filter="blocked" aria-pressed="false">Blocked</button>
                   </div>
-                  <button class="add-ticket-btn" id="addTicketBtn" title="Add New Ticket">+ Add Ticket</button>
+                  <button class="add-ticket-btn" id="addTicketBtn" aria-label="Add new ticket" title="Add New Ticket">+ Add Ticket</button>
                 </div>
-                <div class="tickets-list" id="ticketsList">
+                <div class="tickets-list" id="ticketsList" role="list" aria-label="Ticket list">
                   <!-- Populated by JS -->
                 </div>
               </div>
 
               <!-- Description Tab -->
-              <div class="tab-pane" id="descriptionPane">
+              <div class="tab-pane" role="tabpanel" id="descriptionPane" aria-labelledby="tabDescription" hidden>
                 <div class="description-content" id="descriptionContent">
                   <!-- Populated by JS -->
                 </div>
               </div>
 
               <!-- Activity Tab -->
-              <div class="tab-pane" id="activityPane">
-                <div class="activity-timeline" id="activityTimeline">
+              <div class="tab-pane" role="tabpanel" id="activityPane" aria-labelledby="tabActivity" hidden>
+                <div class="activity-timeline" id="activityTimeline" role="feed" aria-label="Activity timeline">
                   <!-- Populated by JS -->
                 </div>
               </div>
 
               <!-- Files Tab -->
-              <div class="tab-pane" id="filesPane">
-                <div class="files-list" id="filesList">
+              <div class="tab-pane" role="tabpanel" id="filesPane" aria-labelledby="tabFiles" hidden>
+                <div class="files-list" id="filesList" role="list" aria-label="Files list">
                   <!-- Populated by JS -->
                 </div>
               </div>
             </div>
           </main>
 
-          <!-- Right Panel: Actions, Stats & Insights -->
-          <aside class="detail-panel detail-panel-right" id="detailPanelRight">
-            <!-- Quick Actions -->
-            <div class="panel-section">
-              <h3 class="panel-title">⚡ Actions</h3>
-              <div class="action-grid">
-                <button class="action-btn-grid" id="quickStartBtn">
-                  <span class="action-icon">▶</span>
-                  <span class="action-text">Start</span>
-                </button>
-                <button class="action-btn-grid" id="quickPauseBtn">
-                  <span class="action-icon">‖</span>
-                  <span class="action-text">Pause</span>
-                </button>
-                <button class="action-btn-grid success" id="quickCompleteBtn">
-                  <span class="action-icon">✓</span>
-                  <span class="action-text">Done</span>
-                </button>
-                <button class="action-btn-grid warning" id="quickArchiveBtn">
-                  <span class="action-icon">◫</span>
-                  <span class="action-text">Archive</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Status Timeline Chart -->
+          <!-- Right Panel: Charts & Context -->
+          <aside class="detail-panel detail-panel-right" id="detailPanelRight" role="complementary" aria-label="Charts and contextual information">
+            <!-- Progress Over Time Chart -->
             <div class="panel-section">
               <h3 class="panel-title">◇ Progress Over Time</h3>
-              <div class="chart-container chart-line-container" id="progressLineChart">
+              <div class="chart-container chart-line-container" id="progressLineChart" role="img" aria-label="Progress over time chart">
                 <!-- Line chart renders here -->
               </div>
             </div>
 
             <!-- Time Stats -->
             <div class="panel-section">
-              <h3 class="panel-title">◷ Time</h3>
-              <div class="time-grid">
+              <h3 class="panel-title">◷ Time Tracking</h3>
+              <div class="time-grid" role="group" aria-label="Time information">
                 <div class="time-card">
-                  <span class="time-icon">◫</span>
+                  <span class="time-icon" aria-hidden="true">◫</span>
                   <div class="time-content">
-                    <span class="time-value" id="timeCreated">—</span>
+                    <span class="time-value" id="timeCreated" aria-label="Created time">—</span>
                     <span class="time-label">Created</span>
+                    <span class="time-detail" id="timeCreatedDetail" aria-label="Created date detail"></span>
                   </div>
                 </div>
                 <div class="time-card">
-                  <span class="time-icon">◰</span>
+                  <span class="time-icon" aria-hidden="true">◰</span>
                   <div class="time-content">
-                    <span class="time-value" id="timeUpdated">—</span>
+                    <span class="time-value" id="timeUpdated" aria-label="Last updated time">—</span>
                     <span class="time-label">Updated</span>
+                    <span class="time-detail" id="timeUpdatedDetail" aria-label="Updated date detail"></span>
                   </div>
                 </div>
-                <div class="time-card highlight">
-                  <span class="time-icon">◷</span>
+                <div class="time-card time-highlight">
+                  <span class="time-icon" aria-hidden="true">◷</span>
                   <div class="time-content">
-                    <span class="time-value" id="timeDuration">—</span>
+                    <span class="time-value" id="timeDuration" aria-label="Total duration">—</span>
                     <span class="time-label">Duration</span>
+                    <span class="time-detail" id="timeDurationDetail" aria-label="Duration detail"></span>
                   </div>
                 </div>
               </div>
@@ -440,8 +474,8 @@
 
             <!-- Activity Heatmap -->
             <div class="panel-section">
-              <h3 class="panel-title">▧ Activity</h3>
-              <div class="chart-container" id="activityHeatmap">
+              <h3 class="panel-title">▧ Activity Heatmap</h3>
+              <div class="chart-container" id="activityHeatmap" role="img" aria-label="Activity heatmap showing daily activity">
                 <!-- Heatmap renders here -->
               </div>
             </div>
@@ -449,22 +483,25 @@
             <!-- Tags -->
             <div class="panel-section">
               <h3 class="panel-title">▨ Tags</h3>
-              <div class="tags-list" id="tagsList">
-                <span class="tag">work-effort</span>
-                <button class="tag-add" title="Add Tag">+</button>
+              <div class="tags-list" id="tagsList" role="list" aria-label="Tags">
+                <span class="tag" role="listitem">work-effort</span>
+                <button class="tag-add" aria-label="Add new tag" title="Add Tag">+</button>
               </div>
             </div>
 
             <!-- Related Work -->
             <div class="panel-section">
-              <h3 class="panel-title">◇ Related</h3>
-              <div class="related-list" id="relatedList">
-                <p class="panel-empty">No related work efforts</p>
+              <h3 class="panel-title">◇ Related Work</h3>
+              <div class="related-list" id="relatedList" role="list" aria-label="Related work efforts">
+                <p class="panel-empty" role="status">No related work efforts</p>
               </div>
             </div>
           </aside>
         </div>
       </div>
+
+      <!-- Footer (always visible at bottom of main content) -->
+      <div id="site-footer"></div>
     </main>
 
     <!-- Toast Container -->
@@ -541,7 +578,7 @@
           </div>
 
           <div class="about-footer">
-            <span class="about-version">Version 0.2.0</span>
+            <span class="about-version">Version 0.6.2</span>
             <span class="about-author">Built with ◈ by ctavolazzi</span>
           </div>
         </div>
@@ -590,6 +627,9 @@
       </div>
     </div>
   </div>
+
+  <!-- V3 Responsive System (load first) -->
+  <script src="responsive.js"></script>
 
   <!-- Shared Components -->
   <script src="components/nav.js"></script>

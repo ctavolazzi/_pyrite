@@ -1,12 +1,19 @@
 {
   "name": "mission-control-dashboard",
-  "version": "1.0.0",
+  "version": "0.6.2",
   "description": "Real-time dashboard for monitoring work efforts across multiple repositories",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node tests/test-runner.js",
+    "test:verbose": "node tests/test-runner.js --verbose",
+    "test:data-flow": "node tests/test-runner.js tests/data-flow/**/*.test.js",
+    "test:raw": "node --test",
+    "test:oracle": "node tests/debugger/examples/basic-usage.js",
+    "test:oracle:watch": "node --watch tests/debugger/examples/basic-usage.js",
+    "test:oracle:component": "node tests/debugger/examples/basic-usage.js component"
   },
   "dependencies": {
     "chalk": "^5.6.2",
@@ -25,6 +32,10 @@
   "author": "ctavolazzi",
   "license": "MIT",
   "devDependencies": {
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "@playwright/test": "^1.40.0",
+    "@testing-library/dom": "^9.3.0",
+    "axe-core": "^4.8.0",
+    "pocketbase": "^0.20.0"
   }
 }

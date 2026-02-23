@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyrite"
+version = "0.7.0"
+description = "AI-powered repository management toolkit"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    {name = "Pyrite Team"}
+]
+
+dependencies = [
+    "empirica",
+    "novasystem",
+]
+
+[project.optional-dependencies]
+dev = []
+
+[tool.setuptools]
+packages = []
+
+[tool.setuptools.package-data]
+pyrite = []
+
+[tool.uv.sources]
+novasystem = { path = "../NovaSystem-Codex", editable = true }
+empirica = { path = "../empirica", editable = true }
+

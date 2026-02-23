@@ -11,4 +11,54 @@ Initialize and configure the demo workspace
 
 ## Acceptance Criteria
 
-- [ ] Demo completed successfully
+- [ ] Demo completed successfully:)
+
+
+---
+Use this to transfer context between AI chats.
+
+### Cursor Prompt Wrapper
+---
+
+```
+< BEGIN CURSOR RESPONSE >
+
+
+
+</ END CURSOR RESPONSE > 
+
+User (me):
+> 
+```
+
+---
+### Claude Code Prompt Wrapper
+---
+
+```
+< BEGIN CLAUDE CODE CLOUD RESPONSE >
+
+
+
+</ END CLAUDE CODE CLOUD RESPONSE > 
+
+User (me):
+> 
+```
+
+---
+### Gemini Prompt Wrapper
+---
+
+```
+< BEGIN GEMINI RESPONSE >
+
+
+
+</ END GEMINI RESPONSE > 
+
+User (me):
+> 
+```
+
+---

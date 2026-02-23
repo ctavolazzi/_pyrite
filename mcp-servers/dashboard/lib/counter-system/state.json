@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "created": "2026-01-01T18:09:11.419Z",
+  "lastUpdated": "2026-01-01T18:09:11.419Z",
+  "counters": {
+    "workEfforts": {
+      "global": 0,
+      "byRepo": {}
+    },
+    "tickets": {
+      "global": 0,
+      "byWorkEffort": {},
+      "byRepo": {}
+    },
+    "checkpoints": {
+      "global": 0
+    }
+  },
+  "integrity": {
+    "checksum": "c7afb31ea927fb078cc93f88f4248b8f4e97b6fe4bfb8ab0b9c5339de78a4909",
+    "lastValidation": "2026-01-01T18:09:11.419Z",
+    "validationStatus": "valid"
+  },
+  "audit": []
+}

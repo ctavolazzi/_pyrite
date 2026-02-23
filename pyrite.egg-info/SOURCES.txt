@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+pyrite.egg-info/PKG-INFO
+pyrite.egg-info/SOURCES.txt
+pyrite.egg-info/dependency_links.txt
+pyrite.egg-info/requires.txt
+pyrite.egg-info/top_level.txt
