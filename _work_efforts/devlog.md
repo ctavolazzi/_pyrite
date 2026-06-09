@@ -1,5 +1,58 @@
 # Pyrite Devlog
 
+## 2026-04-07
+
+### 23:15 - Daily Note Bridge Plugin — Full Implementation
+
+**Work Effort:** `[[WE-260407-wo2z]]` — Obsidian Wiki-Linked Work Efforts in Daily Note
+
+**What was built:**
+- New plugin at `plugins/daily_note/plugin.py` (~330 lines) — `DailyNoteBridge` class
+- Bridges _pyrite work effort tracking into the Obsidian daily note harness
+- Added `daily-note` subcommand to `pyrite` CLI with 7 flags
+
+**Key features:**
+1. **Work effort scanning** — Parses YAML frontmatter from all 28 WE-*/index.md files
+2. **Wiki-linked markdown** — `[[WE-ID]]` and `[[WE-ID|Title]]` links in daily note tables
+3. **Full sync** — Updates frontmatter, work_efforts, focus_snapshot, in_the_lab in one pass
+4. **Note creation** — Creates daily notes from template with Templater tag resolution
+5. **Obsidian note files** — Pre-creates `WE-ID.md` files in vault so [[links]] resolve
+6. **Operations logging** — Every operation logged to trail_log SQLite with session + op IDs
+7. **Graceful degradation** — Missing notes, missing sections, corrupt frontmatter all handled
+
+**CLI usage:**
+```bash
+./pyrite daily-note                    # sync work_efforts section
+./pyrite daily-note --full             # frontmatter + all sections + obsidian notes
+./pyrite daily-note --dry-run          # preview without writing
+./pyrite daily-note --no-git-health    # skip repo scan
+./pyrite daily-note --status           # show section fill status
+./pyrite daily-note --handoff          # read yesterday's handoff
+./pyrite daily-note --ensure-tomorrow  # create tomorrow's note from template
+```
+
+**Files created:**
+- `plugins/daily_note/__init__.py`
+- `plugins/daily_note/plugin.py`
+- 28 Obsidian WE note files in vault `_work_efforts_/pyrite/`
+- Tomorrow's daily note (2026-04-08.md) from template
+
+**Files modified:**
+- `pyrite` CLI — added `daily-note` subcommand
+
+**Test results:**
+- 50+ operations logged to trail_log, 0 errors
+- Dry run, live sync, idempotency, cross-day, ensure_tomorrow all verified
+- Obsidian note creation idempotent (28 created first run, 0/28 skipped on re-run)
+
+**Architecture decisions:**
+- Bridge lives in _pyrite (data producer), not SimpleAgentOS (write target)
+- daily_note.py stays zero-dependency — imported via sys.path insertion
+- Regex YAML parser (no PyYAML) consistent with daily_note.py approach
+- `_work_efforts_/pyrite/` subfolder in vault isolates generated notes
+
+---
+
 ## 2025-12-31
 
 ### 12:34 - GitHub Health Check Tool - Work Effort Created

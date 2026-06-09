@@ -1,0 +1,1050 @@
+/* ============================================================================
+   MISSION CONTROL — VISUAL ENHANCEMENTS v1.0
+
+   Layered on top of existing V2/V3 styles. Adds:
+   - Animated background grid
+   - Glowing stat cards with animated borders
+   - Enhanced hero section with particle field
+   - Refined scrollbars
+   - Better queue item interactions
+   - Scan-line overlay for technical feel
+   - Improved micro-animations
+   ============================================================================ */
+
+/* ============================================================================
+   CUSTOM FONTS — Distinctive display type
+   ============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-tech: 'Oxanium', 'Space Grotesk', system-ui, sans-serif;
+
+  /* Enhanced accent palette */
+  --ember: #ff6b2b;
+  --ember-glow: rgba(255, 107, 43, 0.25);
+  --plasma: #00d4ff;
+  --plasma-glow: rgba(0, 212, 255, 0.15);
+  --forge-gradient: linear-gradient(135deg, #ff9d3d 0%, #ff6b2b 50%, #ff9d3d 100%);
+  --grid-line: rgba(255, 157, 61, 0.04);
+  --grid-line-strong: rgba(255, 157, 61, 0.08);
+  --scan-line: rgba(255, 157, 61, 0.02);
+}
+
+/* ============================================================================
+   AMBIENT BACKGROUND — Subtle dot grid
+   ============================================================================ */
+.main-content {
+  background:
+    radial-gradient(circle at 1px 1px, var(--grid-line) 1px, transparent 0) 0 0 / 24px 24px,
+    var(--bg-secondary);
+}
+
+/* Subtle vignette on main content */
+.main-content::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.3) 100%);
+  z-index: 0;
+}
+
+.main-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================================
+   SCROLLBAR — Refined dark scrollbar
+   ============================================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ============================================================================
+   HERO BANNER — Dramatic upgrade with animated grid & particle field
+   ============================================================================ */
+.hero-banner {
+  position: relative;
+  background: linear-gradient(180deg, #151210 0%, var(--bg-primary) 100%);
+  border: 1px solid rgba(255, 157, 61, 0.15);
+  overflow: hidden;
+}
+
+/* Animated grid overlay */
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--grid-line-strong) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(0deg, var(--grid-line-strong) 1px, transparent 1px) 0 0 / 40px 40px,
+    radial-gradient(ellipse at 30% 40%, rgba(255, 157, 61, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 60%, rgba(0, 212, 255, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+  animation: gridDrift 20s linear infinite;
+}
+
+@keyframes gridDrift {
+  0% { background-position: 0 0, 0 0, 30% 40%, 70% 60%; }
+  100% { background-position: 40px 40px, 40px 40px, 30% 40%, 70% 60%; }
+}
+
+/* Horizontal scan line */
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  animation: heroScan 4s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+@keyframes heroScan {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.hero-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.hero-gem {
+  font-size: 4rem;
+  color: var(--accent);
+  text-shadow:
+    0 0 20px var(--accent-glow),
+    0 0 60px rgba(255, 157, 61, 0.15);
+  animation: heroGemPulse 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+
+@keyframes heroGemPulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+  }
+  50% {
+    transform: scale(1.05) rotate(3deg);
+    filter: drop-shadow(0 0 16px var(--accent-glow)) drop-shadow(0 0 40px rgba(255, 107, 43, 0.1));
+  }
+}
+
+.hero-name {
+  font-family: var(--font-tech);
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 60%, var(--ember) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.hero-subtitle {
+  font-family: var(--font-tech);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ============================================================================
+   STAT CARDS — Animated border glow + glass morphism
+   ============================================================================ */
+.stat-card {
+  position: relative;
+  background: rgba(42, 38, 34, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Subtle top-edge glow */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 157, 61, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card:hover {
+  border-color: rgba(255, 157, 61, 0.2);
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 157, 61, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.stat-card.highlight {
+  border-color: rgba(255, 157, 61, 0.25);
+  background: linear-gradient(135deg, rgba(42, 38, 34, 0.8) 0%, rgba(255, 157, 61, 0.08) 100%);
+}
+
+.stat-card.highlight::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 157, 61, 0.3), transparent 60%);
+  -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Stat value number animation on load */
+.stat-value {
+  font-family: var(--font-tech);
+  font-variant-numeric: tabular-nums;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-family: var(--font-tech);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+}
+
+.stat-icon {
+  background: rgba(255, 157, 61, 0.08);
+  border: 1px solid rgba(255, 157, 61, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+
+.stat-card:hover .stat-icon {
+  background: rgba(255, 157, 61, 0.12);
+  border-color: rgba(255, 157, 61, 0.2);
+  box-shadow: 0 0 16px rgba(255, 157, 61, 0.1);
+}
+
+/* Test & Demo cards refined */
+.test-card,
+.demo-card {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.test-btn,
+.demo-btn {
+  font-family: var(--font-tech);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================================
+   QUEUE SECTION — Refined card styling
+   ============================================================================ */
+.queue-section {
+  background: rgba(42, 38, 34, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.section-header {
+  background: rgba(34, 31, 27, 0.8);
+}
+
+.section-title {
+  font-family: var(--font-tech);
+  letter-spacing: 0.15em;
+}
+
+/* Queue items — status accent bar + better hover */
+.queue-item {
+  position: relative;
+  background: rgba(26, 23, 20, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Status accent bar on left */
+.queue-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--text-dim);
+  border-radius: 3px 0 0 3px;
+  transition: width 0.2s, box-shadow 0.2s;
+}
+
+/* Status-specific left bar colors */
+.queue-item:has(.queue-indicator.active)::before,
+.queue-item:has(.queue-badge.active)::before {
+  background: var(--status-active);
+}
+
+.queue-item:has(.queue-indicator.in_progress)::before,
+.queue-item:has(.queue-badge.in_progress)::before {
+  background: var(--status-in-progress);
+  box-shadow: 0 0 8px var(--status-in-progress);
+}
+
+.queue-item:has(.queue-indicator.completed)::before,
+.queue-item:has(.queue-badge.completed)::before {
+  background: var(--status-completed);
+}
+
+.queue-item:has(.queue-indicator.pending)::before,
+.queue-item:has(.queue-badge.pending)::before {
+  background: var(--status-pending);
+}
+
+.queue-item:has(.queue-indicator.blocked)::before,
+.queue-item:has(.queue-badge.blocked)::before {
+  background: var(--status-blocked);
+  animation: blockedPulse 1.5s infinite;
+}
+
+@keyframes blockedPulse {
+  0%, 100% { box-shadow: 0 0 4px var(--status-blocked); }
+  50% { box-shadow: 0 0 12px var(--status-blocked); }
+}
+
+.queue-item:hover {
+  background: rgba(34, 31, 27, 0.8);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.queue-item:hover::before {
+  width: 4px;
+}
+
+.queue-item:active {
+  transform: translateX(2px) scale(0.998);
+}
+
+.queue-title {
+  font-family: var(--font-tech);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.queue-id {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.queue-item:hover .queue-id {
+  opacity: 0.8;
+}
+
+/* Queue badge refinement */
+.queue-badge {
+  font-family: var(--font-tech);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.queue-badge.in_progress {
+  border-color: rgba(59, 158, 255, 0.2);
+}
+
+.queue-badge.active {
+  border-color: rgba(255, 157, 61, 0.2);
+}
+
+/* ============================================================================
+   FILTER BUTTONS — Refined pill design
+   ============================================================================ */
+.filter-btn {
+  font-family: var(--font-tech);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 20px;
+  padding: 5px 14px;
+  transition: all 0.2s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.filter-btn:hover {
+  background: rgba(255, 157, 61, 0.06);
+  transform: translateY(-1px);
+}
+
+.filter-btn.active {
+  background: rgba(255, 157, 61, 0.12);
+  color: var(--accent);
+  border-color: rgba(255, 157, 61, 0.3);
+  box-shadow: 0 0 12px rgba(255, 157, 61, 0.1);
+  transform: translateY(-1px);
+}
+
+.queue-filters .filter-btn.active {
+  font-weight: 600;
+}
+
+/* ============================================================================
+   SIDEBAR — Enhanced tree navigation
+   ============================================================================ */
+.sidebar {
+  background: linear-gradient(180deg, var(--bg-primary) 0%, #0e0c0a 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.brand-prefix {
+  font-family: var(--font-tech);
+}
+
+.brand-name {
+  font-family: var(--font-tech);
+  letter-spacing: 0.15em;
+}
+
+.brand-tagline .tagline-text {
+  font-family: var(--font-tech);
+  letter-spacing: 0.1em;
+}
+
+/* Tree node — refined interaction */
+.tree-node {
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.tree-node:hover {
+  background: rgba(255, 157, 61, 0.05);
+}
+
+.tree-node.active {
+  background: rgba(255, 157, 61, 0.1);
+  border-left: 2px solid var(--accent);
+  padding-left: calc(var(--space-sm) - 2px);
+}
+
+/* Tree indent guides — refined */
+.tree-children {
+  border-left: 1px solid rgba(255, 157, 61, 0.08);
+  margin-left: calc(var(--space-md) + 2px);
+}
+
+/* Tree item count badge */
+.tree-count {
+  font-family: var(--font-tech);
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Tree status dots — refined */
+.tree-status {
+  font-family: var(--font-tech);
+  font-size: 0.45rem;
+  letter-spacing: 0.05em;
+}
+
+/* Add repo button */
+.add-repo-btn {
+  font-family: var(--font-tech);
+  letter-spacing: 0.1em;
+  border: 1px dashed rgba(255, 157, 61, 0.2);
+  transition: all 0.2s;
+}
+
+.add-repo-btn:hover {
+  border-color: rgba(255, 157, 61, 0.4);
+  background: rgba(255, 157, 61, 0.05);
+  box-shadow: 0 0 16px rgba(255, 157, 61, 0.05);
+}
+
+/* ============================================================================
+   SITE NAV — Refined top bar
+   ============================================================================ */
+.site-nav {
+  background: rgba(10, 8, 6, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.site-nav-text {
+  font-family: var(--font-tech);
+  letter-spacing: 0.1em;
+}
+
+.site-nav-link {
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.site-nav-link:hover {
+  background: rgba(255, 157, 61, 0.06);
+}
+
+.site-nav-link-active {
+  background: rgba(255, 157, 61, 0.1);
+  box-shadow: 0 0 8px rgba(255, 157, 61, 0.05);
+}
+
+/* ============================================================================
+   TOPBAR — Enhanced breadcrumb area
+   ============================================================================ */
+.topbar {
+  background: rgba(18, 16, 14, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.breadcrumb {
+  font-family: var(--font-tech);
+}
+
+/* Activity indicator enhanced */
+.activity-indicator {
+  font-family: var(--font-tech);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 20px;
+  background: rgba(34, 31, 27, 0.6);
+}
+
+/* View toggle buttons */
+.view-btn {
+  transition: all 0.2s;
+}
+
+.view-btn.active {
+  color: var(--accent);
+  background: rgba(255, 157, 61, 0.1);
+}
+
+/* ============================================================================
+   DETAIL VIEW — Enhanced panels
+   ============================================================================ */
+.detail-header {
+  background: linear-gradient(90deg, rgba(42, 38, 34, 0.9) 0%, rgba(34, 31, 27, 0.9) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.detail-title {
+  font-family: var(--font-tech);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.detail-tabs .detail-tab {
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s;
+}
+
+.detail-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  background: rgba(255, 157, 61, 0.05);
+}
+
+/* Panel sections */
+.panel-title {
+  font-family: var(--font-tech);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Progress ring glow */
+.progress-ring-container svg circle[stroke-dasharray] {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Status buttons */
+.status-btn {
+  font-family: var(--font-tech);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.status-btn:hover {
+  transform: translateY(-1px);
+}
+
+.status-btn.active {
+  box-shadow: 0 0 12px rgba(255, 157, 61, 0.15);
+}
+
+/* ============================================================================
+   TOAST NOTIFICATIONS — Enhanced
+   ============================================================================ */
+.toast {
+  font-family: var(--font-tech);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================================
+   MODALS — Enhanced backdrop and styling
+   ============================================================================ */
+.modal-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.modal {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  font-family: var(--font-tech);
+  letter-spacing: 0.05em;
+}
+
+.about-name {
+  font-family: var(--font-tech);
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.about-gem {
+  filter: drop-shadow(0 0 20px var(--accent-glow));
+}
+
+/* ============================================================================
+   SEARCH — Enhanced styling
+   ============================================================================ */
+.search-box input {
+  font-family: var(--font-tech);
+  border-radius: 8px;
+  background: rgba(34, 31, 27, 0.6);
+}
+
+.search-box input:focus {
+  background: rgba(34, 31, 27, 0.9);
+  box-shadow: 0 0 0 2px rgba(255, 157, 61, 0.15), 0 0 16px rgba(255, 157, 61, 0.05);
+}
+
+/* ============================================================================
+   ORIENTATION HIGHLIGHT — Flash animation when navigating
+   ============================================================================ */
+.sidebar.orient-highlight {
+  animation: sidebarFlash 1.5s ease;
+}
+
+@keyframes sidebarFlash {
+  0% { box-shadow: inset 0 0 0 rgba(255, 157, 61, 0); }
+  20% { box-shadow: inset 0 0 40px rgba(255, 157, 61, 0.08); }
+  100% { box-shadow: inset 0 0 0 rgba(255, 157, 61, 0); }
+}
+
+/* ============================================================================
+   STAT CARD TOOLTIPS — Show on hover for first-time users
+   ============================================================================ */
+.stat-card[title] {
+  cursor: pointer;
+}
+
+/* ============================================================================
+   GLOBAL MICRO-INTERACTIONS
+   ============================================================================ */
+
+/* Smooth focus outlines */
+:focus-visible {
+  outline: 2px solid rgba(255, 157, 61, 0.4);
+  outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(255, 157, 61, 0.25);
+  color: var(--text-primary);
+}
+
+/* Button press effect */
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Link hover glow */
+a:hover {
+  text-shadow: 0 0 8px rgba(255, 157, 61, 0.2);
+}
+
+/* ============================================================================
+   CONNECTION STATUS — Enhanced
+   ============================================================================ */
+.connection-status {
+  font-family: var(--font-tech);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.connection-status.connected .status-text {
+  color: var(--status-completed);
+}
+
+/* ============================================================================
+   VERSION BADGE — Subtle refinement
+   ============================================================================ */
+.version-badge {
+  font-family: var(--font-tech);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   FOOTER — Enhanced
+   ============================================================================ */
+.footer-brand {
+  font-family: var(--font-tech);
+}
+
+.footer-version {
+  font-family: var(--font-tech);
+}
+
+/* ============================================================================
+   LOADING STATES — Better skeleton animation
+   ============================================================================ */
+.tree-skeleton {
+  background: linear-gradient(90deg,
+    rgba(34, 31, 27, 0.6) 25%,
+    rgba(255, 157, 61, 0.05) 50%,
+    rgba(34, 31, 27, 0.6) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 6px;
+}
+
+/* ============================================================================
+   REDUCED MOTION — Respect user preference
+   ============================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .hero-banner::before,
+  .hero-banner::after {
+    animation: none;
+  }
+
+  .hero-gem {
+    animation: none;
+  }
+
+  .stat-card:hover {
+    transform: none;
+  }
+
+  .queue-item:hover {
+    transform: none;
+  }
+
+  .filter-btn:hover,
+  .filter-btn.active {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   HERO ORIENTATION — Quick-start wayfinding cards
+   ============================================================================ */
+.hero-orientation {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 1.5rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.orient-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+  text-align: left;
+}
+
+.orient-item:hover {
+  background: rgba(255, 157, 61, 0.06);
+  border-color: rgba(255, 157, 61, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.orient-icon {
+  font-size: 1.2rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 157, 61, 0.08);
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+.orient-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.orient-text strong {
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+.orient-text span {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Orientation card arrow indicator on hover */
+.orient-item::after {
+  content: '→';
+  font-size: 0.75rem;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s;
+  align-self: center;
+  margin-left: auto;
+}
+
+.orient-item:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ============================================================================
+   SIDEBAR NAVIGATION HINTS — Contextual cues
+   ============================================================================ */
+
+/* Sidebar section labels for clarity */
+.sidebar-section-label {
+  font-family: var(--font-tech);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 12px 16px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 157, 61, 0.1), transparent);
+}
+
+/* Keyboard shortcut hints */
+.shortcut-hint {
+  font-family: var(--font-tech);
+  font-size: 0.5rem;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  margin-left: auto;
+}
+
+/* Tooltip system */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(10, 8, 6, 0.95);
+  color: var(--text-primary);
+  font-family: var(--font-tech);
+  font-size: 0.65rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 157, 61, 0.15);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.2s;
+  z-index: 1000;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================================
+   QUEUE SECTION — Better wayfinding
+   ============================================================================ */
+
+/* Queue item ticket count indicator */
+.queue-ticket-count {
+  font-family: var(--font-tech);
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 6px;
+  border-radius: 8px;
+  letter-spacing: 0.05em;
+}
+
+/* Empty state with better guidance */
+.queue-empty {
+  padding: 3rem 2rem;
+}
+
+.queue-empty .empty-icon {
+  font-size: 2.5rem;
+  opacity: 0.3;
+  margin-bottom: 0.75rem;
+}
+
+.queue-empty p {
+  font-family: var(--font-tech);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.queue-empty-hint {
+  font-family: var(--font-tech);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-top: 0.5rem;
+}
+
+/* ============================================================================
+   RESPONSIVE — Mobile polish
+   ============================================================================ */
+@media (max-width: 900px) {
+  .hero-orientation {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-name {
+    font-size: 2rem;
+  }
+
+  .hero-gem {
+    font-size: 2.5rem;
+  }
+
+  .hero-orientation {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .orient-item::after {
+    display: none;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .queue-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

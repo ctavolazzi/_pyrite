@@ -175,6 +175,17 @@ Verifies and fixes repository structure:
 
 See [`tools/structure-check/`](tools/structure-check/README.md) for details.
 
+### Ticket Tool
+
+Create tickets in work efforts (TKT-xxxx-NNN format):
+
+```bash
+./pyrite ticket create --we WE-260127-abcd --title "Fix login bug"
+./pyrite ticket create --we WE-260127-abcd --title "Add tests" --desc "Unit tests"
+```
+
+See [`tools/ticket/`](tools/ticket/README.md) for details.
+
 ## Interfaces
 
 ### Pyrite Console (NEW)

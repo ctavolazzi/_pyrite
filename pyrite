@@ -6,14 +6,17 @@ Usage:
     pyrite <command> [options]
 
 Commands:
-    lint       Run Obsidian markdown linter
-    health     Check GitHub integration health
-    structure  Verify repository structure
+    lint        Run Obsidian markdown linter
+    health      Check GitHub integration health
+    structure   Verify repository structure
+    ticket      Create tickets in work efforts
+    daily-note  Sync work efforts to Obsidian daily note
 
 Examples:
     pyrite lint --scope _work_efforts --fix
     pyrite health
     pyrite structure --fix
+    pyrite daily-note --dry-run
     pyrite --version
 """
 
@@ -60,6 +63,90 @@ def cmd_structure(args):
     return run_tool(script, args)
 
 
+def cmd_ticket(args):
+    """Run the ticket tool (create, list)."""
+    repo_root = get_repo_root()
+    script = repo_root / "tools" / "ticket" / "create.py"
+    return run_tool(script, args)
+
+
+def cmd_daily_note(args):
+    """Sync work efforts to today's daily note."""
+    # Lazy import so the plugin is only loaded when needed
+    plugin_dir = str(get_repo_root())
+    if plugin_dir not in sys.path:
+        sys.path.insert(0, plugin_dir)
+    from plugins.daily_note.plugin import DailyNoteBridge
+
+    config = {
+        "work_efforts_dir": str(get_repo_root() / "_work_efforts"),
+        "simpleagentos_dir": "/Users/ctavolazzi/Code/_experiments/SimpleAgentOS",
+    }
+
+    dry_run = "--dry-run" in args
+    if "--no-git-health" in args:
+        config["include_git_health"] = False
+
+    # Extract --date value if provided
+    date = None
+    if "--date" in args:
+        idx = args.index("--date")
+        if idx + 1 < len(args):
+            date = args[idx + 1]
+
+    bridge = DailyNoteBridge(config)
+    full = "--full" in args
+
+    if full:
+        result = bridge.full_sync(date=date, dry_run=dry_run)
+        if dry_run:
+            for section, data in result.items():
+                if isinstance(data, dict):
+                    print(f"--- {section} ---")
+                    print(data.get("content", data.get("fields", data)))
+                    print()
+                else:
+                    print(f"--- {section}: {data} ---")
+            print("-- dry run, nothing written --")
+        else:
+            for section, data in result.items():
+                if isinstance(data, dict):
+                    print(f"  {section}: {data.get('status', '?')}")
+                else:
+                    print(f"  {section}: {data}")
+            print("Full daily note sync complete.")
+    else:
+        result = bridge.sync(date=date, dry_run=dry_run)
+        if dry_run:
+            print(result["content"])
+            print("\n-- dry run, nothing written --")
+        else:
+            print(f"Daily note synced: {result['status']} ({result['section']})")
+
+    # Status check
+    if "--status" in args:
+        status = bridge.get_section_status(date)
+        print("\nSection status:")
+        for section, state in status.items():
+            print(f"  {section}: {state}")
+
+    # Yesterday's handoff
+    if "--handoff" in args:
+        import json
+        handoff = bridge.read_yesterday_handoff()
+        print("\nYesterday's handoff:")
+        print(json.dumps(handoff, indent=2))
+
+    # Ensure tomorrow's note exists
+    if "--ensure-tomorrow" in args:
+        result = bridge.ensure_tomorrow()
+        print(f"\nTomorrow's note: {result['status']}")
+        if "path" in result:
+            print(f"  Created: {result['path']}")
+
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='pyrite',
@@ -67,14 +154,18 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Commands:
-  lint       Run Obsidian markdown linter
-  health     Check GitHub integration health
-  structure  Verify repository structure
+  lint        Run Obsidian markdown linter
+  health      Check GitHub integration health
+  structure   Verify repository structure
+  ticket      Create tickets in work efforts
+  daily-note  Sync work efforts to Obsidian daily note
 
 Examples:
   pyrite lint --scope _work_efforts --fix
   pyrite health
   pyrite structure --fix
+  pyrite ticket create --we WE-260127-abcd --title "Fix bug"
+  pyrite daily-note --dry-run
   pyrite --version
 
 For command-specific help:
@@ -112,6 +203,19 @@ For command-specific help:
         add_help=False
     )
 
+    ticket_parser = subparsers.add_parser(
+        'ticket',
+        help='Create tickets in work efforts',
+        add_help=False
+    )
+
+    # Daily note command
+    daily_note_parser = subparsers.add_parser(
+        'daily-note',
+        help='Sync work efforts to daily note',
+        add_help=False
+    )
+
     # Parse known args to allow forwarding unknowns to subcommands
     args, unknown = parser.parse_known_args()
 
@@ -125,6 +229,8 @@ For command-specific help:
         'lint': cmd_lint,
         'health': cmd_health,
         'structure': cmd_structure,
+        'ticket': cmd_ticket,
+        'daily-note': cmd_daily_note,
     }
 
     handler = handlers.get(args.command)

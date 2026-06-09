@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="styles/main.css">
   <!-- Detail View Improvements -->
   <link rel="stylesheet" href="styles/detail-view-improvements.css">
+  <!-- Visual Enhancements v1.0 -->
+  <link rel="stylesheet" href="styles/enhancements.css">
 </head>
 <body class="has-sidebar">
   <!-- Skip Link for Accessibility -->
@@ -133,42 +135,73 @@
 
       <!-- Dashboard View -->
       <div class="view dashboard-view active" id="dashboardView">
-        <!-- Hero Banner -->
-        <section class="hero-banner">
+        <!-- Hero Banner — What is _pyrite? -->
+        <section class="hero-banner" id="heroBanner">
           <div class="hero-content">
             <div class="hero-title">
               <span class="hero-gem">◈</span>
               <span class="hero-name">_pyrite</span>
             </div>
-            <p class="hero-subtitle">Real-time monitoring • Multi-repo support • AI-assisted workflows</p>
+            <p class="hero-subtitle">Work Effort Command Center — Track, manage, and monitor AI-assisted development across all your repos</p>
+            <!-- Quick Orientation — What can I do here? -->
+            <div class="hero-orientation">
+              <div class="orient-item" data-navigate="sidebar">
+                <span class="orient-icon">◂</span>
+                <div class="orient-text">
+                  <strong>Browse Repos</strong>
+                  <span>Use the sidebar to explore repositories and work efforts</span>
+                </div>
+              </div>
+              <div class="orient-item" data-navigate="queue">
+                <span class="orient-icon">▤</span>
+                <div class="orient-text">
+                  <strong>Work Queue</strong>
+                  <span>See all tasks below — filter by status, click to drill in</span>
+                </div>
+              </div>
+              <div class="orient-item" data-navigate="search">
+                <span class="orient-icon">⌕</span>
+                <div class="orient-text">
+                  <strong>Search</strong>
+                  <span>Find any work effort or ticket instantly from the sidebar</span>
+                </div>
+              </div>
+              <div class="orient-item" data-navigate="docs">
+                <span class="orient-icon">◫</span>
+                <div class="orient-text">
+                  <strong>Docs & API</strong>
+                  <span>Use the top nav for documentation and system tools</span>
+                </div>
+              </div>
+            </div>
           </div>
           <button class="hero-dismiss" id="heroDismiss" title="Dismiss">×</button>
         </section>
 
         <!-- Stats Overview -->
         <section class="stats-section">
-          <div class="stat-card" data-stat="repos">
+          <div class="stat-card" data-stat="repos" title="Click to see all repositories in the sidebar">
             <div class="stat-icon">◇</div>
             <div class="stat-content">
               <span class="stat-value" id="statRepos">0</span>
               <span class="stat-label">Repositories</span>
             </div>
           </div>
-          <div class="stat-card" data-stat="workEfforts">
+          <div class="stat-card" data-stat="workEfforts" title="Total work efforts across all repos">
             <div class="stat-icon">◈</div>
             <div class="stat-content">
               <span class="stat-value" id="statWorkEfforts">0</span>
               <span class="stat-label">Work Efforts</span>
             </div>
           </div>
-          <div class="stat-card" data-stat="tickets">
+          <div class="stat-card" data-stat="tickets" title="Total tickets across all work efforts">
             <div class="stat-icon">▣</div>
             <div class="stat-content">
               <span class="stat-value" id="statTickets">0</span>
               <span class="stat-label">Tickets</span>
             </div>
           </div>
-          <div class="stat-card highlight" data-stat="active">
+          <div class="stat-card highlight" data-stat="active" title="Currently in-progress items needing attention">
             <div class="stat-icon pulsing">●</div>
             <div class="stat-content">
               <span class="stat-value" id="statActive">0</span>
@@ -177,14 +210,14 @@
           </div>
           <!-- Test System Button -->
           <div class="stat-card test-card" data-stat="test">
-            <button class="test-btn" id="testSystemBtn" title="Run System Test">
+            <button class="test-btn" id="testSystemBtn" title="Run a connectivity and data integrity check">
               <span class="test-icon">⚡</span>
               <span class="test-label">Test System</span>
             </button>
           </div>
           <!-- Demo Button -->
           <div class="stat-card demo-card" data-stat="demo">
-            <button class="demo-btn" id="demoBtn" title="Run Live Demo">
+            <button class="demo-btn" id="demoBtn" title="Watch a guided walkthrough of Mission Control features">
               <span class="demo-icon">▶</span>
               <span class="demo-label">Live Demo</span>
             </button>
@@ -640,5 +673,36 @@
   <script src="charts.js"></script>
   <script src="events.js"></script>
   <script src="app.js"></script>
+
+  <!-- Orientation card navigation -->
+  <script>
+  document.querySelectorAll('.orient-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.navigate;
+      if (target === 'sidebar') {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('collapsed')) {
+          document.getElementById('sidebarToggle')?.click();
+        }
+        // Flash the sidebar briefly
+        sidebar?.classList.add('orient-highlight');
+        setTimeout(() => sidebar?.classList.remove('orient-highlight'), 1500);
+      } else if (target === 'queue') {
+        document.querySelector('.queue-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else if (target === 'search') {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('collapsed')) {
+          document.getElementById('sidebarToggle')?.click();
+        }
+        setTimeout(() => document.getElementById('searchInput')?.focus(), 300);
+      } else if (target === 'docs') {
+        // Navigate to docs page if available
+        const docsLink = document.querySelector('.site-nav-link[href*="docs"]');
+        if (docsLink) docsLink.click();
+        else window.open('/docs/', '_self');
+      }
+    });
+  });
+  </script>
 </body>
 </html>
