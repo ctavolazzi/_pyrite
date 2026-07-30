@@ -9,7 +9,7 @@ Commands:
     lint        Run Obsidian markdown linter
     health      Check GitHub integration health
     structure   Verify repository structure
-    ticket      Create tickets in work efforts
+    ticket      Create, list and re-status tickets in work efforts
     we          Create a work effort from a list of todos
     daily-note  Sync work efforts to Obsidian daily note
 
@@ -66,7 +66,7 @@ def cmd_structure(args):
 
 
 def cmd_ticket(args):
-    """Run the ticket tool (create, list)."""
+    """Run the ticket tool (create, list, status)."""
     repo_root = get_repo_root()
     script = repo_root / "tools" / "ticket" / "create.py"
     return run_tool(script, args)
@@ -166,7 +166,7 @@ Commands:
   lint        Run Obsidian markdown linter
   health      Check GitHub integration health
   structure   Verify repository structure
-  ticket      Create tickets in work efforts
+  ticket      Create, list and re-status tickets in work efforts
   we          Create a work effort from a list of todos
   daily-note  Sync work efforts to Obsidian daily note
 

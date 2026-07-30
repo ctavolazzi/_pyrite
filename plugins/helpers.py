@@ -8,9 +8,15 @@ and validating folder names using the naming linter.
 import re
 import random
 import string
+import importlib.util
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+# Sentinel so a genuinely-missing naming linter is cached as "absent" rather
+# than retried on every call.
+_UNLOADED = object()
+_NAMING_RULES = _UNLOADED
 
 
 def iso_z(dt: Optional[datetime] = None) -> str:
@@ -87,6 +93,39 @@ def sanitize_title(title: str, max_length: int = 50) -> str:
     return title
 
 
+def _load_naming_rules():
+    """
+    Load tools/naming-linter/rules/common.py by file path.
+
+    The directory is `naming-linter` with a hyphen, which is not a legal
+    Python identifier, so `from tools.naming_linter.rules.common import ...`
+    could never resolve. The ImportError was caught and turned into None, so
+    validate_folder_name silently returned "valid" for every input and
+    create_work_effort_structure(validate=True) was decorative for as long as
+    it has existed. Loading by path is what actually works here.
+
+    Returns:
+        The loaded module, or None if the file is genuinely missing.
+    """
+    global _NAMING_RULES
+    if _NAMING_RULES is not _UNLOADED:
+        return _NAMING_RULES
+
+    rules_path = (
+        Path(__file__).resolve().parent.parent
+        / "tools" / "naming-linter" / "rules" / "common.py"
+    )
+    if not rules_path.exists():
+        _NAMING_RULES = None
+        return None
+
+    spec = importlib.util.spec_from_file_location("_pyrite_naming_rules", rules_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    _NAMING_RULES = module
+    return module
+
+
 def validate_folder_name(folder_name: str) -> Optional[str]:
     """
     Validate work effort folder name using naming linter
@@ -102,12 +141,11 @@ def validate_folder_name(folder_name: str) -> Optional[str]:
         >>> if error:
         ...     print(f"Invalid: {error}")
     """
-    try:
-        from tools.naming_linter.rules.common import validate_we_folder_name
-        return validate_we_folder_name(folder_name)
-    except ImportError:
-        # Naming linter not available - skip validation
+    rules = _load_naming_rules()
+    if rules is None:
+        # Naming linter genuinely unavailable - skip validation
         return None
+    return rules.validate_we_folder_name(folder_name)
 
 
 def create_work_effort_structure(

@@ -1,7 +1,7 @@
 ---
 id: TKT-rllq-001
 title: "validate_folder_name can never validate: it imports tools.naming_linter but the directory is tools/naming-linter, and the ImportError is swallowed and None returned"
-status: pending
+status: completed
 created: 2026-07-30T12:45:37.609Z
 parent: WE-260730-rllq
 labels: ['pyrite', 'bug']

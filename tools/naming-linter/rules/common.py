@@ -10,8 +10,17 @@ from typing import Optional, Dict
 WE_FOLDER_PATTERN = re.compile(r'^WE-\d{6}-[a-z0-9]{4}_[a-z0-9_]+$')
 WE_INDEX_PATTERN = re.compile(r'^WE-\d{6}-[a-z0-9]{4}_index\.md$')
 WE_ID_PATTERN = re.compile(r'^WE-\d{6}-[a-z0-9]{4}$')
-TICKET_PATTERN = re.compile(r'^TKT-\d{6}-\d{3}_[a-z0-9_]+\.md$')
-TICKET_ID_PATTERN = re.compile(r'^TKT-\d{6}-\d{3}$')
+# Canonical ticket ID is TKT-xxxx-NNN, where xxxx is the parent work effort's
+# short id. That is what plugins.helpers.generate_ticket_id emits, what
+# tools/obsidian-linter/check.py validates, and what tools/ticket/README.md
+# documents. This file used to require the date form TKT-YYMMDD-NNN instead,
+# so the repo's two linters disagreed about the same filename.
+#
+# Measured 2026-07-30: 167 ticket files use the canonical form, 102 use the
+# legacy date form. The legacy ones are real drift and this pattern is meant
+# to surface them. tools/work-effort-migrator is the path for converting them.
+TICKET_PATTERN = re.compile(r'^TKT-[a-z0-9]{4}-\d{3}_[a-z0-9_]+\.md$')
+TICKET_ID_PATTERN = re.compile(r'^TKT-[a-z0-9]{4}-\d{3}$')
 
 
 def validate_we_folder_name(folder_name: str) -> Optional[str]:

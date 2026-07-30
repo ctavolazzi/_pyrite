@@ -1,7 +1,7 @@
 ---
 id: TKT-rllq-003
 title: "pyrite ticket help claims a create and list tool, but tools/ticket/create.py implements no list action"
-status: pending
+status: completed
 created: 2026-07-30T12:45:37.609Z
 parent: WE-260730-rllq
 labels: ['pyrite', 'bug']

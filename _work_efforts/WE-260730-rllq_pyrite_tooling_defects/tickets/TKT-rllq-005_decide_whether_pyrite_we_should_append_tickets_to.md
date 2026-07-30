@@ -1,7 +1,7 @@
 ---
 id: TKT-rllq-005
 title: "Decide whether pyrite we should append tickets to an existing work effort and regenerate the hub table, or stay create-only"
-status: pending
+status: completed
 created: 2026-07-30T12:45:37.610Z
 parent: WE-260730-rllq
 labels: ['pyrite', 'bug']

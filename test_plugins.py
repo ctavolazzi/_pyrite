@@ -15,20 +15,17 @@ def test_imports():
     print("Test 1: Imports")
     print("-" * 50)
 
-    try:
-        from plugins import (
-            BasePlugin,
-            ExternalTask,
-            WorkEffort,
-            generate_we_id,
-            sanitize_title,
-            validate_folder_name
-        )
-        print("✓ All imports successful")
-        return True
-    except ImportError as e:
-        print(f"✗ Import failed: {e}")
-        return False
+    # No try/except: an ImportError here IS the failure, and swallowing it
+    # was what let this test report success while returning False.
+    from plugins import (  # noqa: F401
+        BasePlugin,
+        ExternalTask,
+        WorkEffort,
+        generate_we_id,
+        sanitize_title,
+        validate_folder_name
+    )
+    print("✓ All imports successful")
 
 
 def test_abstract_class():
@@ -39,17 +36,13 @@ def test_abstract_class():
     from plugins import BasePlugin
 
     try:
-        # This should fail
-        plugin = BasePlugin({})
-        print("✗ BasePlugin should not be instantiable")
-        return False
+        BasePlugin({})
     except TypeError as e:
-        if "abstract" in str(e).lower():
-            print("✓ BasePlugin correctly prevents direct instantiation")
-            return True
-        else:
-            print(f"✗ Unexpected error: {e}")
-            return False
+        assert "abstract" in str(e).lower(), \
+            f"BasePlugin raised TypeError but not about abstractness: {e}"
+        print("✓ BasePlugin correctly prevents direct instantiation")
+    else:
+        raise AssertionError("BasePlugin should not be instantiable, but was")
 
 
 def test_template_plugin():
@@ -59,27 +52,19 @@ def test_template_plugin():
 
     from plugins._template import TemplatePlugin
 
+    plugin = TemplatePlugin({'api_key': 'test', 'service_url': 'http://test.com'})
+    print(f"✓ Template plugin instantiated: {plugin.name}")
+
+    is_valid = plugin.validate_config()
+    assert is_valid is True, f"validate_config() returned {is_valid!r}, expected True"
+    print(f"✓ Config validation works: {is_valid}")
+
     try:
-        # Create instance
-        plugin = TemplatePlugin({'api_key': 'test', 'service_url': 'http://test.com'})
-        print(f"✓ Template plugin instantiated: {plugin.name}")
-
-        # Test config validation
-        is_valid = plugin.validate_config()
-        print(f"✓ Config validation works: {is_valid}")
-
-        # Test that abstract methods raise NotImplementedError
-        try:
-            plugin.fetch_tasks()
-            print("✗ fetch_tasks() should raise NotImplementedError")
-            return False
-        except NotImplementedError:
-            print("✓ fetch_tasks() raises NotImplementedError")
-
-        return True
-    except Exception as e:
-        print(f"✗ Template plugin failed: {e}")
-        return False
+        plugin.fetch_tasks()
+    except NotImplementedError:
+        print("✓ fetch_tasks() raises NotImplementedError")
+    else:
+        raise AssertionError("fetch_tasks() should raise NotImplementedError")
 
 
 def test_event_system():
@@ -94,30 +79,18 @@ def test_event_system():
     def event_handler(event):
         events_received.append(event)
 
-    try:
-        plugin = TemplatePlugin({'api_key': 'test', 'service_url': 'http://test.com'})
-        plugin.on_event(event_handler)
+    plugin = TemplatePlugin({'api_key': 'test', 'service_url': 'http://test.com'})
+    plugin.on_event(event_handler)
+    plugin.emit_event('test.event', {'message': 'hello'})
 
-        # Emit test event
-        plugin.emit_event('test.event', {'message': 'hello'})
-
-        if len(events_received) == 1:
-            event = events_received[0]
-            if (event['plugin'] == 'template' and
-                event['type'] == 'test.event' and
-                event['data']['message'] == 'hello' and
-                'timestamp' in event):
-                print("✓ Event system works correctly")
-                return True
-            else:
-                print(f"✗ Event format incorrect: {event}")
-                return False
-        else:
-            print(f"✗ Expected 1 event, got {len(events_received)}")
-            return False
-    except Exception as e:
-        print(f"✗ Event system failed: {e}")
-        return False
+    assert len(events_received) == 1, \
+        f"expected exactly 1 event, got {len(events_received)}"
+    event = events_received[0]
+    assert event['plugin'] == 'template', f"wrong plugin: {event['plugin']}"
+    assert event['type'] == 'test.event', f"wrong type: {event['type']}"
+    assert event['data']['message'] == 'hello', f"wrong payload: {event['data']}"
+    assert 'timestamp' in event, "event carries no timestamp"
+    print("✓ Event system works correctly")
 
 
 def test_helpers():
@@ -127,38 +100,28 @@ def test_helpers():
 
     from plugins import generate_we_id, sanitize_title, validate_folder_name
 
-    try:
-        # Test generate_we_id
-        we_id = generate_we_id()
-        if we_id.startswith('WE-') and len(we_id) == 14:
-            print(f"✓ generate_we_id() works: {we_id}")
-        else:
-            print(f"✗ Invalid WE ID format: {we_id}")
-            return False
+    we_id = generate_we_id()
+    assert we_id.startswith('WE-'), f"WE ID has no WE- prefix: {we_id}"
+    assert len(we_id) == 14, f"WE ID is {len(we_id)} chars, expected 14: {we_id}"
+    print(f"✓ generate_we_id() works: {we_id}")
 
-        # Test sanitize_title
-        title = sanitize_title("Build User Authentication System!")
-        if title == "build_user_authentication_system":
-            print(f"✓ sanitize_title() works: {title}")
-        else:
-            print(f"✗ Unexpected sanitized title: {title}")
-            return False
+    title = sanitize_title("Build User Authentication System!")
+    assert title == "build_user_authentication_system", \
+        f"unexpected sanitized title: {title}"
+    print(f"✓ sanitize_title() works: {title}")
 
-        # Test validate_folder_name
-        folder_name = f"{we_id}_test_task"
-        error = validate_folder_name(folder_name)
-        if error is None:
-            print(f"✓ validate_folder_name() works: {folder_name}")
-        else:
-            print(f"✗ Validation failed: {error}")
-            return False
+    folder_name = f"{we_id}_test_task"
+    error = validate_folder_name(folder_name)
+    assert error is None, f"a valid folder name was rejected: {error}"
+    print(f"✓ validate_folder_name() accepts a good name: {folder_name}")
 
-        return True
-    except Exception as e:
-        print(f"✗ Helper functions failed: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
+    # The negative half. Without this, the assertion above passes just as
+    # happily against a validator that returns None for everything, which is
+    # exactly what this one did until the naming-linter import was repaired.
+    bad = validate_folder_name("WE-260730-abcd_Has_Capitals")
+    assert bad is not None, \
+        "validate_folder_name accepted an invalid name, so it is not validating"
+    print("✓ validate_folder_name() rejects a bad name")
 
 
 def test_dataclasses():
@@ -168,34 +131,30 @@ def test_dataclasses():
 
     from plugins import ExternalTask, WorkEffort
 
-    try:
-        # Create ExternalTask
-        task = ExternalTask(
-            id='test-123',
-            title='Test Task',
-            description='Test description',
-            created=datetime.now(),
-            due_date=None,
-            labels=['test', 'demo'],
-            url='https://example.com/task/123',
-            raw_data={'id': 'test-123'}
-        )
-        print(f"✓ ExternalTask created: {task.id}")
+    task = ExternalTask(
+        id='test-123',
+        title='Test Task',
+        description='Test description',
+        created=datetime.now(),
+        due_date=None,
+        labels=['test', 'demo'],
+        url='https://example.com/task/123',
+        raw_data={'id': 'test-123'}
+    )
+    assert task.id == 'test-123', f"ExternalTask lost its id: {task.id}"
+    assert task.labels == ['test', 'demo'], f"ExternalTask lost labels: {task.labels}"
+    print(f"✓ ExternalTask created: {task.id}")
 
-        # Create WorkEffort
-        we = WorkEffort(
-            we_id='WE-260101-test',
-            folder_path=Path('_work_efforts/WE-260101-test_task'),
-            index_path=Path('_work_efforts/WE-260101-test_task/WE-260101-test_index.md'),
-            tickets_dir=Path('_work_efforts/WE-260101-test_task/tickets'),
-            source_task=task
-        )
-        print(f"✓ WorkEffort created: {we.we_id}")
-
-        return True
-    except Exception as e:
-        print(f"✗ Dataclasses failed: {e}")
-        return False
+    we = WorkEffort(
+        we_id='WE-260101-test',
+        folder_path=Path('_work_efforts/WE-260101-test_task'),
+        index_path=Path('_work_efforts/WE-260101-test_task/WE-260101-test_index.md'),
+        tickets_dir=Path('_work_efforts/WE-260101-test_task/tickets'),
+        source_task=task
+    )
+    assert we.we_id == 'WE-260101-test', f"WorkEffort lost its id: {we.we_id}"
+    assert we.source_task is task, "WorkEffort did not keep its source task"
+    print(f"✓ WorkEffort created: {we.we_id}")
 
 
 def main():
@@ -213,21 +172,32 @@ def main():
         test_helpers
     ]
 
-    results = [test() for test in tests]
+    # The tests assert rather than returning a bool, so failure arrives as an
+    # exception. That is the point: pytest ignores a returned False and
+    # reported this whole file as passing no matter what it found.
+    failures = []
+    for test in tests:
+        try:
+            test()
+        except Exception as e:
+            failures.append((test.__name__, e))
+            print(f"✗ {test.__name__} FAILED: {e}")
 
     print("\n" + "=" * 50)
     print("Test Results")
     print("=" * 50)
-    passed = sum(results)
-    total = len(results)
+    total = len(tests)
+    passed = total - len(failures)
     print(f"Passed: {passed}/{total}")
 
-    if passed == total:
+    if not failures:
         print("✓ All tests passed!")
         return 0
-    else:
-        print(f"✗ {total - passed} test(s) failed")
-        return 1
+
+    print(f"✗ {len(failures)} test(s) failed")
+    for name, error in failures:
+        print(f"  {name}: {error}")
+    return 1
 
 
 if __name__ == '__main__':
