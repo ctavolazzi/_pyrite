@@ -388,12 +388,19 @@ def main():
     )
     parser.add_argument(
         "--work-efforts-dir",
-        default="_work_efforts",
-        help="Base directory for work efforts (default: _work_efforts)",
+        help="Base directory for work efforts (default: <repo root>/_work_efforts)",
     )
 
     args = parser.parse_args()
-    base = Path(args.work_efforts_dir).resolve()
+    # Default relative to the repo, not the shell's cwd. `pyrite` lives at the
+    # repo root but is run from anywhere, and a cwd-relative default fails
+    # silently from a subdirectory: the command reports "work efforts
+    # directory not found" and the status change never lands.
+    base = (
+        Path(args.work_efforts_dir).resolve()
+        if args.work_efforts_dir
+        else _repo_root / "_work_efforts"
+    )
 
     if not base.exists():
         print(f"Error: Work efforts directory not found: {base}", file=sys.stderr)
