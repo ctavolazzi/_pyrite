@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-003
 title: "Confirm NO_NEW_GROUND actually fires in prune.mjs once coverageAdded is non-zero"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.329Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']

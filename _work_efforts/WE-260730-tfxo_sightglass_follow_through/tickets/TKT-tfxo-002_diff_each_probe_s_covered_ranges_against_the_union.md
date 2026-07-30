@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-002
 title: "Diff each probe's covered ranges against the union of all other probes"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.329Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']

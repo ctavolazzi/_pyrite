@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-001
 title: "Wire page.coverage.startJSCoverage() into interpreter.mjs and feed coverageAdded"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.329Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']
