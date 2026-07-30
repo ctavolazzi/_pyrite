@@ -32,6 +32,7 @@ if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
 
 from plugins.helpers import (  # noqa: E402
+    iso_z,
     generate_we_id,
     sanitize_title,
     create_work_effort_structure,
@@ -173,6 +174,135 @@ def cmd_create(
     return 0
 
 
+def read_ticket(path: Path) -> dict:
+    """Pull id, title and status out of a ticket file's frontmatter."""
+    text = path.read_text()
+    fields = {}
+    for key in ('id', 'title', 'status'):
+        match = re.search(rf'^{key}:\s*(.+)$', text, re.MULTILINE)
+        if match:
+            fields[key] = match.group(1).strip().strip('"\'')
+    return fields
+
+
+def cmd_sync(work_efforts_dir: Path, we_id: str, dry_run: bool = False) -> int:
+    """
+    Rewrite a work effort's Tickets table from the ticket files on disk.
+
+    The hub carries each ticket's status so the table is readable on its own,
+    which means the table drifts the moment a ticket file changes. This is the
+    reconciler. It replaces ONLY the Tickets block and the last_updated field,
+    so an objective, a description or hand-written notes elsewhere in the
+    index survive untouched.
+    """
+    we_path = find_work_effort_by_id(work_efforts_dir, we_id)
+    if not we_path:
+        print(f"Error: Work effort not found: {we_id}", file=sys.stderr)
+        return 1
+
+    index_path = we_path / f"{we_id}_index.md"
+    if not index_path.exists():
+        print(f"Error: Index not found: {index_path}", file=sys.stderr)
+        return 1
+
+    tickets = [read_ticket(p) for p in sorted((we_path / 'tickets').glob('TKT-*.md'))]
+    if not tickets:
+        print(f"No tickets in {we_id}, nothing to sync")
+        return 0
+
+    table = "## Tickets\n\n| Ticket | Title | Status |\n|--------|-------|--------|\n"
+    for ticket in tickets:
+        stem = ticket_file_stem(ticket['id'], ticket['title'])
+        table += (
+            f"| [[{stem}|{ticket['id']}]] "
+            f"| {ticket['title']} "
+            f"| {ticket.get('status', 'pending')} |\n"
+        )
+
+    text = index_path.read_text()
+    # Replace from the Tickets heading up to the next second-level heading.
+    new_text, count = re.subn(
+        r'## Tickets\n.*?(?=\n## )',
+        table,
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    if count == 0:
+        print(
+            f"Error: no '## Tickets' section in {index_path.name} to sync",
+            file=sys.stderr,
+        )
+        return 1
+
+    new_text = re.sub(
+        r'^last_updated:.*$',
+        f'last_updated: {iso_z()}',
+        new_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+    done = sum(1 for t in tickets if t.get('status') == 'completed')
+    if dry_run:
+        print(f"Would sync {we_id}: {done}/{len(tickets)} complete")
+        print(table)
+        print("-- dry run, nothing written --")
+        return 0
+
+    if new_text == text:
+        print(f"{we_id}: already in sync, {done}/{len(tickets)} complete")
+        return 0
+
+    index_path.write_text(new_text)
+    print(f"Synced {we_id}: {done}/{len(tickets)} tickets complete")
+    if done == len(tickets):
+        print("  every ticket is complete. Set the work effort status with:")
+        print(f"    pyrite we close --we {we_id}")
+    return 0
+
+
+def cmd_close(work_efforts_dir: Path, we_id: str, dry_run: bool = False) -> int:
+    """Set a work effort to completed, refusing while tickets are open."""
+    we_path = find_work_effort_by_id(work_efforts_dir, we_id)
+    if not we_path:
+        print(f"Error: Work effort not found: {we_id}", file=sys.stderr)
+        return 1
+
+    tickets = [read_ticket(p) for p in sorted((we_path / 'tickets').glob('TKT-*.md'))]
+    open_tickets = [t for t in tickets if t.get('status') != 'completed']
+    if open_tickets:
+        print(
+            f"Refusing to close {we_id}: {len(open_tickets)} ticket(s) still open",
+            file=sys.stderr,
+        )
+        for ticket in open_tickets:
+            print(f"  {ticket['id']}  {ticket.get('status')}", file=sys.stderr)
+        return 1
+
+    index_path = we_path / f"{we_id}_index.md"
+    text = index_path.read_text()
+    new_text = re.sub(
+        r'^status:.*$', 'status: completed', text, count=1, flags=re.MULTILINE
+    )
+    new_text = re.sub(
+        r'^last_updated:.*$',
+        f'last_updated: {iso_z()}',
+        new_text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+    if dry_run:
+        print(f"Would close {we_id} ({len(tickets)} tickets, all complete)")
+        print("-- dry run, nothing written --")
+        return 0
+
+    index_path.write_text(new_text)
+    print(f"Closed {we_id}: {len(tickets)} tickets, all complete")
+    return 0
+
+
 def cmd_list(work_efforts_dir: Path, status_filter: str | None = None) -> int:
     """List work efforts with their ID, status and title."""
     rows = []
@@ -214,8 +344,8 @@ def main():
         "action",
         nargs="?",
         default="create",
-        choices=["create", "list"],
-        help="create (default) or list",
+        choices=["create", "list", "sync", "close"],
+        help="create (default), list, sync or close",
     )
     parser.add_argument("--title", "-t", help="Work effort title (required for create)")
     parser.add_argument("--objective", "-o", default="", help="One-line objective")
@@ -271,6 +401,13 @@ def main():
 
     if args.action == "list":
         return cmd_list(base, args.filter_status)
+
+    if args.action in ("sync", "close"):
+        if not args.we:
+            print(f"Error: --we is required for {args.action}", file=sys.stderr)
+            return 1
+        handler = cmd_sync if args.action == "sync" else cmd_close
+        return handler(base, args.we, args.dry_run)
 
     if not args.title:
         print("Error: --title is required for create", file=sys.stderr)

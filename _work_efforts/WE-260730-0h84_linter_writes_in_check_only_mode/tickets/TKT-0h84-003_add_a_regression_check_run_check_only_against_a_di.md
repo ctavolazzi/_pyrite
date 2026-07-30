@@ -1,7 +1,7 @@
 ---
 id: TKT-0h84-003
 title: "Add a regression check: run check-only against a dirty fixture and assert the file is byte-identical after"
-status: pending
+status: completed
 created: 2026-07-30T12:24:54.246Z
 parent: WE-260730-0h84
 labels: ['linter', 'bug']

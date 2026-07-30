@@ -84,7 +84,8 @@ class ObsidianLinter:
     STANDARD_FRONTMATTER_FIELDS = {'id', 'title', 'status', 'created'}
 
     def __init__(self, root_path: str = ".", scope: Optional[str] = None,
-                 strict: bool = False, dry_run: bool = False):
+                 strict: bool = False, dry_run: bool = False,
+                 fix: bool = False):
         """
         Initialize the linter.
 
@@ -93,11 +94,16 @@ class ObsidianLinter:
             scope: Limit checking to specific directory (e.g., "_work_efforts")
             strict: Enable stricter checking
             dry_run: Preview fixes without applying them
+            fix: Write formatting fixes back to disk. Defaults to False so the
+                default invocation is read-only. --fix was parsed but never
+                reached this constructor, so the only write guard was dry_run
+                and every check-only run silently rewrote files.
         """
         self.root_path = Path(root_path).resolve()
         self.scope = scope
         self.strict = strict
         self.dry_run = dry_run
+        self.fix = fix
         self.stats = LintStats()
 
         # Build index of all markdown files for wikilink resolution
@@ -836,8 +842,9 @@ class ObsidianLinter:
         )
         issues.extend(formatting_issues)
 
-        # Apply fixes if requested and available
-        if fixed_content and not self.dry_run:
+        # Apply fixes only when asked. Both guards are load-bearing: fix says
+        # writing was requested at all, dry_run says preview it instead.
+        if fixed_content and self.fix and not self.dry_run:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(fixed_content)
@@ -994,7 +1001,8 @@ Examples:
         root_path=args.path,
         scope=args.scope,
         strict=args.strict,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
+        fix=args.fix
     )
 
     # Run linting
