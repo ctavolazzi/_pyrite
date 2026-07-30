@@ -13,6 +13,28 @@ from pathlib import Path
 from typing import Optional
 
 
+def iso_z(dt: Optional[datetime] = None) -> str:
+    """
+    Format a timestamp the way the obsidian linter and the rest of the
+    repo expect: ISO 8601 with exactly 3 fractional digits and a Z suffix.
+
+    datetime.isoformat() emits 6 fractional digits and no Z, which fails
+    the linter's `created` date check in tools/obsidian-linter/check.py.
+
+    Args:
+        dt: Timestamp to format (default: now)
+
+    Returns:
+        Timestamp string (e.g., '2026-07-30T12:15:28.126Z')
+
+    Example:
+        >>> iso_z(datetime(2026, 7, 30, 12, 15, 28, 126905))
+        '2026-07-30T12:15:28.126Z'
+    """
+    stamp = dt or datetime.now()
+    return stamp.strftime('%Y-%m-%dT%H:%M:%S.') + f"{stamp.microsecond // 1000:03d}Z"
+
+
 def generate_we_id() -> str:
     """
     Generate a work effort ID in WE-YYMMDD-xxxx format
@@ -190,6 +212,29 @@ def generate_ticket_id(we_id: str, sequence: int) -> str:
     return f"TKT-{short_id}-{sequence:03d}"
 
 
+def ticket_file_stem(ticket_id: str, title: str) -> str:
+    """
+    Build the filename stem a ticket will be written to.
+
+    Kept as its own function because the work effort index has to link to
+    the ticket by its exact stem. The obsidian linter resolves a wikilink
+    only against exact index keys, so [[TKT-abcd-001]] is reported broken
+    while [[TKT-abcd-001_the_title]] resolves.
+
+    Args:
+        ticket_id: Ticket ID (e.g., 'TKT-abcd-001')
+        title: Ticket title
+
+    Returns:
+        Filename stem without the .md extension
+
+    Example:
+        >>> ticket_file_stem('TKT-abcd-001', 'Create login form')
+        'TKT-abcd-001_create_login_form'
+    """
+    return f"{ticket_id}_{sanitize_title(title)}"
+
+
 def create_ticket_file(
     tickets_dir: Path,
     ticket_id: str,
@@ -197,7 +242,8 @@ def create_ticket_file(
     description: Optional[str] = None,
     source_task_id: Optional[str] = None,
     source_url: Optional[str] = None,
-    labels: Optional[list[str]] = None
+    labels: Optional[list[str]] = None,
+    parent: Optional[str] = None
 ) -> Path:
     """
     Create a ticket file in the tickets directory
@@ -210,6 +256,9 @@ def create_ticket_file(
         source_task_id: ID of source task (optional)
         source_url: URL to source task (optional)
         labels: List of labels/tags (optional)
+        parent: Work effort ID this ticket belongs to (optional). Emits the
+            `parent` frontmatter field the obsidian linter validates, plus a
+            resolving wiki-link back to the work effort index.
 
     Returns:
         Path to created ticket file
@@ -226,12 +275,11 @@ def create_ticket_file(
         ... )
     """
     # Sanitize title for filename
-    sanitized_title = sanitize_title(title)
-    filename = f"{ticket_id}_{sanitized_title}.md"
+    filename = f"{ticket_file_stem(ticket_id, title)}.md"
     ticket_path = tickets_dir / filename
 
     # Build YAML frontmatter
-    created_iso = datetime.now().isoformat()
+    created_iso = iso_z()
     frontmatter = f"""---
 id: {ticket_id}
 title: "{title}"
@@ -239,6 +287,8 @@ status: pending
 created: {created_iso}
 """
 
+    if parent:
+        frontmatter += f"parent: {parent}\n"
     if source_task_id:
         frontmatter += f"source_task_id: {source_task_id}\n"
     if source_url:
@@ -250,6 +300,9 @@ created: {created_iso}
 
     # Build markdown content
     content = f"{frontmatter}\n# {title}\n\n"
+
+    if parent:
+        content += f"Part of [[{parent}_index|{parent}]]\n\n"
 
     if description:
         content += f"## Description\n\n{description}\n\n"
@@ -275,7 +328,12 @@ def format_index_file(
     source: Optional[str] = None,
     source_url: Optional[str] = None,
     labels: Optional[list[str]] = None,
-    created: Optional[datetime] = None
+    created: Optional[datetime] = None,
+    objective: Optional[str] = None,
+    status: str = "active",
+    tickets: Optional[list[dict]] = None,
+    priority: Optional[str] = None,
+    category: Optional[str] = None
 ) -> str:
     """
     Generate content for work effort index file
@@ -288,6 +346,14 @@ def format_index_file(
         source_url: URL to original task
         labels: List of labels/tags
         created: Creation timestamp
+        objective: One-line statement of what this work effort is for
+        status: Work effort status. The obsidian linter accepts only
+            active, paused or completed for a work effort. in_progress is a
+            ticket status and fails validation here.
+        tickets: Ticket dicts with 'id' and 'title' keys. Rendered as a
+            table of wiki-links so the index is the hub of its own tickets.
+        priority: Optional priority label
+        category: Optional category label
 
     Returns:
         Markdown content with YAML frontmatter
@@ -301,17 +367,25 @@ def format_index_file(
         ...     labels=['urgent', 'backend']
         ... )
     """
-    created_iso = (created or datetime.now()).isoformat()
+    created_iso = iso_z(created)
     labels_str = labels or []
 
-    # Build YAML frontmatter
+    # Build YAML frontmatter. last_updated is emitted from the start because
+    # the daily-note bridge reads it first and only falls back to created.
     frontmatter = f"""---
 id: {we_id}
 title: "{title}"
-status: in_progress
+status: {status}
 created: {created_iso}
+last_updated: {created_iso}
 """
 
+    if objective:
+        frontmatter += f'objective: "{objective}"\n'
+    if priority:
+        frontmatter += f"priority: {priority}\n"
+    if category:
+        frontmatter += f"category: {category}\n"
     if source:
         frontmatter += f"source: {source}\n"
     if source_url:
@@ -324,8 +398,25 @@ created: {created_iso}
     # Build markdown content
     content = f"{frontmatter}\n# {title}\n\n"
 
+    if objective:
+        content += f"## Objective\n\n{objective}\n\n"
+
     if description:
         content += f"## Description\n\n{description}\n\n"
+
+    if tickets:
+        content += "## Tickets\n\n"
+        content += "| Ticket | Title | Status |\n"
+        content += "|--------|-------|--------|\n"
+        for ticket in tickets:
+            stem = ticket_file_stem(ticket['id'], ticket['title'])
+            ticket_status = ticket.get('status', 'pending')
+            content += (
+                f"| [[{stem}|{ticket['id']}]] "
+                f"| {ticket['title']} "
+                f"| {ticket_status} |\n"
+            )
+        content += "\n"
 
     if source and source_url:
         content += f"""## Source Task
@@ -338,7 +429,20 @@ created: {created_iso}
 
         content += "\n"
 
-    content += """## Progress
+    if tickets:
+        content += f"""## Progress
+
+- Work effort created with {len(tickets)} tickets
+- The Tickets table above is the single record of per-ticket status
+
+## Next Steps
+
+1. Work the tickets above in order
+2. Flip each ticket's `status` to completed as it lands
+3. Set this work effort's `status` to completed when every ticket is done
+"""
+    else:
+        content += """## Progress
 
 - Work effort created
 - Ready for implementation

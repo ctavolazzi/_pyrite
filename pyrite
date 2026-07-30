@@ -10,12 +10,14 @@ Commands:
     health      Check GitHub integration health
     structure   Verify repository structure
     ticket      Create tickets in work efforts
+    we          Create a work effort from a list of todos
     daily-note  Sync work efforts to Obsidian daily note
 
 Examples:
     pyrite lint --scope _work_efforts --fix
     pyrite health
     pyrite structure --fix
+    pyrite we create --title "Ship checkout" --todo "Wire webhook"
     pyrite daily-note --dry-run
     pyrite --version
 """
@@ -67,6 +69,13 @@ def cmd_ticket(args):
     """Run the ticket tool (create, list)."""
     repo_root = get_repo_root()
     script = repo_root / "tools" / "ticket" / "create.py"
+    return run_tool(script, args)
+
+
+def cmd_we(args):
+    """Run the work effort tool (create, list)."""
+    repo_root = get_repo_root()
+    script = repo_root / "tools" / "work-effort" / "create.py"
     return run_tool(script, args)
 
 
@@ -158,6 +167,7 @@ Commands:
   health      Check GitHub integration health
   structure   Verify repository structure
   ticket      Create tickets in work efforts
+  we          Create a work effort from a list of todos
   daily-note  Sync work efforts to Obsidian daily note
 
 Examples:
@@ -165,6 +175,8 @@ Examples:
   pyrite health
   pyrite structure --fix
   pyrite ticket create --we WE-260127-abcd --title "Fix bug"
+  pyrite we create --title "Ship checkout" --todos-file todos.md
+  pyrite we list --filter-status active
   pyrite daily-note --dry-run
   pyrite --version
 
@@ -209,6 +221,12 @@ For command-specific help:
         add_help=False
     )
 
+    we_parser = subparsers.add_parser(
+        'we',
+        help='Create a work effort from a list of todos',
+        add_help=False
+    )
+
     # Daily note command
     daily_note_parser = subparsers.add_parser(
         'daily-note',
@@ -230,6 +248,7 @@ For command-specific help:
         'health': cmd_health,
         'structure': cmd_structure,
         'ticket': cmd_ticket,
+        'we': cmd_we,
         'daily-note': cmd_daily_note,
     }
 
