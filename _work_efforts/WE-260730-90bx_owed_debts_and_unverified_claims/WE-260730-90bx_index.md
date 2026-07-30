@@ -3,7 +3,7 @@ id: WE-260730-90bx
 title: "Owed debts and unverified claims"
 status: active
 created: 2026-07-30T12:45:37.282Z
-last_updated: 2026-07-30T12:45:37.282Z
+last_updated: 2026-07-30T16:26:59.473Z
 objective: "Work promised in earlier sessions and never delivered, plus claims made from memory that were never checked"
 labels: ['debt']
 ---
@@ -23,9 +23,9 @@ Tracked separately because an unpaid debt is invisible next to new work. The lib
 | Ticket | Title | Status |
 |--------|-------|--------|
 | [[TKT-90bx-001_deliver_the_full_written_adversarial_self_critique|TKT-90bx-001]] | Deliver the full written adversarial self-critique that was started and abandoned when the B-09 bypass surfaced mid-critique | pending |
-| [[TKT-90bx-002_verify_the_six_library_recommendations_by_actually|TKT-90bx-002]] | Verify the six library recommendations by actually searching, since they were given from memory: Playwright, V8 coverage via page.coverage, axe-core/playwright, fast-check, pixelmatch with pngjs, Crawlee | pending |
-| [[TKT-90bx-003_verify_the_five_prior_art_claims_that_were_also_gi|TKT-90bx-003]] | Verify the five prior-art claims that were also given from memory: Stagehand, browser-use, Skyvern, Gremlins.js, GraphWalker | pending |
-| [[TKT-90bx-004_record_the_sixth_and_seventh_false_passes_in_the_v|TKT-90bx-004]] | Record the sixth and seventh false passes in the verification ledger, including the one where a structurally-zero number was cited as evidence | pending |
+| [[TKT-90bx-002_verify_the_six_library_recommendations_by_actually|TKT-90bx-002]] | Verify the six library recommendations by actually searching, since they were given from memory: Playwright, V8 coverage via page.coverage, axe-core/playwright, fast-check, pixelmatch with pngjs, Crawlee | completed |
+| [[TKT-90bx-003_verify_the_five_prior_art_claims_that_were_also_gi|TKT-90bx-003]] | Verify the five prior-art claims that were also given from memory: Stagehand, browser-use, Skyvern, Gremlins.js, GraphWalker | completed |
+| [[TKT-90bx-004_record_the_sixth_and_seventh_false_passes_in_the_v|TKT-90bx-004]] | Record the sixth and seventh false passes in the verification ledger, including the one where a structurally-zero number was cited as evidence | completed |
 
 ## Progress
 
