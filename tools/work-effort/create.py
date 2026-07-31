@@ -234,11 +234,16 @@ def cmd_sync(work_efforts_dir: Path, we_id: str, dry_run: bool = False) -> int:
         flags=re.DOTALL,
     )
     if count == 0:
-        print(
-            f"Error: no '## Tickets' section in {index_path.name} to sync",
-            file=sys.stderr,
-        )
-        return 1
+        # No Tickets section yet. That is the normal shape of a work effort
+        # created without todos, and adding tickets to it later with
+        # `pyrite ticket create` is a supported workflow, so build the section
+        # rather than refusing. Inserted before Progress when that exists, so
+        # the tickets sit above the narrative rather than after it.
+        anchor = '## Progress'
+        if anchor in new_text:
+            new_text = new_text.replace(anchor, f"{table}\n{anchor}", 1)
+        else:
+            new_text = new_text.rstrip() + f"\n\n{table}"
 
     new_text = re.sub(
         r'^last_updated:.*$',
@@ -275,6 +280,24 @@ def cmd_close(work_efforts_dir: Path, we_id: str, dry_run: bool = False) -> int:
         return 1
 
     tickets = [read_ticket(p) for p in sorted((we_path / 'tickets').glob('TKT-*.md'))]
+
+    # A work effort with no tickets would close on a vacuous truth: "no ticket
+    # is incomplete" is trivially satisfied by having no tickets. That is the
+    # same defect as an assertion sweeping an empty population, and it would
+    # let an untouched work effort be marked completed.
+    if not tickets:
+        print(
+            f"Refusing to close {we_id}: it has no tickets, so there is "
+            "nothing to have completed",
+            file=sys.stderr,
+        )
+        print(
+            "  Add tickets with `pyrite ticket create`, or set the status by "
+            "hand if this work effort genuinely tracked no discrete work.",
+            file=sys.stderr,
+        )
+        return 1
+
     open_tickets = [t for t in tickets if t.get('status') != 'completed']
     if open_tickets:
         print(

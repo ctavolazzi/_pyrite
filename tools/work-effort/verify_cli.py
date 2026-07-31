@@ -191,7 +191,38 @@ with tempfile.TemporaryDirectory() as tmp:
     we(base, "sync", "--we", sync_we)
     check("HAND WRITTEN" in idx.read_text(), "sync preserves hand-written sections")
 
+    # 6b. A work effort created with no todos has no Tickets section at all.
+    #     Adding a ticket later with `pyrite ticket create` is a normal
+    #     workflow, and sync has to cope with building the section rather than
+    #     replacing it.
+    r = we(base, "create", "--title", "Grown later")
+    grown_we = we_id_from(r.stdout)
+    check("## Tickets" not in index_of(base, grown_we).read_text(),
+          "a work effort with no todos starts with no Tickets section")
+    tkt(base, "create", "--we", grown_we, "--title", "added after the fact")
+    r = we(base, "sync", "--we", grown_we)
+    check(r.returncode == 0,
+          f"sync copes with a missing Tickets section (stderr: {r.stderr.strip()[:70]})")
+    body = index_of(base, grown_we).read_text()
+    check("## Tickets" in body, "sync creates the Tickets section")
+    check("added after the fact" in body, "the late ticket appears in it")
+    try:
+        check(isinstance(yaml.safe_load(body.split('---')[1]), dict),
+              "the index still parses after sync inserted a section")
+    except yaml.YAMLError:
+        check(False, "the index still parses after sync inserted a section")
+
     print("\nclose")
+    # A work effort with zero tickets must not close on a vacuous truth.
+    # "no open tickets" is trivially satisfied by having no tickets, which is
+    # the same defect as an assertion that sweeps an empty population.
+    r = we(base, "create", "--title", "Empty effort")
+    empty_we = we_id_from(r.stdout)
+    r = we(base, "close", "--we", empty_we)
+    check(r.returncode == 1,
+          "close refuses a work effort with no tickets rather than closing vacuously")
+    check("no tickets" in (r.stderr + r.stdout).lower(),
+          "the refusal explains that there was nothing to check")
     check(we(base, "close", "--we", sync_we).returncode == 1,
           "close refuses while a ticket is open")
     tkt(base, "status", "--id", f"TKT-{short}-002", "--status", "completed")
