@@ -206,14 +206,21 @@ def cmd_sync(work_efforts_dir: Path, we_id: str, dry_run: bool = False) -> int:
         print(f"Error: Index not found: {index_path}", file=sys.stderr)
         return 1
 
-    tickets = [read_ticket(p) for p in sorted((we_path / 'tickets').glob('TKT-*.md'))]
+    ticket_paths = sorted((we_path / 'tickets').glob('TKT-*.md'))
+    tickets = [read_ticket(p) for p in ticket_paths]
     if not tickets:
         print(f"No tickets in {we_id}, nothing to sync")
         return 0
 
     table = "## Tickets\n\n| Ticket | Title | Status |\n|--------|-------|--------|\n"
-    for ticket in tickets:
-        stem = ticket_file_stem(ticket['id'], ticket['title'])
+    for path, ticket in zip(ticket_paths, tickets):
+        # Link to the file that actually exists, NOT to a stem recomputed from
+        # the title. Those two agree only until someone edits a title, and the
+        # title is the mutable half: renaming a ticket used to leave the hub
+        # pointing at a filename nothing had written, so the wikilink dangled
+        # while sync reported success. A link derived from metadata can go
+        # stale; a link derived from the path cannot.
+        stem = path.stem
         table += (
             f"| [[{stem}|{ticket['id']}]] "
             f"| {escape_table_cell(ticket['title'])} "
