@@ -1,0 +1,1856 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The work effort tracking system</title>
+<meta name="description" content="How pyrite we and pyrite ticket turn a list of todos into a hub-and-spoke set of markdown work efforts, and how the Mission Control dashboard reads them." />
+<style>
+:root{
+  --bg:#f6f5f2;
+  --bg-2:#eceae4;
+  --panel:#fffefc;
+  --panel-2:#f4f2ed;
+  --ink:#16181c;
+  --ink-2:#333944;
+  --muted:#606877;
+  --line:rgb(22 24 28 / 0.13);
+  --line-2:rgb(22 24 28 / 0.30);
+  --accent:#2f6fed;
+  --accent-soft:rgb(47 111 237 / 0.10);
+  --ok:#0f766e;
+  --warn:#b45309;
+  --risk:#b91c1c;
+  --k-entry:#c2410c;
+  --k-service:#2563eb;
+  --k-ui:#7c3aed;
+  --k-data:#0f766e;
+  --k-external:#a16207;
+  --k-build:#525a67;
+  --k-config:#0369a1;
+  --k-lib:#be185d;
+  --shadow:0 1px 2px rgb(16 18 22 / 0.05), 0 10px 30px rgb(16 18 22 / 0.07);
+  --shadow-sm:0 1px 2px rgb(16 18 22 / 0.06);
+  --r:12px;
+  --r-sm:8px;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  --grid:rgb(22 24 28 / 0.05);
+  --scene-a:#e8e6e0;
+  --scene-b:#f6f5f2;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e1014;
+    --bg-2:#14171d;
+    --panel:#171a21;
+    --panel-2:#1d222a;
+    --ink:#e9ecf1;
+    --ink-2:#c7cdd8;
+    --muted:#8d97a8;
+    --line:rgb(233 236 241 / 0.14);
+    --line-2:rgb(233 236 241 / 0.32);
+    --accent:#6f9bff;
+    --accent-soft:rgb(111 155 255 / 0.14);
+    --ok:#4ec3b4;
+    --warn:#e0a23c;
+    --risk:#f0776b;
+    --k-entry:#f08a53;
+    --k-service:#6f9bff;
+    --k-ui:#b18cf5;
+    --k-data:#4ec3b4;
+    --k-external:#d9b35c;
+    --k-build:#98a2b3;
+    --k-config:#4bb3e8;
+    --k-lib:#f07ab0;
+    --shadow:0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.35);
+    --shadow-sm:0 1px 2px rgb(0 0 0 / 0.4);
+    --grid:rgb(233 236 241 / 0.05);
+    --scene-a:#0b0d11;
+    --scene-b:#171a21;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f6f5f2; --bg-2:#eceae4; --panel:#fffefc; --panel-2:#f4f2ed;
+  --ink:#16181c; --ink-2:#333944; --muted:#606877;
+  --line:rgb(22 24 28 / 0.13); --line-2:rgb(22 24 28 / 0.30);
+  --accent:#2f6fed; --accent-soft:rgb(47 111 237 / 0.10);
+  --ok:#0f766e; --warn:#b45309; --risk:#b91c1c;
+  --k-entry:#c2410c; --k-service:#2563eb; --k-ui:#7c3aed; --k-data:#0f766e;
+  --k-external:#a16207; --k-build:#525a67; --k-config:#0369a1; --k-lib:#be185d;
+  --shadow:0 1px 2px rgb(16 18 22 / 0.05), 0 10px 30px rgb(16 18 22 / 0.07);
+  --grid:rgb(22 24 28 / 0.05); --scene-a:#e8e6e0; --scene-b:#f6f5f2;
+}
+:root[data-theme="dark"]{
+  --bg:#0e1014; --bg-2:#14171d; --panel:#171a21; --panel-2:#1d222a;
+  --ink:#e9ecf1; --ink-2:#c7cdd8; --muted:#8d97a8;
+  --line:rgb(233 236 241 / 0.14); --line-2:rgb(233 236 241 / 0.32);
+  --accent:#6f9bff; --accent-soft:rgb(111 155 255 / 0.14);
+  --ok:#4ec3b4; --warn:#e0a23c; --risk:#f0776b;
+  --k-entry:#f08a53; --k-service:#6f9bff; --k-ui:#b18cf5; --k-data:#4ec3b4;
+  --k-external:#d9b35c; --k-build:#98a2b3; --k-config:#4bb3e8; --k-lib:#f07ab0;
+  --shadow:0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.35);
+  --grid:rgb(233 236 241 / 0.05); --scene-a:#0b0d11; --scene-b:#171a21;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.62;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{line-height:1.16;letter-spacing:-0.018em;margin:0}
+h1{font-size:clamp(2rem,4.4vw,3.4rem);font-weight:680}
+h2{font-size:clamp(1.4rem,2.6vw,2.05rem);font-weight:640}
+h3{font-size:1.06rem;font-weight:640}
+p{margin:0 0 1rem}
+code,kbd{font-family:var(--mono);font-size:0.86em}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+/* The map needs more room than prose does. Anything narrower and the right
+   hand columns of the diagram fall off the edge of the frame. */
+.wrap.wide{max-width:1420px}
+.eyebrow{
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.16em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 0.6rem;
+}
+.lede{font-size:1.1rem;color:var(--ink-2);max-width:64ch}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+
+/* reveal on scroll, scoped to .js so a script error cannot blank the page */
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1)}
+.js .rv.in{opacity:1;transform:none}
+
+/* ---------- header ---------- */
+header.hero{
+  position:relative;overflow:hidden;
+  border-bottom:1px solid var(--line);
+  background:
+    radial-gradient(120% 80% at 78% 0%, var(--accent-soft), transparent 62%),
+    linear-gradient(var(--bg-2), var(--bg));
+  padding:clamp(2.6rem,7vw,5rem) 0 clamp(2rem,4vw,3rem);
+}
+header.hero::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:46px 46px;
+  mask-image:radial-gradient(120% 90% at 50% 0%,#000,transparent 72%);
+}
+.hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:2.4rem;align-items:center}
+@media (max-width:860px){.hero-grid{grid-template-columns:1fr}}
+.title-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:0.8rem}
+.tagline{margin-top:1rem}
+.facts{display:flex;flex-wrap:wrap;gap:0.7rem;margin-top:1.7rem;padding:0;list-style:none}
+.fact{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:0.5rem 0.8rem;box-shadow:var(--shadow-sm);min-width:104px;
+}
+.fact b{display:block;font-size:1.24rem;font-weight:660;letter-spacing:-0.02em}
+.fact span{display:block;font-family:var(--mono);font-size:0.63rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+.fact em{display:block;font-style:normal;font-size:0.76rem;color:var(--muted);margin-top:0.1rem}
+.hero-motif{width:100%;height:auto;max-height:300px}
+.themetog{
+  position:absolute;top:14px;right:18px;z-index:5;
+  background:var(--panel);color:var(--muted);border:1px solid var(--line);
+  border-radius:999px;padding:0.34rem 0.8rem;cursor:pointer;
+  font-family:var(--mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;
+}
+.themetog:hover{color:var(--ink);border-color:var(--line-2)}
+
+/* ---------- nav ---------- */
+nav.jump{
+  position:sticky;top:0;z-index:40;backdrop-filter:blur(10px);
+  background:color-mix(in srgb,var(--bg) 86%,transparent);
+  border-bottom:1px solid var(--line);
+}
+nav.jump ol{display:flex;gap:0.2rem;margin:0;padding:0.45rem 22px;list-style:none;overflow-x:auto;max-width:1180px;margin:0 auto}
+nav.jump a{
+  display:block;white-space:nowrap;color:var(--muted);
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.07em;text-transform:uppercase;
+  padding:0.34rem 0.62rem;border-radius:999px;text-decoration:none;
+}
+nav.jump a:hover,nav.jump a[aria-current="true"]{color:var(--ink);background:var(--panel-2);text-decoration:none}
+
+/* ---------- sections ---------- */
+section{padding:clamp(2.6rem,6vw,4.4rem) 0;border-bottom:1px solid var(--line)}
+.sec-head{max-width:70ch;margin-bottom:1.9rem}
+.sec-head p{color:var(--muted);margin-top:0.7rem}
+
+/* ---------- map ---------- */
+.map-shell{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:1.4rem;align-items:start}
+/* Below this width the aside would squeeze the diagram into a scroll bar, so
+   it drops underneath and the map takes the whole column. */
+@media (max-width:1250px){.map-shell{grid-template-columns:1fr}
+  .detail{position:static;max-height:none}}
+.map-frame{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.map-scroll{overflow-x:auto;overflow-y:hidden}
+.map-scroll svg{display:block;width:100%;min-width:900px;height:auto}
+.map-bar{
+  display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;
+  padding:0.6rem 0.8rem;border-top:1px solid var(--line);background:var(--panel-2);
+}
+.legend{display:flex;flex-wrap:wrap;gap:0.55rem;margin:0;padding:0;list-style:none}
+.legend li{display:flex;align-items:center;gap:0.34rem;font-size:0.72rem;color:var(--muted)}
+.legend i{width:10px;height:10px;border-radius:3px;display:block}
+.btn{
+  background:var(--panel);border:1px solid var(--line);color:var(--ink-2);
+  border-radius:999px;padding:0.32rem 0.78rem;cursor:pointer;
+  font-family:var(--mono);font-size:0.7rem;letter-spacing:0.06em;
+}
+.btn:hover{border-color:var(--line-2);color:var(--ink)}
+.btn[aria-pressed="true"],.btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.spacer{flex:1 1 auto}
+
+/* svg internals */
+.node-box{fill:var(--panel);stroke:var(--line-2);stroke-width:1.2;transition:filter .2s ease}
+.node-g{cursor:pointer}
+.node-g:focus{outline:none}
+.node-g:focus-visible .node-box{stroke:var(--accent);stroke-width:2.4}
+.node-g:hover .node-box{stroke:var(--accent)}
+.node-accent{stroke-width:0}
+.node-title{font:600 13.5px var(--sans);fill:var(--ink)}
+.node-sub{font:11px var(--mono);fill:var(--muted)}
+.node-kind{font:9.5px var(--mono);letter-spacing:.08em}
+.band-rect{fill:var(--panel-2);stroke:var(--line);stroke-width:1;rx:12}
+.band-label{font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;fill:var(--muted)}
+.band-blurb{font:11.5px var(--sans);fill:var(--muted)}
+.edge{fill:none;stroke:var(--line-2);stroke-width:1.6;transition:stroke .25s ease,opacity .25s ease}
+.edge.k-data{stroke:var(--k-data)}
+.edge.k-call{stroke:var(--k-service)}
+.edge.k-build{stroke:var(--k-build);stroke-dasharray:5 4}
+.edge.k-event{stroke:var(--k-ui);stroke-dasharray:2 5}
+.edge-label{font:10.5px var(--mono);fill:var(--muted)}
+.dot{fill:var(--accent);opacity:.9}
+.dot.k-data{fill:var(--k-data)}
+.dot.k-call{fill:var(--k-service)}
+.dot.k-build{fill:var(--k-build)}
+.dot.k-event{fill:var(--k-ui)}
+svg.dim .node-g:not(.on){opacity:.24}
+svg.dim .edge:not(.on){opacity:.1}
+svg.dim .dot:not(.on){opacity:.06}
+svg.dim .edge.on{stroke-width:2.6}
+.node-g.step .node-box{stroke:var(--accent);stroke-width:2.6}
+
+/* detail aside */
+.detail{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);padding:1.1rem;position:sticky;top:60px;max-height:78vh;overflow:auto;
+}
+.detail h3{margin-bottom:0.25rem}
+.detail .kindtag{font-family:var(--mono);font-size:0.66rem;letter-spacing:.1em;text-transform:uppercase}
+.detail p{font-size:0.92rem}
+.detail .files{list-style:none;margin:0.6rem 0 0;padding:0}
+.detail .files li{font-family:var(--mono);font-size:0.76rem;color:var(--ink-2);padding:0.16rem 0;word-break:break-all}
+.chiprow{display:flex;flex-wrap:wrap;gap:0.3rem;margin:0.6rem 0 0}
+.chip{
+  font-family:var(--mono);font-size:0.68rem;border:1px solid var(--line);
+  border-radius:999px;padding:0.12rem 0.5rem;color:var(--muted);
+}
+.dl{margin:0.7rem 0 0;font-size:0.86rem}
+.dl div{display:flex;gap:0.5rem;padding:0.2rem 0;border-top:1px solid var(--line)}
+.dl dt{color:var(--muted);min-width:88px;font-family:var(--mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em}
+.dl dd{margin:0;color:var(--ink-2)}
+
+/* ---------- flows ---------- */
+.flow-tabs{display:flex;flex-wrap:wrap;gap:0.45rem;margin-bottom:1.2rem}
+.flow-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1.4rem;align-items:start}
+@media (max-width:900px){.flow-body{grid-template-columns:1fr}}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{
+  position:relative;padding:0.75rem 0.9rem 0.75rem 2.6rem;border:1px solid var(--line);
+  border-radius:var(--r-sm);background:var(--panel);margin-bottom:0.55rem;
+  transition:border-color .25s ease,background .25s ease,transform .25s ease;
+}
+.steps li::before{
+  counter-increment:s;content:counter(s);
+  position:absolute;left:0.72rem;top:0.78rem;width:1.35rem;height:1.35rem;
+  border-radius:50%;background:var(--panel-2);border:1px solid var(--line);
+  display:grid;place-items:center;font-family:var(--mono);font-size:0.7rem;color:var(--muted);
+}
+.steps li.on{border-color:var(--accent);background:var(--accent-soft);transform:translateX(3px)}
+.steps li.on::before{background:var(--accent);border-color:var(--accent);color:#fff}
+.steps b{display:block;font-size:0.94rem}
+.steps p{margin:0.2rem 0 0;font-size:0.86rem;color:var(--muted)}
+.steps .fileref{font-family:var(--mono);font-size:0.74rem;color:var(--ink-2);word-break:break-all}
+
+/* ---------- 3d ---------- */
+.scene-frame{
+  position:relative;border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;background:linear-gradient(160deg,var(--scene-a),var(--scene-b));
+  box-shadow:var(--shadow);
+}
+#scene{display:block;width:100%;height:clamp(340px,56vh,620px)}
+.scene-hint{
+  position:absolute;left:12px;bottom:10px;font-family:var(--mono);font-size:0.68rem;
+  color:var(--muted);background:color-mix(in srgb,var(--panel) 78%,transparent);
+  border:1px solid var(--line);border-radius:999px;padding:0.22rem 0.66rem;pointer-events:none;
+}
+.scene-tip{
+  position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:0.72rem;
+  color:var(--ink);background:color-mix(in srgb,var(--panel) 90%,transparent);
+  border:1px solid var(--line-2);border-radius:var(--r-sm);padding:0.3rem 0.6rem;
+  pointer-events:none;opacity:0;transition:opacity .18s ease;max-width:60%;
+}
+.scene-tip.on{opacity:1}
+.scene-fallback{
+  display:none;padding:1.4rem;color:var(--muted);font-size:0.9rem;text-align:center;
+}
+.scene-frame.failed #scene{display:none}
+.scene-frame.failed .scene-fallback{display:block}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0.9rem;margin-top:1.1rem}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:1rem;box-shadow:var(--shadow-sm);
+}
+.card h3{margin-bottom:0.35rem}
+.card p{font-size:0.88rem;color:var(--muted);margin:0}
+.card .files{list-style:none;margin:0.6rem 0 0;padding:0}
+.card .files li{font-family:var(--mono);font-size:0.74rem;color:var(--ink-2);word-break:break-all}
+
+/* ---------- tables ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:460px;font-size:0.86rem}
+th,td{text-align:left;padding:0.5rem 0.8rem;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:0.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+tbody tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-family:var(--mono)}
+.bar{height:5px;border-radius:3px;background:var(--accent);min-width:2px}
+
+/* ---------- risk + truth ---------- */
+/* These sit on a <p> inside .card, and `.card p` already sets a muted colour at
+   the same specificity. Qualify them so the risk actually reads as a risk. */
+.risk-low,.card p.risk-low{color:var(--ok)}
+.risk-medium,.card p.risk-medium{color:var(--warn)}
+.risk-high,.card p.risk-high{color:var(--risk)}
+.truth{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0.9rem}
+.truth ul{margin:0.5rem 0 0;padding-left:1.1rem}
+.truth li{font-size:0.88rem;color:var(--ink-2);margin-bottom:0.3rem}
+.truth .card.v{border-left:3px solid var(--ok)}
+.truth .card.i{border-left:3px solid var(--warn)}
+.truth .card.u{border-left:3px solid var(--risk)}
+
+footer{padding:2.2rem 0 3.4rem;color:var(--muted);font-size:0.84rem}
+footer .mono{font-size:0.76rem}
+
+@media (prefers-reduced-motion:reduce){
+  .js .rv{opacity:1;transform:none;transition:none}
+  .steps li{transition:none}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');
+try{var t=localStorage.getItem('arch-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+
+<header class="hero">
+  <button class="themetog" type="button" id="themetog">theme</button>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow" id="hero-eyebrow"></p>
+      <h1 id="hero-title"></h1>
+      <p class="lede tagline" id="hero-tagline"></p>
+      <ul class="facts" id="hero-facts"></ul>
+    </div>
+    <div aria-hidden="true">
+      <style>
+        .motif .plane{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
+        .motif .cell{fill:var(--panel-2);stroke:var(--line-2);stroke-width:1}
+        .motif .wire{fill:none;stroke:var(--line-2);stroke-width:1.3;opacity:.55}
+        .motif .pulse{fill:none;stroke-width:2.2;stroke-linecap:round;
+          stroke-dasharray:9 210;animation:motif-run 3.4s linear infinite}
+        .motif .p1{stroke:var(--k-service)}
+        .motif .p2{stroke:var(--k-data);animation-delay:-.85s}
+        .motif .p3{stroke:var(--k-ui);animation-delay:-1.7s}
+        .motif .p4{stroke:var(--k-entry);animation-delay:-2.5s}
+        .motif .tick{fill:var(--muted);font:9px var(--mono);letter-spacing:.14em}
+        .motif .beat{animation:motif-beat 3.4s ease-in-out infinite}
+        .motif .b2{animation-delay:-1.1s}
+        .motif .b3{animation-delay:-2.2s}
+        @keyframes motif-run{from{stroke-dashoffset:219}to{stroke-dashoffset:0}}
+        @keyframes motif-beat{0%,100%{opacity:.35}45%{opacity:1}}
+        @media (prefers-reduced-motion:reduce){
+          .motif .pulse{animation:none;stroke-dasharray:none;opacity:.5}
+          .motif .beat{animation:none;opacity:.7}
+        }
+      </style>
+      <svg class="hero-motif motif" viewBox="0 0 380 262" role="img" aria-hidden="true">
+        <rect class="plane" x="30" y="20" width="320" height="54" rx="12"/>
+        <rect class="plane" x="30" y="103" width="320" height="54" rx="12"/>
+        <rect class="plane" x="30" y="186" width="320" height="54" rx="12"/>
+        <text class="tick" x="30" y="14">SURFACE</text>
+        <text class="tick" x="30" y="97">LOGIC</text>
+        <text class="tick" x="30" y="180">STATE</text>
+        <rect class="cell" x="46" y="34" width="88" height="26" rx="7"/>
+        <rect class="cell beat" x="146" y="34" width="88" height="26" rx="7"/>
+        <rect class="cell" x="246" y="34" width="88" height="26" rx="7"/>
+        <rect class="cell beat b2" x="46" y="117" width="88" height="26" rx="7"/>
+        <rect class="cell" x="146" y="117" width="88" height="26" rx="7"/>
+        <rect class="cell" x="246" y="117" width="88" height="26" rx="7"/>
+        <rect class="cell" x="46" y="200" width="88" height="26" rx="7"/>
+        <rect class="cell beat b3" x="146" y="200" width="88" height="26" rx="7"/>
+        <rect class="cell" x="246" y="200" width="88" height="26" rx="7"/>
+        <g>
+          <path id="mw1" class="wire" d="M90,60 C90,88 90,90 90,117"/>
+          <path id="mw2" class="wire" d="M190,60 C190,88 190,90 190,117"/>
+          <path id="mw3" class="wire" d="M290,60 C290,90 190,88 190,117"/>
+          <path id="mw4" class="wire" d="M90,143 C90,172 190,172 190,200"/>
+          <path id="mw5" class="wire" d="M190,143 C190,172 190,174 190,200"/>
+          <path id="mw6" class="wire" d="M290,143 C290,172 290,174 290,200"/>
+          <use class="pulse p1" href="#mw1"/>
+          <use class="pulse p2" href="#mw3"/>
+          <use class="pulse p3" href="#mw4"/>
+          <use class="pulse p4" href="#mw6"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<nav class="jump" aria-label="Sections">
+  <ol id="jumplist"></ol>
+</nav>
+
+<main>
+  <section id="map">
+    <div class="wrap wide">
+      <div class="sec-head rv">
+        <p class="eyebrow">01 / system map</p>
+        <h2>How the pieces fit</h2>
+        <p>Every box is a real directory or service in this codebase. Every line is a
+           real dependency. Click a box to see what it is, which files it owns, and
+           what it talks to.</p>
+      </div>
+      <div class="map-shell">
+        <div class="map-frame rv">
+          <div class="map-scroll" id="map-scroll"></div>
+          <div class="map-bar">
+            <ul class="legend" id="map-legend"></ul>
+            <span class="spacer"></span>
+            <button class="btn" type="button" id="map-reset">clear focus</button>
+            <button class="btn on" type="button" id="map-motion" aria-pressed="true">motion</button>
+          </div>
+        </div>
+        <aside class="detail rv" id="detail" aria-live="polite"></aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="flows">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">02 / runtime paths</p>
+        <h2>What happens when</h2>
+        <p>Pick a path and watch it travel the map above. These are the routes a
+           request, a build, or a piece of data actually takes.</p>
+      </div>
+      <div class="flow-tabs rv" id="flow-tabs"></div>
+      <div class="flow-body">
+        <div class="rv">
+          <ol class="steps" id="flow-steps"></ol>
+        </div>
+        <div class="rv">
+          <div class="card" id="flow-note"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">03 / the stack in 3d</p>
+        <h2>The same system, stacked</h2>
+        <p>Drag to orbit, scroll to zoom, click a block to open its detail. Height is
+           layer depth: the top plane is what the outside world touches, the bottom is
+           what everything rests on.</p>
+      </div>
+      <div class="scene-frame rv" id="scene-frame">
+        <canvas id="scene"></canvas>
+        <div class="scene-tip" id="scene-tip"></div>
+        <div class="scene-hint">drag to orbit &middot; scroll to zoom &middot; click a block</div>
+        <div class="scene-fallback" id="scene-fallback"></div>
+      </div>
+      <div class="grid3" id="stack-cards"></div>
+    </div>
+  </section>
+
+  <section id="modules">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">04 / modules</p>
+        <h2>What each part owns</h2>
+        <p>Sized by what is actually in the tree, not by how important it sounds.</p>
+      </div>
+      <div class="grid3" id="module-cards"></div>
+    </div>
+  </section>
+
+  <section id="state">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">05 / state and data</p>
+        <h2>Where the truth lives</h2>
+        <p>Every place this system keeps something that outlives a single request.</p>
+      </div>
+      <div class="grid3" id="state-cards"></div>
+    </div>
+  </section>
+
+  <section id="seams">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">06 / seams</p>
+        <h2>Where to change things</h2>
+        <p>The joints that take a change cleanly, and the ones that fight back.</p>
+      </div>
+      <div class="grid3" id="seam-cards"></div>
+    </div>
+  </section>
+
+  <section id="measured">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">07 / measured</p>
+        <h2>Ground truth from the scan</h2>
+        <p>This section is generated straight from a filesystem and git scan. Nothing
+           here was written by hand, so it is the part to trust first.</p>
+      </div>
+      <div id="measured-body"></div>
+    </div>
+  </section>
+
+  <section id="trust">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <p class="eyebrow">08 / confidence</p>
+        <h2>What is verified, what is not</h2>
+        <p>A diagram that hides its own uncertainty is worse than no diagram.</p>
+      </div>
+      <div class="truth" id="trust-cards"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p id="foot-line"></p>
+    <p class="mono" id="foot-meta"></p>
+  </div>
+</footer>
+
+<script type="application/json" id="arch-spec">{"meta": {"title": "The work effort tracking system", "eyebrow": "architecture / _pyrite", "tagline": "A todo list becomes a folder of markdown files that link to each other in both directions, and a dashboard reads that folder as live state. Every number on this page came off the filesystem.", "footer": "Counts from a scan of the working tree at 94ea3a9 on branch main. Import edges are resolved, not guessed. The four verification suites were run to produce the numbers quoted for them.", "description": "How pyrite we and pyrite ticket turn a list of todos into a hub-and-spoke set of markdown work efforts, and how the Mission Control dashboard reads them.", "root": "/Users/ctavolazzi/Code/active/_pyrite", "generated": "2026-07-31T00:12:33Z"}, "layers": [{"id": "cli", "name": "CLI", "blurb": "What a human or agent types"}, {"id": "verbs", "name": "Verbs", "blurb": "One script per noun, argparse only"}, {"id": "core", "name": "Shared core", "blurb": "Every write goes through here"}, {"id": "store", "name": "Store", "blurb": "Markdown on disk is the database"}, {"id": "readers", "name": "Readers", "blurb": "Things that consume the store"}, {"id": "checks", "name": "Verification", "blurb": "Suites that can actually fail"}], "nodes": [{"id": "pyrite", "layer": "cli", "kind": "entry", "name": "pyrite", "blurb": "Repo-root dispatcher. Forwards unknown args to one tool per subcommand.", "detail": "Deliberately thin. It resolves the repo root and shells out, so each tool stays runnable on its own without importing the dispatcher.", "files": ["pyrite"], "tech": ["python", "argparse", "subprocess"], "loc": 265, "fileCount": 1, "verified": true}, {"id": "we", "layer": "verbs", "kind": "service", "name": "we create/sync/close", "blurb": "Turns a list of todos into a work effort. Also reconciles and closes one.", "detail": "create allocates every ticket id up front so the hub can link to files that do not exist yet and so a dry run reports real ids. sync rebuilds only the Tickets block. close refuses while any ticket is open, and refuses a work effort with no tickets at all.", "files": ["tools/work-effort/create.py", "tools/work-effort/README.md"], "tech": ["python", "argparse"], "loc": 471, "fileCount": 1, "verified": true}, {"id": "ticket", "layer": "verbs", "kind": "service", "name": "ticket verbs", "blurb": "Adds a ticket to an existing work effort and changes its status.", "detail": "status exists so a state change is a CLI verb rather than a hand edit. It validates the value, refuses an unknown or ambiguous id, is idempotent, and names the sync to run afterwards.", "files": ["tools/ticket/create.py", "tools/ticket/README.md"], "tech": ["python", "argparse"], "loc": 230, "fileCount": 1, "verified": true}, {"id": "helpers", "layer": "core", "kind": "lib", "name": "plugins.helpers", "blurb": "The only place that formats a file. Ids, quoting, escaping, sequences.", "detail": "13 functions. Fixing a formatting bug here fixes it for the Todoist plugin and both CLI tools at once, which is why yaml_quote and escape_table_cell live here rather than at the call sites.", "files": ["plugins/helpers.py", "plugins/__init__.py"], "tech": ["python", "stdlib only"], "loc": 560, "fileCount": 1, "verified": true}, {"id": "naming", "layer": "core", "kind": "config", "name": "naming-linter rules", "blurb": "Canonical patterns for folder, index and ticket names.", "detail": "Loaded by file path, because the directory is naming-linter with a hyphen and no import statement can name it. The previous import could never resolve and its ImportError was swallowed, so validation silently passed everything.", "files": ["tools/naming-linter/rules/common.py", "tools/naming-linter/rules/work_efforts.py"], "tech": ["python", "re"], "loc": 693, "fileCount": 4, "verified": true}, {"id": "store", "layer": "store", "kind": "data", "name": "_work_efforts", "blurb": "37 folders, 314 markdown files. YAML frontmatter plus wiki-links.", "detail": "One folder per work effort: an index that is the hub, and a tickets subfolder holding the spokes. There is no database and no index file to keep in sync, because the directory listing is the index.", "files": ["_work_efforts/WE-260730-tfxo_sightglass_follow_through/WE-260730-tfxo_index.md", "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/"], "tech": ["markdown", "yaml frontmatter"], "loc": 314, "fileCount": 314, "verified": true}, {"id": "dashboard", "layer": "readers", "kind": "ui", "name": "Mission Control", "blurb": "Watches the folder and pushes a WebSocket frame per change.", "detail": "Parses frontmatter with gray-matter, which is a real YAML parser and therefore throws on malformed input rather than degrading. That is what made the unescaped-quote bug a availability problem rather than a cosmetic one.", "files": ["mcp-servers/dashboard/server.js", "mcp-servers/dashboard/lib/watcher.js", "mcp-servers/dashboard/lib/parser.js"], "tech": ["node", "express", "ws", "chokidar", "gray-matter"], "loc": 1674, "fileCount": 6, "verified": true}, {"id": "obsidian", "layer": "readers", "kind": "service", "name": "obsidian-linter", "blurb": "Validates frontmatter, wiki-link targets and ticket-to-parent reciprocity.", "detail": "Resolves a wiki-link only against an exact filename stem, which is why the hub links to the full stem with an alias rather than to a bare id.", "files": ["tools/obsidian-linter/check.py", "tools/obsidian-linter/lint.py"], "tech": ["python", "stdlib only"], "loc": 2905, "fileCount": 7, "verified": true}, {"id": "vhelpers", "layer": "checks", "kind": "build", "name": "verify.py", "blurb": "25 asserts on the core, using the exact keyword sets real callers pass.", "files": ["tools/work-effort/verify.py"], "tech": ["python", "assert"], "loc": 166, "fileCount": 1, "verified": true}, {"id": "vcli", "layer": "checks", "kind": "build", "name": "verify_cli.py", "blurb": "59 asserts driving the real scripts through subprocess with hostile input.", "detail": "Found four data-corruption bugs the happy-path testing had missed. Every fix is mutation-tested: reverting it turns the suite red.", "files": ["tools/work-effort/verify_cli.py"], "tech": ["python", "subprocess", "pyyaml"], "loc": 290, "fileCount": 1, "verified": true}, {"id": "vreadonly", "layer": "checks", "kind": "build", "name": "verify_readonly.py", "blurb": "5 asserts that the linter writes nothing unless asked. It used to.", "files": ["tools/obsidian-linter/verify_readonly.py"], "tech": ["python", "hashlib"], "loc": 116, "fileCount": 1, "verified": true}, {"id": "vtiles", "layer": "checks", "kind": "build", "name": "tile-totals.mjs", "blurb": "Drives a real browser, because a DOM dump cannot measure an animation.", "files": ["mcp-servers/dashboard/tests/tile-totals.mjs"], "tech": ["node", "playwright"], "loc": 114, "fileCount": 1, "verified": true}], "edges": [{"from": "pyrite", "to": "we", "kind": "call", "label": "subcommand"}, {"from": "pyrite", "to": "ticket", "kind": "call", "label": "subcommand"}, {"from": "we", "to": "helpers", "kind": "call", "label": "2 imports"}, {"from": "ticket", "to": "helpers", "kind": "call", "label": "1 import"}, {"from": "helpers", "to": "naming", "kind": "call", "label": "by file path"}, {"from": "we", "to": "store", "kind": "data", "label": "writes"}, {"from": "ticket", "to": "store", "kind": "data", "label": "writes"}, {"from": "helpers", "to": "store", "kind": "data", "label": "formats"}, {"from": "dashboard", "to": "store", "kind": "event", "label": "watches"}, {"from": "obsidian", "to": "store", "kind": "data", "label": "validates"}, {"from": "vhelpers", "to": "helpers", "kind": "build", "label": "25 asserts"}, {"from": "vcli", "to": "we", "kind": "build", "label": "subprocess"}, {"from": "vcli", "to": "ticket", "kind": "build", "label": "subprocess"}, {"from": "vreadonly", "to": "obsidian", "kind": "build", "label": "5 asserts"}, {"from": "vtiles", "to": "dashboard", "kind": "build", "label": "real browser"}], "flows": [{"id": "create", "name": "A todo list becomes a work effort", "blurb": "The write path. Nine tickets in, one hub and nine spokes out, links resolving both ways.", "steps": [{"node": "pyrite", "title": "pyrite we create --todos-file todos.md", "text": "The dispatcher resolves the repo root and forwards every unknown argument to the work-effort tool.", "file": "pyrite"}, {"node": "we", "title": "Parse the todos", "text": "Markdown checklists, bullets, numbered lists or bare lines all reduce to titles. Headings and blanks are dropped. A checked box still becomes a ticket, because the point is to capture the whole list.", "file": "tools/work-effort/create.py"}, {"node": "we", "title": "Allocate every id up front", "text": "Ticket ids are assigned before anything is written, so the hub can link to files that do not exist yet and a dry run can report the real ids it would use.", "file": "tools/work-effort/create.py"}, {"node": "helpers", "title": "Format, quote and escape", "text": "yaml_quote makes a title safe for a real YAML parser. escape_table_cell stops a pipe adding a column. ticket_file_stem computes the filename, and the hub links by that exact stem.", "file": "plugins/helpers.py"}, {"node": "naming", "title": "Validate the folder name", "text": "Loaded by file path rather than imported, because the directory has a hyphen in it. Rejects capitals, a short date, an uppercase id.", "file": "tools/naming-linter/rules/common.py"}, {"node": "store", "title": "Write the hub and the spokes", "text": "One index carrying a Tickets table, one file per ticket carrying a parent field and a back-link. Both directions resolve.", "file": "_work_efforts/"}, {"node": "dashboard", "title": "The watcher fires", "text": "chokidar sees the new files and the server pushes an update frame. No reload, no polling.", "file": "mcp-servers/dashboard/lib/watcher.js"}]}, {"id": "close", "name": "Work gets done and the record catches up", "blurb": "The update path, and the two places it refuses to lie.", "steps": [{"node": "ticket", "title": "pyrite ticket status --status completed", "text": "Validates the value against four allowed statuses, refuses an unknown or ambiguous id, and does nothing if the status already matches.", "file": "tools/ticket/create.py"}, {"node": "store", "title": "One ticket file changes", "text": "Only the status line in the frontmatter. The hub is now stale, and the tool says so rather than pretending otherwise.", "file": "_work_efforts/"}, {"node": "we", "title": "pyrite we sync rebuilds the table", "text": "Reads every ticket file, regenerates only the Tickets block, and refreshes last_updated. An objective, a description and hand-written notes all survive.", "file": "tools/work-effort/create.py"}, {"node": "we", "title": "pyrite we close, which can refuse", "text": "Refuses while any ticket is open. Also refuses a work effort with no tickets at all, because 'no ticket is incomplete' is trivially true when there are none.", "file": "tools/work-effort/create.py"}, {"node": "dashboard", "title": "The board moves", "text": "A frame per file change. Measured across three runs: three, two and five frames, one per edit.", "file": "mcp-servers/dashboard/server.js"}]}, {"id": "verify", "name": "Proving the thing can fail", "blurb": "The path that stops a green result from being decoration.", "steps": [{"node": "vcli", "title": "Predict, then measure", "text": "Five defects were predicted by reading the code. Three were confirmed, one was refuted, and a fourth was found only because a weak assertion got strengthened.", "file": "tools/work-effort/verify_cli.py"}, {"node": "vcli", "title": "Feed it hostile input", "text": "Seven title shapes: embedded quotes, a colon, a backslash, a leading dash, a hash, braces, and both quote kinds together. Each round-trips through a real YAML parser.", "file": "tools/work-effort/verify_cli.py"}, {"node": "helpers", "title": "Fix at the root", "text": "yaml_quote, escape_table_cell and next_ticket_sequence live in the shared core, so the Todoist plugin inherits the fixes without knowing they happened.", "file": "plugins/helpers.py"}, {"node": "vcli", "title": "Mutate the fix and watch it go red", "text": "Revert yaml_quote and 3 checks fail with real YAMLErrors. Revert the escaping and 2 fail on cell counts. Revert the sync regex, 3 fail. Revert the sequence fix, 1 fails.", "file": "tools/work-effort/verify_cli.py"}, {"node": "vtiles", "title": "Check the instrument, not just the result", "text": "A DOM dump cannot measure a requestAnimationFrame tween. Six such readings produced a bug report that had to be retracted. This suite drives a real browser instead.", "file": "mcp-servers/dashboard/tests/tile-totals.mjs"}]}], "state": [{"name": "_work_efforts", "kind": "markdown on disk", "where": "in-repo, committed", "blurb": "37 work efforts, 314 markdown files, 269 tickets. Frontmatter is the schema and the directory listing is the index. Git history is the audit log, which is most of the reason there is no database.", "files": ["_work_efforts/"]}, {"name": "Ticket status", "kind": "single field", "where": "ticket frontmatter", "blurb": "Held in exactly one place. The hub's Tickets table is a rendered copy that sync regenerates, never an independent record, so the two cannot disagree for long.", "files": ["tools/work-effort/create.py"]}, {"name": "Dashboard memory", "kind": "in-process", "where": "node server", "blurb": "Rebuilt from disk on boot and kept current by the watcher. Nothing is persisted, so deleting it costs a restart and nothing else.", "files": ["mcp-servers/dashboard/lib/watcher.js"]}], "seams": [{"title": "Every write goes through one module", "risk": "low", "text": "Formatting lives only in plugins.helpers, so the four data-corruption bugs were four fixes in one file rather than four fixes in three call sites. Adding a writer that formats its own frontmatter would give that up.", "files": ["plugins/helpers.py"]}, {"title": "A real YAML parser reads these files, so bad quoting is downtime", "risk": "high", "text": "gray-matter throws rather than degrading, so one ticket with an unescaped quote took its whole work effort out of the dashboard. All 314 files parse today, but only because no title had yet contained a double quote. That was luck until yaml_quote existed.", "files": ["plugins/helpers.py", "mcp-servers/dashboard/lib/parser.js"]}, {"title": "Two linters disagreed about the same filename", "risk": "medium", "text": "naming-linter required TKT-YYMMDD-NNN while the generator and obsidian-linter used TKT-xxxx-NNN. 167 files follow the canonical form and 102 the legacy one. Reconciled, but nothing runs naming-linter automatically, so the drift is surfaced rather than enforced.", "files": ["tools/naming-linter/rules/common.py", "tools/obsidian-linter/check.py"]}, {"title": "Ticket ids are only unique by construction", "risk": "medium", "text": "next_ticket_sequence reads the highest id on disk and adds one. Two concurrent creates in the same work effort would still collide. Single-operator use makes this theoretical today and a real bug the moment anything runs in parallel.", "files": ["plugins/helpers.py"]}, {"title": "Work effort ids are four random characters", "risk": "medium", "text": "36^4 is about 1.7 million, so collisions are unlikely but not impossible, and create_work_effort_structure uses mkdir(exist_ok=True). An explicit colliding id is now refused. A randomly drawn collision would still merge two work efforts into one folder.", "files": ["plugins/helpers.py"]}, {"title": "The hub table is a copy, and only sync reconciles it", "risk": "low", "text": "Change a status and the table is stale until someone runs sync. The tool prints the exact command every time, but nothing enforces it, so a hand-edited ticket can leave the hub disagreeing with reality indefinitely.", "files": ["tools/work-effort/create.py"]}], "ground": {"verified": ["Line counts and file counts come from a scan of the working tree at 94ea3a9.", "Import edges between plugins, tools/work-effort and tools/ticket are resolved by the scanner, not inferred.", "Check counts were produced by running each suite: 25, 59, 5, and 6 under pytest.", "314 markdown files under _work_efforts parse under gray-matter, the parser the dashboard uses. Zero failures.", "37 work efforts and 269 tickets counted by pyrite we list and pyrite ticket list.", "The four fixes are mutation-tested, and each mutation was confirmed to have applied before its result was believed.", "Live update frames were counted on a socket with the initial state dump excluded."], "inferred": ["The layer assignment is editorial. Nothing in the repo declares these six layers.", "Purpose descriptions come from reading the entrypoints and both ends of the heaviest edges, not every file.", "The dashboard is described from its lib and server files plus observed behaviour, not a full read of its 13,377 line public directory."], "unknown": ["Whether two concurrent ticket creates actually collide in practice. The race is visible in the code and has never been exercised.", "Whether the 102 legacy-form ticket ids matter to any consumer, or are simply old.", "How the system behaves past a few thousand work efforts. Every read is a directory glob and none of it is indexed.", "Whether the Todoist plugin still works end to end. It shares the core and was not run this session."]}, "facts": [{"label": "lines of code", "value": "38,216"}, {"label": "files", "value": "784"}, {"label": "primary language", "value": "Markdown", "note": "65,713 lines"}, {"label": "directories", "value": "112"}, {"label": "commits", "value": "156"}, {"label": "uncommitted", "value": "3", "note": "files not in git"}]}</script>
+<script type="application/json" id="arch-scan">{"schema": "architecture-scan/1", "root": "/Users/ctavolazzi/Code/active/_pyrite", "name": "pyrite", "generated_utc": "2026-07-31T00:12:33Z", "truncated": false, "totals": {"files": 784, "measured_files": 737, "loc": 38216, "bytes": 6400488, "modules": 112, "modules_listed": 40, "edges": 14, "edges_listed": 14}, "git": {"is_repo": true, "branch": "main", "head": "94ea3a9", "commits": 156, "last_commit": "2026-07-30 fix: sync can build a missing Tickets section, close refuses a vacuous close", "contributors": 2, "hot_files": [{"path": "_work_efforts/devlog.md", "touches": 19}, {"path": "README.md", "touches": 9}, {"path": "_coordination/CONTEXT.md", "touches": 8}, {"path": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md", "touches": 7}, {"path": "mcp-servers/dashboard/package-lock.json", "touches": 6}, {"path": "tools/obsidian-linter/check.py", "touches": 6}, {"path": "mcp-servers/dashboard/public/index.html", "touches": 6}, {"path": "tools/obsidian-linter/README.md", "touches": 6}, {"path": "_work_efforts/WE-251227-g6nh_notification_center_feature/WE-251227-g6nh_index.md", "touches": 6}, {"path": "_work_efforts/WE-251227-hldk_mission_control_v2_command_center/WE-251227-hldk_index.md", "touches": 6}, {"path": "tools/work-effort/create.py", "touches": 5}, {"path": "plugins/helpers.py", "touches": 5}], "dirty": 3}, "languages": [{"lang": "Markdown", "files": 580, "loc": 65713}, {"lang": "JavaScript", "files": 59, "loc": 24835}, {"lang": "Python", "files": 39, "loc": 13342}, {"lang": "JSON", "files": 19, "loc": 10278}, {"lang": "CSS", "files": 18, "loc": 18557}, {"lang": "Text", "files": 10, "loc": 584}, {"lang": "HTML", "files": 9, "loc": 6102}, {"lang": "YAML", "files": 1, "loc": 58}, {"lang": "Shell", "files": 1, "loc": 39}, {"lang": "TOML", "files": 1, "loc": 33}], "modules": [{"id": "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets", "files": 34, "loc": 1054, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-251231-001_create_v3_dev_environment.md", "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-251231-002_css_audit_and_inventory.md", "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-251231-003_html_structure_audit.md", "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-251231-004_design_tokens_enhanced.md", "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-251231-005_css_reset_and_base.md", "_work_efforts/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-251231-006_fluid_typography_scale.md"]}, {"id": "(root)", "files": 32, "loc": 11249, "langs": ["Markdown", "Python", "JSON"], "imports_out": 9, "imports_in": 0, "sample_files": ["Work Effort Tools.md", "ARCHITECTURE_PROPOSAL.md", "blend_validation_test.py", "test_todoist.py", "TODOIST_INTEGRATION_MVP.md", "FINAL_RECAP_PHASE3.md"]}, {"id": "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration", "files": 19, "loc": 603, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/WE-251231-sdc6_index.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-251231-001_migrate_form_components_search_filters_buttons.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-251231-002_migrate_detail_view_layout_and_components.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-251231-003_migrate_queue_item_cards_and_status_badges.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-251231-004_migrate_overlay_components_modals_toasts_dropdowns.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-251231-005_javascript_view_switching_integration.md"]}, {"id": "mcp-servers/dashboard/tests/debugger", "files": 19, "loc": 7303, "langs": ["Markdown", "JavaScript"], "imports_out": 0, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/tests/debugger/DEVELOPMENT_PROCESS.md", "mcp-servers/dashboard/tests/debugger/NOVASYSTEM_BREAKDOWN.md", "mcp-servers/dashboard/tests/debugger/RECAP.md", "mcp-servers/dashboard/tests/debugger/MISSING_ITEMS_CHECKLIST.md", "mcp-servers/dashboard/tests/debugger/PRODUCTION_STATE_ANALYSIS.md", "mcp-servers/dashboard/tests/debugger/TheOracle.js"]}, {"id": "mcp-servers/dashboard/tests/experiments", "files": 19, "loc": 5891, "langs": ["JavaScript", "Markdown", "JSON"], "imports_out": 17, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/tests/experiments/generated-test-data/scenario-02-multiple-work-efforts.json", "mcp-servers/dashboard/tests/experiments/generated-test-data/scenario-04-large-work-effort.json", "mcp-servers/dashboard/tests/experiments/garage-playground.js", "mcp-servers/dashboard/tests/experiments/event-bus-stress-test.js", "mcp-servers/dashboard/tests/experiments/visualize-data-flow.js", "mcp-servers/dashboard/tests/experiments/live-dashboard-experiment.js"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite", "files": 18, "loc": 583, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite/WE-251231-un7r_index.md", "_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-001_create_v3_dev_environment.md", "_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-002_css_audit_and_inventory.md", "_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-003_html_structure_audit.md", "_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-004_design_tokens_enhanced.md", "_work_efforts_backup_20260101_173549/WE-251231-un7r_mission_control_v3_responsive_rewrite/tickets/TKT-un7r-005_css_reset_and_base.md"]}, {"id": "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation", "files": 16, "loc": 637, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/CLAUDE_CODE_PROMPT.md", "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md", "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-251231-007_refactor_to_modular_structure_future_enhancement.md", "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-25qq-007_refactor_to_modular_structure_future_enhancement.md", "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-251231-001_define_tool_architecture_and_file_structure.md", "_work_efforts/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-251231-002_implement_core_github_api_health_checks.md"]}, {"id": "roadmap", "files": 16, "loc": 11068, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["roadmap/phase-2-performance/README.md", "roadmap/phase-4-platform/README.md", "roadmap/architecture/event-driven/README.md", "roadmap/phase-3-intelligence/README.md", "roadmap/architecture/BUILD_GUIDE.md", "roadmap/phase-1-foundation/README.md"]}, {"id": "_docs", "files": 15, "loc": 1948, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_docs/20-29_development/architecture_category/architecture.02_core_data_structures_algorithms.md", "_docs/20-29_development/standards_category/standards.01_adversarial_verification_protocol.md", "_docs/20-29_development/architecture_category/architecture.01_event_bus_pattern_implementation.md", "_docs/20-29_development/features_category/features.01_command_center_view.md", "_docs/20-29_development/development_category/development.01_mission_control_roadmap.md", "_docs/20-29_development/planning_category/planning.01_stage_2_testing_infrastructure_requirements.md"]}, {"id": "_work_efforts/WE-251227-hldk_mission_control_v2_command_center", "files": 15, "loc": 527, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251227-hldk_mission_control_v2_command_center/WE-251227-hldk_index.md", "_work_efforts/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-251227-001_tree_navigation_component.md", "_work_efforts/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-251227-004_toast_notification_system.md", "_work_efforts/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-251227-005_detail_page_view.md", "_work_efforts/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-251227-006_start_stop_controls.md", "_work_efforts/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-251227-007_real_time_visual_indicators.md"]}, {"id": "_work_efforts/WE-251231-ocwm_detail_view_overhaul", "files": 15, "loc": 495, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251231-ocwm_detail_view_overhaul/WE-251231-ocwm_index.md", "_work_efforts/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-251231-004_implement_copy_id_functionality.md", "_work_efforts/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-ocwm-004_implement_copy_id_functionality.md", "_work_efforts/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-251231-001_create_detail_view_improvements_css_stylesheet.md", "_work_efforts/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-251231-002_update_index_html_with_aria_labels_and_semantic_elements.md", "_work_efforts/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-251231-003_add_time_tracking_enhancements_to_app_js.md"]}, {"id": "_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign", "files": 15, "loc": 498, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/WE-251231-tbsw_index.md", "_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-251231-007_mobile_responsive_command_center.md", "_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-tbsw-007_mobile_responsive_command_center.md", "_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-251231-001_design_command_center_layout_structure.md", "_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-251231-002_create_live_activity_feed_component.md", "_work_efforts/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-251231-003_build_chat_command_input_interface.md"]}, {"id": "_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications", "files": 13, "loc": 456, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/WE-251227-8w5z_index.md", "_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-251227-002_implement_toastmanager_with_type_based_durations.md", "_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-002_implement_toastmanager_with_type_based_durations.md", "_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-251227-001_create_eventbus_class_with_wildcards_and_middleware.md", "_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-251227-003_add_animationcontroller_for_ui_feedback.md", "_work_efforts/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-001_create_eventbus_class_with_wildcards_and_middleware.md"]}, {"id": "mcp-servers/dashboard/public/styles", "files": 13, "loc": 7284, "langs": ["CSS"], "imports_out": 0, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/public/styles/enhancements.css", "mcp-servers/dashboard/public/styles/main.css", "mcp-servers/dashboard/public/styles/components/command-center.css", "mcp-servers/dashboard/public/styles/components/buttons.css", "mcp-servers/dashboard/public/styles/components/sidebar.css", "mcp-servers/dashboard/public/styles/layout.css"]}, {"id": "mcp-servers/dashboard/tests/data-flow", "files": 13, "loc": 2461, "langs": ["Markdown", "JavaScript"], "imports_out": 5, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/tests/data-flow/client-flow.test.js", "mcp-servers/dashboard/tests/data-flow/DATA_FLOW_MAP.md", "mcp-servers/dashboard/tests/data-flow/watcher-flow.test.js", "mcp-servers/dashboard/tests/data-flow/integration-flow.test.js", "mcp-servers/dashboard/tests/data-flow/parser-flow.test.js", "mcp-servers/dashboard/tests/data-flow/websocket-flow.test.js"]}, {"id": "mcp-servers/dashboard-legacy-20260105/public", "files": 12, "loc": 12596, "langs": ["JavaScript", "CSS", "HTML"], "imports_out": 0, "imports_in": 0, "sample_files": ["mcp-servers/dashboard-legacy-20260105/public/styles.css", "mcp-servers/dashboard-legacy-20260105/public/app.js", "mcp-servers/dashboard-legacy-20260105/public/docs/index.html", "mcp-servers/dashboard-legacy-20260105/public/events.js", "mcp-servers/dashboard-legacy-20260105/public/index.html", "mcp-servers/dashboard-legacy-20260105/public/charts.js"]}, {"id": "tools/obsidian-linter", "files": 12, "loc": 4284, "langs": ["Python", "Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["tools/obsidian-linter/check.py", "tools/obsidian-linter/fix-obsidian-links.py", "tools/obsidian-linter/validate.py", "tools/obsidian-linter/ROADMAP_ENHANCEMENT.md", "tools/obsidian-linter/fix-all.py", "tools/obsidian-linter/README.md"]}, {"id": "_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features", "files": 11, "loc": 403, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/tickets/TKT-251227-001_responsive_css_framework_and_breakpoints.md", "_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/tickets/TKT-fwmv-001_responsive_css_framework_and_breakpoints.md", "_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/WE-251227-fwmv_index.md", "_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/tickets/TKT-251227-002_individual_ticket_detail_page_modal.md", "_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/tickets/TKT-fwmv-002_individual_ticket_detail_page_modal.md", "_work_efforts/WE-251227-fwmv_mission_control_responsive_interactive_features/tickets/TKT-251227-003_real_time_statistics_and_graphs.md"]}, {"id": "_work_efforts/WE-260730-4gxi_sts_blocked_on_chris", "files": 11, "loc": 245, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260730-4gxi_sts_blocked_on_chris/WE-260730-4gxi_index.md", "_work_efforts/WE-260730-4gxi_sts_blocked_on_chris/tickets/TKT-4gxi-001_authenticate_wrangler_and_the_stripe_cli_both_are.md", "_work_efforts/WE-260730-4gxi_sts_blocked_on_chris/tickets/TKT-4gxi-002_start_docker_desktop_so_sql_014_can_run_against_a.md", "_work_efforts/WE-260730-4gxi_sts_blocked_on_chris/tickets/TKT-4gxi-003_provide_the_business_mailing_address_for_the_can_s.md", "_work_efforts/WE-260730-4gxi_sts_blocked_on_chris/tickets/TKT-4gxi-004_answer_whether_cloudflare_web_analytics_is_enabled.md", "_work_efforts/WE-260730-4gxi_sts_blocked_on_chris/tickets/TKT-4gxi-005_decide_g_07_move_the_consent_banner_into_layout_fl.md"]}, {"id": "_work_efforts/WE-260730-7hgp_sts_checkout_go_live", "files": 11, "loc": 245, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260730-7hgp_sts_checkout_go_live/WE-260730-7hgp_index.md", "_work_efforts/WE-260730-7hgp_sts_checkout_go_live/tickets/TKT-7hgp-001_re_probe_before_touching_anything_sts_py_status_st.md", "_work_efforts/WE-260730-7hgp_sts_checkout_go_live/tickets/TKT-7hgp-002_decide_and_execute_the_deploy_of_the_11_commits_pr.md", "_work_efforts/WE-260730-7hgp_sts_checkout_go_live/tickets/TKT-7hgp-003_apply_sql_014_to_production_supabase_or_accept_in.md", "_work_efforts/WE-260730-7hgp_sts_checkout_go_live/tickets/TKT-7hgp-004_b_05_add_the_stripe_price_id_authors_secret_to_clo.md", "_work_efforts/WE-260730-7hgp_sts_checkout_go_live/tickets/TKT-7hgp-005_b_03_create_the_live_mode_stripe_webhook_endpoint.md"]}, {"id": "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup", "files": 10, "loc": 1616, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/LEGACY_CSS_AUDIT.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-260101-004_test_component_showcase.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-c1ny-004_test_component_showcase.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-260101-003_audit_legacy_styles_removal.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-c1ny-003_audit_legacy_styles_removal.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-260101-002_create_component_documentation.md"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration", "files": 10, "loc": 324, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/WE-251231-sdc6_index.md", "_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-001_migrate_form_components_search_filters_buttons.md", "_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-002_migrate_detail_view_layout_and_components.md", "_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-003_migrate_queue_item_cards_and_status_badges.md", "_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-004_migrate_overlay_components_modals_toasts_dropdowns.md", "_work_efforts_backup_20260101_173549/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-005_javascript_view_switching_integration.md"]}, {"id": "mcp-servers/dashboard/docs", "files": 10, "loc": 2479, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/docs/USER-GUIDE.md", "mcp-servers/dashboard/docs/ARCHITECTURE.md", "mcp-servers/dashboard/docs/components/layout.md", "mcp-servers/dashboard/docs/components/indicators.md", "mcp-servers/dashboard/docs/components/cards.md", "mcp-servers/dashboard/docs/components/buttons.md"]}, {"id": "mcp-servers/dashboard/public", "files": 10, "loc": 13377, "langs": ["JavaScript", "HTML", "CSS"], "imports_out": 0, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/public/styles.css", "mcp-servers/dashboard/public/app.js", "mcp-servers/dashboard/public/events.js", "mcp-servers/dashboard/public/components.html", "mcp-servers/dashboard/public/index-old.html", "mcp-servers/dashboard/public/index.html"]}, {"id": "_work_efforts/WE-251227-1gku_mission_control_dashboard", "files": 9, "loc": 312, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251227-1gku_mission_control_dashboard/WE-251227-1gku_index.md", "_work_efforts/WE-251227-1gku_mission_control_dashboard/tickets/TKT-1gku-004_create_documentation.md", "_work_efforts/WE-251227-1gku_mission_control_dashboard/tickets/TKT-251227-004_create_documentation.md", "_work_efforts/WE-251227-1gku_mission_control_dashboard/tickets/TKT-1gku-001_fix_mcp_server_folder_path_bug.md", "_work_efforts/WE-251227-1gku_mission_control_dashboard/tickets/TKT-1gku-002_build_dashboard_server.md", "_work_efforts/WE-251227-1gku_mission_control_dashboard/tickets/TKT-1gku-003_build_dashboard_ui.md"]}, {"id": "_work_efforts/WE-251231-1o01_mission_control_clean_redesign", "files": 9, "loc": 285, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251231-1o01_mission_control_clean_redesign/WE-251231-1o01_index.md", "_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-1o01-001_create_clean_html_structure.md", "_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-1o01-002_build_minimal_css.md", "_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-1o01-003_write_simple_js_logic.md", "_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-1o01-004_test_and_verify.md", "_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-251231-001_create_clean_html_structure.md"]}, {"id": "_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation", "files": 9, "loc": 306, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation/WE-260104-wppd_index.md", "_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation/tickets/TKT-wppd-001_implement_resultrepository_class_pocketbase_integration.md", "_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation/tickets/TKT-wppd-002_implement_componentdiscovery_class_dom_traversal.md", "_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation/tickets/TKT-wppd-003_implement_testqueue_class_fifo_execution.md", "_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation/tickets/TKT-wppd-004_implement_cssanalyzer_class_css_analysis.md", "_work_efforts/WE-260104-wppd_theoracle_phase_2_core_infrastructure_implementation/tickets/TKT-wppd-005_implement_componentagent_first_agent.md"]}, {"id": "_work_efforts/WE-260730-pbno_sts_unblocked_engineering", "files": 9, "loc": 203, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260730-pbno_sts_unblocked_engineering/WE-260730-pbno_index.md", "_work_efforts/WE-260730-pbno_sts_unblocked_engineering/tickets/TKT-pbno-001_c_02_add_a_prebuild_step_emitting_src_lib_stats_ge.md", "_work_efforts/WE-260730-pbno_sts_unblocked_engineering/tickets/TKT-pbno-002_c_03_port_the_provenance_pattern_so_every_rendered.md", "_work_efforts/WE-260730-pbno_sts_unblocked_engineering/tickets/TKT-pbno-003_c_04_add_a_build_assertion_that_fails_on_any_hardc.md", "_work_efforts/WE-260730-pbno_sts_unblocked_engineering/tickets/TKT-pbno-004_c_05_resolve_the_1_dead_link_of_186_in_works_cited.md", "_work_efforts/WE-260730-pbno_sts_unblocked_engineering/tickets/TKT-pbno-005_b_10_shorten_the_7_day_signed_download_url_ttl_or.md"]}, {"id": "_work_efforts/WE-260730-tfxo_sightglass_follow_through", "files": 9, "loc": 203, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260730-tfxo_sightglass_follow_through/WE-260730-tfxo_index.md", "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/TKT-tfxo-001_wire_page_coverage_startjscoverage_into_interprete.md", "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/TKT-tfxo-002_diff_each_probe_s_covered_ranges_against_the_union.md", "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/TKT-tfxo-003_confirm_no_new_ground_actually_fires_in_prune_mjs.md", "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/TKT-tfxo-004_add_axe_core_playwright_to_the_explore_loop_for_fr.md", "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/TKT-tfxo-005_give_the_hollow_detector_an_opt_out_for_tests_that.md"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation", "files": 9, "loc": 405, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation/CLAUDE_CODE_PROMPT.md", "_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation/WE-251231-25qq_index.md", "_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-25qq-007_refactor_to_modular_structure_future_enhancement.md", "_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-25qq-001_define_tool_architecture_and_file_structure.md", "_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-25qq-002_implement_core_github_api_health_checks.md", "_work_efforts_backup_20260101_173549/WE-251231-25qq_github_health_check_tool_foundation/tickets/TKT-25qq-003_add_security_layer_for_token_handling.md"]}, {"id": "_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis", "files": 8, "loc": 257, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis/WE-260102-t2z2_index.md", "_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis/tickets/TKT-t2z2-001_map_data_flow_paths_from_file_system_to_ui.md", "_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis/tickets/TKT-t2z2-002_create_parser_data_flow_tests.md", "_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis/tickets/TKT-t2z2-003_create_watcher_event_propagation_tests.md", "_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis/tickets/TKT-t2z2-004_create_websocket_message_flow_tests.md", "_work_efforts/WE-260102-t2z2_dashboard_data_flow_testing_analysis/tickets/TKT-t2z2-005_create_client_side_state_update_tests.md"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center", "files": 8, "loc": 284, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center/WE-251227-hldk_index.md", "_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-hldk-001_tree_navigation_component.md", "_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-hldk-004_toast_notification_system.md", "_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-hldk-005_detail_page_view.md", "_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-hldk-006_start_stop_controls.md", "_work_efforts_backup_20260101_173549/WE-251227-hldk_mission_control_v2_command_center/tickets/TKT-hldk-007_real_time_visual_indicators.md"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul", "files": 8, "loc": 270, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul/WE-251231-ocwm_index.md", "_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-ocwm-004_implement_copy_id_functionality.md", "_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-ocwm-001_create_detail_view_improvements_css_stylesheet.md", "_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-ocwm-002_update_index_html_with_aria_labels_and_semantic_elements.md", "_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-ocwm-003_add_time_tracking_enhancements_to_app_js.md", "_work_efforts_backup_20260101_173549/WE-251231-ocwm_detail_view_overhaul/tickets/TKT-ocwm-005_add_tab_switching_accessibility.md"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign", "files": 8, "loc": 273, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/WE-251231-tbsw_index.md", "_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-tbsw-007_mobile_responsive_command_center.md", "_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-tbsw-001_design_command_center_layout_structure.md", "_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-tbsw-002_create_live_activity_feed_component.md", "_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-tbsw-003_build_chat_command_input_interface.md", "_work_efforts_backup_20260101_173549/WE-251231-tbsw_mission_control_live_ai_command_center_redesign/tickets/TKT-tbsw-004_implement_work_queue_panel.md"]}, {"id": "mcp-servers/dashboard", "files": 8, "loc": 4878, "langs": ["Markdown", "JSON", "JavaScript"], "imports_out": 6, "imports_in": 0, "sample_files": ["mcp-servers/dashboard/package-lock.json", "mcp-servers/dashboard/server.js", "mcp-servers/dashboard/README.md", "mcp-servers/dashboard/ARCHITECTURE_PROPOSAL.md", "mcp-servers/dashboard/HTML_AUDIT.md", "mcp-servers/dashboard/CSS_AUDIT.md"]}, {"id": "mcp-servers/dashboard/lib", "files": 8, "loc": 2012, "langs": ["JavaScript", "Markdown", "JSON"], "imports_out": 0, "imports_in": 16, "sample_files": ["mcp-servers/dashboard/lib/counter-system/validator.js", "mcp-servers/dashboard/lib/counter-system/index.js", "mcp-servers/dashboard/lib/parser.js", "mcp-servers/dashboard/lib/counter-system/README.md", "mcp-servers/dashboard/lib/counter-system/migrator.js", "mcp-servers/dashboard/lib/watcher.js"]}, {"id": "_work_efforts/WE-251227-g6nh_notification_center_feature", "files": 7, "loc": 229, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-251227-g6nh_notification_center_feature/WE-251227-g6nh_index.md", "_work_efforts/WE-251227-g6nh_notification_center_feature/tickets/TKT-251227-001_activity_tracking_works.md", "_work_efforts/WE-251227-g6nh_notification_center_feature/tickets/TKT-251227-002_bell_badge_counts_unread.md", "_work_efforts/WE-251227-g6nh_notification_center_feature/tickets/TKT-251227-003_panel_shows_notifications.md", "_work_efforts/WE-251227-g6nh_notification_center_feature/tickets/TKT-g6nh-001_activity_tracking_works.md", "_work_efforts/WE-251227-g6nh_notification_center_feature/tickets/TKT-g6nh-002_bell_badge_counts_unread.md"]}, {"id": "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor", "files": 7, "loc": 225, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/WE-260102-vawh_index.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-001_create_shared_test_utilities_module.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-002_extract_common_mock_factories_mockeventbus_missioncontrolharness.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-003_create_reusable_test_fixture_generators.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-004_consolidate_test_helper_functions.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-005_update_all_test_files_to_use_shared_utilities.md"]}, {"id": "_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications", "files": 7, "loc": 248, "langs": ["Markdown"], "imports_out": 0, "imports_in": 0, "sample_files": ["_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications/WE-251227-8w5z_index.md", "_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-002_implement_toastmanager_with_type_based_durations.md", "_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-001_create_eventbus_class_with_wildcards_and_middleware.md", "_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-003_add_animationcontroller_for_ui_feedback.md", "_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-004_wire_websocket_to_eventbus.md", "_work_efforts_backup_20260101_173549/WE-251227-8w5z_bulletproof_event_system_toast_notifications/tickets/TKT-8w5z-005_add_css_animations.md"]}, {"id": "mcp-servers/dashboard/tests/helpers", "files": 7, "loc": 1099, "langs": ["JavaScript", "Markdown"], "imports_out": 0, "imports_in": 12, "sample_files": ["mcp-servers/dashboard/tests/helpers/fixtures.js", "mcp-servers/dashboard/tests/helpers/mission-control-harness.js", "mcp-servers/dashboard/tests/helpers/example-usage.test.js", "mcp-servers/dashboard/tests/helpers/README.md", "mcp-servers/dashboard/tests/helpers/mock-event-bus.js", "mcp-servers/dashboard/tests/helpers/CHANGELOG.md"]}], "edges": [{"from": "mcp-servers/dashboard/tests/experiments", "to": "mcp-servers/dashboard/tests/helpers", "count": 12}, {"from": "mcp-servers/dashboard", "to": "mcp-servers/dashboard/lib", "count": 6}, {"from": "mcp-servers/dashboard/tests/data-flow", "to": "mcp-servers/dashboard/lib", "count": 5}, {"from": "mcp-servers/dashboard/tests/experiments", "to": "mcp-servers/dashboard/lib", "count": 5}, {"from": "(root)", "to": "plugins", "count": 5}, {"from": "mcp-servers/dashboard-legacy-20260105", "to": "mcp-servers/dashboard-legacy-20260105/lib", "count": 3}, {"from": "mcp-servers/console", "to": "mcp-servers/console/lib", "count": 2}, {"from": "plugins/todoist", "to": "plugins", "count": 2}, {"from": "(root)", "to": "plugins/_template", "count": 2}, {"from": "(root)", "to": "plugins/todoist", "count": 2}, {"from": "tools/work-effort", "to": "plugins", "count": 2}, {"from": "plugins/_template", "to": "plugins", "count": 1}, {"from": "tools/naming-linter", "to": "tools/naming-linter/rules", "count": 1}, {"from": "tools/ticket", "to": "plugins", "count": 1}], "manifests": [{"file": "mcp-servers/console/package.json", "kind": "node", "summary": {"name": "pyrite-console", "version": "1.0.0", "type": "module", "main": "server.js", "bin": [], "scripts": {"start": "node server.js", "dev": "node --watch server.js"}, "workspaces": null}}, {"file": "mcp-servers/dashboard-legacy-20260105/package.json", "kind": "node", "summary": {"name": "mission-control-dashboard", "version": "1.0.0", "type": "module", "main": "server.js", "bin": [], "scripts": {"start": "node server.js", "dev": "node --watch server.js"}, "workspaces": null}}, {"file": "mcp-servers/dashboard/package.json", "kind": "node", "summary": {"name": "mission-control-dashboard", "version": "0.6.2", "type": "module", "main": "server.js", "bin": [], "scripts": {"start": "node server.js", "dev": "node --watch server.js", "test": "node tests/test-runner.js", "test:verbose": "node tests/test-runner.js --verbose", "test:data-flow": "node tests/test-runner.js tests/data-flow/**/*.test.js", "test:raw": "node --test", "test:oracle": "node tests/debugger/examples/basic-usage.js", "test:oracle:watch": "node --watch tests/debugger/examples/basic-usage.js", "test:oracle:component": "node tests/debugger/examples/basic-usage.js component"}, "workspaces": null}}, {"file": "mcp-servers/docs-maintainer/requirements.txt", "kind": "python", "summary": {"count": 2}}, {"file": "mcp-servers/simple-tools/package.json", "kind": "node", "summary": {"name": "simple-tools-mcp", "version": "0.1.0", "type": "module", "main": null, "bin": [], "scripts": {}, "workspaces": null}}, {"file": "mcp-servers/work-efforts/package.json", "kind": "node", "summary": {"name": "work-efforts-mcp", "version": "0.1.0", "type": "module", "main": null, "bin": [], "scripts": {}, "workspaces": null}}, {"file": "pyproject.toml", "kind": "python", "summary": {"name": "pyrite", "version": "0.7.0", "scripts": [], "requires_python": ">=3.10"}}, {"file": "tools/work-effort-migrator/requirements.txt", "kind": "python", "summary": {"count": 1}}, {"file": "uv.lock", "kind": "python"}], "dependencies": {"runtime": ["fastmcp", "python-frontmatter"], "dev": [], "external_imports": [{"name": "pathlib", "sites": 32}, {"name": "typing", "sites": 23}, {"name": "sys", "sites": 22}, {"name": "path", "sites": 22}, {"name": "fs", "sites": 20}, {"name": "datetime", "sites": 17}, {"name": "re", "sites": 17}, {"name": "argparse", "sites": 15}, {"name": "url", "sites": 13}, {"name": "os", "sites": 12}, {"name": "json", "sites": 11}, {"name": "dataclasses", "sites": 7}, {"name": "subprocess", "sites": 7}, {"name": "@modelcontextprotocol/sdk", "sites": 6}, {"name": "shutil", "sites": 5}, {"name": "tempfile", "sites": 5}, {"name": "ws", "sites": 5}, {"name": "gray-matter", "sites": 4}, {"name": "chalk", "sites": 4}, {"name": "chokidar", "sites": 4}, {"name": "events", "sites": 4}, {"name": "yaml", "sites": 4}, {"name": "empirica", "sites": 3}, {"name": "novasystem", "sites": 3}, {"name": "pino", "sites": 3}, {"name": "express", "sites": 3}, {"name": "random", "sites": 2}, {"name": "string", "sites": 2}, {"name": "time", "sites": 2}, {"name": "unittest", "sites": 2}, {"name": "urllib", "sites": 2}, {"name": "collections", "sites": 2}, {"name": "hashlib", "sites": 2}, {"name": "Empirica", "sites": 1}, {"name": "NovaSystem", "sites": 1}, {"name": "tomli", "sites": 1}, {"name": "tomllib", "sites": 1}, {"name": "platform", "sites": 1}, {"name": "zod", "sites": 1}, {"name": "@ai-sdk/anthropic", "sites": 1}, {"name": "ai", "sites": 1}, {"name": "crypto", "sites": 1}, {"name": "pocketbase", "sites": 1}, {"name": "child_process", "sites": 1}, {"name": "playwright", "sites": 1}, {"name": "__future__", "sites": 1}, {"name": "fastmcp", "sites": 1}, {"name": "frontmatter", "sites": 1}, {"name": "abc", "sites": 1}, {"name": "harness_log", "sites": 1}, {"name": "git_scanner", "sites": 1}, {"name": "uuid", "sites": 1}, {"name": "importlib", "sites": 1}, {"name": "requests", "sites": 1}, {"name": "enum", "sites": 1}, {"name": "traceback", "sites": 1}]}, "scripts": {}, "entrypoints": [{"path": "blend_validation_test.py", "why": "has __main__ guard", "loc": 917}, {"path": "test_todoist.py", "why": "has __main__ guard", "loc": 723}, {"path": "test_plugins.py", "why": "has __main__ guard", "loc": 204}, {"path": "blend_test.py", "why": "has __main__ guard", "loc": 148}, {"path": "tools/scaffold_new_project.py", "why": "has __main__ guard", "loc": 1009}, {"path": "tools/obsidian-linter/check.py", "why": "has __main__ guard", "loc": 1017}, {"path": "mcp-servers/dashboard/server.js", "why": "server entrypoint", "loc": 1007}, {"path": "mcp-servers/dashboard-legacy-20260105/server.js", "why": "server entrypoint", "loc": 878}, {"path": "mcp-servers/work-efforts/server.js", "why": "server entrypoint", "loc": 710}, {"path": "mcp-servers/docs-maintainer/server.py", "why": "server entrypoint", "loc": 617}, {"path": "tools/nova-process/orchestrate.py", "why": "has __main__ guard", "loc": 493}, {"path": "tools/work-effort/create.py", "why": "has __main__ guard", "loc": 471}, {"path": "tools/obsidian-linter/fix-obsidian-links.py", "why": "has __main__ guard", "loc": 464}, {"path": "tools/obsidian-linter/validate.py", "why": "has __main__ guard", "loc": 454}, {"path": "tools/work-effort-migrator/migrate.py", "why": "has __main__ guard", "loc": 419}, {"path": "tools/obsidian-linter/fix-all.py", "why": "has __main__ guard", "loc": 402}, {"path": "tools/id-generator/generate.py", "why": "has __main__ guard", "loc": 387}, {"path": "tools/github-health-check/check.py", "why": "has __main__ guard", "loc": 372}, {"path": "tools/obsidian-linter/fix-links.py", "why": "has __main__ guard", "loc": 306}, {"path": "plugins/todoist/poll.py", "why": "has __main__ guard", "loc": 267}, {"path": "tools/structure-check/check.py", "why": "has __main__ guard", "loc": 253}, {"path": "tools/ticket/create.py", "why": "has __main__ guard", "loc": 230}, {"path": "tools/work-effort-migrator/test_migrate.py", "why": "has __main__ guard", "loc": 184}, {"path": "tools/naming-linter/lint.py", "why": "has __main__ guard", "loc": 150}], "services": [{"name": "WebSocket", "category": "realtime", "package": "ws", "import_sites": 5}, {"name": "Express", "category": "framework", "package": "express", "import_sites": 3}, {"name": "Playwright", "category": "test", "package": "playwright", "import_sites": 1}], "env_vars": [{"name": "NODE_ENV", "sites": 8}, {"name": "PYTHONPATH", "sites": 4}, {"name": "LOG_LEVEL", "sites": 4}, {"name": "PORT", "sites": 2}, {"name": "DASH_URL", "sites": 2}, {"name": "TODOIST_API_TOKEN", "sites": 1}, {"name": "TODOIST_TRIGGER_LABEL", "sites": 1}, {"name": "GITHUB_TOKEN", "sites": 1}, {"name": "GH_TOKEN", "sites": 1}], "tests": {"files": 87, "sample": ["_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-1o01-004_test_and_verify.md", "_work_efforts/WE-251231-1o01_mission_control_clean_redesign/tickets/TKT-251231-004_test_and_verify.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-251231-007_full_breakpoint_regression_test.md", "_work_efforts/WE-251231-sdc6_mission_control_v3_phase_2_component_migration/tickets/TKT-sdc6-007_full_breakpoint_regression_test.md", "_work_efforts/WE-260101-5cc6_demo_work_effort/tickets/TKT-5cc6-003_test_ticket_from_cli.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-260101-004_test_component_showcase.md", "_work_efforts/WE-260101-c1ny_component_library_v3_cleanup/tickets/TKT-c1ny-004_test_component_showcase.md", "_work_efforts/WE-260102-2hab_data_flow_test_organization_refactor/tickets/TKT-2hab-002_move_existing_test_files_to_appropriate_subdirectories.md", "_work_efforts/WE-260102-2hab_data_flow_test_organization_refactor/tickets/TKT-2hab-003_update_test_runner_to_handle_new_directory_structure.md", "_work_efforts/WE-260102-2hab_data_flow_test_organization_refactor/tickets/TKT-2hab-005_update_documentation_with_new_test_structure.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-001_create_shared_test_utilities_module.md", "_work_efforts/WE-260102-vawh_data_flow_test_utilities_helpers_refactor/tickets/TKT-vawh-003_create_reusable_test_fixture_generators.md"]}, "docs": [".claude/README.md", ".claude/skills/SessionStart.md", ".github/ISSUE_TEMPLATE/bug_report.md", ".github/ISSUE_TEMPLATE/feature_request.md", ".github/PULL_REQUEST_TEMPLATE.md", "AGENTS.md", "ARCHITECTURE_PROPOSAL.md", "BLEND_VALIDATION_REPORT.md", "BLEND_VALIDATION_SUMMARY.md", "CHANGELOG.md", "CLAUDE_CODE_CONTINUATION_PROMPT.md", "CONTRIBUTING.md", "DEMO_OVERHAUL_PLAN.md", "DETAIL_VIEW_OVERHAUL_COMPLETE.md", "FINAL_RECAP_PHASE3.md", "NOVA_UNIFIED_DESIGN.md", "PHASE4_COMPLETE.md", "PHASE_3_SUMMARY.md", "QUICK_START_TODOIST.md", "README.md", "TODOIST_INTEGRATION_MVP.md", "V0.8.0_AUDIT_SUMMARY.md", "V0.9.0_PHASE2_CONTINUATION.md", "V0.9.0_PHASE4_CONTINUATION.md", "WE-251221-0b46.md", "WORK_EFFORT_DETAIL_IMPROVEMENTS.md", "Work Effort Tools.md", "_PYRITE_INTEGRATION_BRIEF.md", "_coordination/CONTEXT.md", "_coordination/CURSOR_CONTINUATION_PROMPT.md"], "largest_files": [{"path": "mcp-servers/dashboard-legacy-20260105/public/styles.css", "loc": 5473}, {"path": "mcp-servers/dashboard/public/styles.css", "loc": 5044}, {"path": "mcp-servers/dashboard/public/app.js", "loc": 3298}, {"path": "mcp-servers/dashboard-legacy-20260105/public/app.js", "loc": 3291}, {"path": "mcp-servers/dashboard/package-lock.json", "loc": 3002}, {"path": "mcp-servers/dashboard/tests/debugger/DEVELOPMENT_PROCESS.md", "loc": 2896}, {"path": "mcp-servers/dashboard-legacy-20260105/package-lock.json", "loc": 2015}, {"path": "mcp-servers/dashboard/tests/experiments/generated-test-data/scenario-02-multiple-work-efforts.json", "loc": 1873}, {"path": "mcp-servers/console/package-lock.json", "loc": 1667}, {"path": "_work_efforts/devlog.md", "loc": 1313}, {"path": "roadmap/phase-2-performance/README.md", "loc": 1118}, {"path": "Work Effort Tools.md", "loc": 1114}, {"path": "mcp-servers/dashboard/public/styles/enhancements.css", "loc": 1050}, {"path": "roadmap/phase-4-platform/README.md", "loc": 1040}, {"path": "tools/obsidian-linter/check.py", "loc": 1017}, {"path": "tools/scaffold_new_project.py", "loc": 1009}, {"path": "mcp-servers/dashboard/server.js", "loc": 1007}, {"path": "mcp-servers/dashboard-legacy-20260105/public/docs/index.html", "loc": 981}, {"path": "mcp-servers/dashboard/public/docs/index.html", "loc": 981}, {"path": "ARCHITECTURE_PROPOSAL.md", "loc": 972}]}</script>
+
+<style>
+  svg.many .edge-label{opacity:0;transition:opacity .2s ease}
+  svg.many .edge-label.on{opacity:1}
+</style>
+<script>
+/* ------------------------------------------------------------------ *
+ * architecture engine: layout, render, animate, explain.
+ * The spec describes the system semantically. Every coordinate on the
+ * page is computed here, so a spec can never produce overlapping boxes.
+ * ------------------------------------------------------------------ */
+(function () {
+  "use strict";
+
+  /* Headless probe hook. A screenshot catches too few animation frames to show
+     motion, so the verification recipe rewrites this one line to a large number
+     and shoots that copy instead. Keep the declaration on its own line, and do
+     not repeat the literal anywhere else in this file or sed will hit both. */
+  var SPEED = 1;
+
+  var L = {
+    W: 1280, PADX: 24, LABEL: 150,
+    NODE_W: 178, NODE_H: 68, GAPX: 20, GAPY: 16,
+    BAND_PAD: 20, LAYER_GAP: 42
+  };
+  var CONTENT = L.W - L.PADX * 2 - L.LABEL;
+  var PER_ROW = Math.max(1, Math.floor((CONTENT + L.GAPX) / (L.NODE_W + L.GAPX)));
+
+  var KINDS = {
+    entry:    { label: "entry",    v: "--k-entry" },
+    service:  { label: "service",  v: "--k-service" },
+    ui:       { label: "ui",       v: "--k-ui" },
+    data:     { label: "data",     v: "--k-data" },
+    external: { label: "external", v: "--k-external" },
+    build:    { label: "build",    v: "--k-build" },
+    config:   { label: "config",   v: "--k-config" },
+    lib:      { label: "lib",      v: "--k-lib" }
+  };
+  var EDGE_KINDS = { data: "data", call: "call", build: "build", event: "event" };
+
+  function readJSON(id) {
+    var el = document.getElementById(id);
+    if (!el) return null;
+    var txt = (el.textContent || "").trim();
+    if (!txt || txt.charAt(0) === "_") return null;
+    try { return JSON.parse(txt); } catch (e) { return null; }
+  }
+
+  var spec = readJSON("arch-spec") || {};
+  var scan = readJSON("arch-scan");
+  var meta = spec.meta || {};
+  var layers = Array.isArray(spec.layers) ? spec.layers : [];
+  var nodes = Array.isArray(spec.nodes) ? spec.nodes : [];
+  var edges = Array.isArray(spec.edges) ? spec.edges : [];
+  var flows = Array.isArray(spec.flows) ? spec.flows : [];
+
+  var reduced = window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  function num(n) {
+    return (typeof n === "number" && isFinite(n)) ? n.toLocaleString("en-US") : "";
+  }
+  function clip(s, max) {
+    s = String(s == null ? "" : s);
+    return s.length > max ? s.slice(0, Math.max(1, max - 1)) + "\u2026" : s;
+  }
+  function kindOf(n) { return KINDS[n && n.kind] ? n.kind : "service"; }
+
+  /* ---------------- layout ---------------- */
+
+  var placed = {};   // node id -> box
+  var bands = [];
+  var mapH = 0;
+
+  (function layout() {
+    var y = 0;
+    layers.forEach(function (layer, li) {
+      var mine = nodes.filter(function (n) { return n.layer === layer.id; });
+      var rows = [];
+      for (var i = 0; i < mine.length; i += PER_ROW) rows.push(mine.slice(i, i + PER_ROW));
+      var bandH = rows.length
+        ? rows.length * L.NODE_H + (rows.length - 1) * L.GAPY + L.BAND_PAD * 2
+        : 56;
+      rows.forEach(function (row, ri) {
+        var rowW = row.length * L.NODE_W + (row.length - 1) * L.GAPX;
+        var startX = L.PADX + L.LABEL + Math.max(0, (CONTENT - rowW) / 2);
+        row.forEach(function (n, ci) {
+          placed[n.id] = {
+            id: n.id, node: n, layer: li, row: ri, col: ci,
+            x: startX + ci * (L.NODE_W + L.GAPX),
+            y: y + L.BAND_PAD + ri * (L.NODE_H + L.GAPY),
+            w: L.NODE_W, h: L.NODE_H
+          };
+        });
+      });
+      bands.push({ layer: layer, y: y, h: bandH, index: li, rows: rows.length });
+      y += bandH + L.LAYER_GAP;
+    });
+    mapH = Math.max(160, y - L.LAYER_GAP);
+  })();
+
+  function edgePath(a, b) {
+    var ax = a.x + a.w / 2, bx = b.x + b.w / 2;
+    if (b.layer > a.layer) {
+      var y1 = a.y + a.h, y2 = b.y;
+      var dy = Math.max(22, (y2 - y1) * 0.48);
+      return "M" + ax + "," + y1 + " C" + ax + "," + (y1 + dy) +
+             " " + bx + "," + (y2 - dy) + " " + bx + "," + y2;
+    }
+    if (b.layer < a.layer) {
+      var u1 = a.y + a.h / 2, u2 = b.y + b.h / 2;
+      var out = Math.min(L.W - 10, Math.max(a.x + a.w, b.x + b.w) + 40);
+      return "M" + (a.x + a.w) + "," + u1 + " C" + out + "," + u1 +
+             " " + out + "," + u2 + " " + (b.x + b.w) + "," + u2;
+    }
+    var m1 = a.y + a.h / 2, m2 = b.y + b.h / 2;
+    if (a.row === b.row) {
+      if (bx > ax) {
+        return "M" + (a.x + a.w) + "," + m1 + " C" + (a.x + a.w + 32) + "," + m1 +
+               " " + (b.x - 32) + "," + m2 + " " + b.x + "," + m2;
+      }
+      return "M" + a.x + "," + m1 + " C" + (a.x - 32) + "," + m1 +
+             " " + (b.x + b.w + 32) + "," + m2 + " " + (b.x + b.w) + "," + m2;
+    }
+    var down = b.row > a.row;
+    var sy = down ? a.y + a.h : a.y;
+    var ey = down ? b.y : b.y + b.h;
+    var mid = (sy + ey) / 2;
+    return "M" + ax + "," + sy + " C" + ax + "," + mid +
+           " " + bx + "," + mid + " " + bx + "," + ey;
+  }
+
+  /* ---------------- svg render ---------------- */
+
+  var liveEdges = [];
+
+  function renderMap() {
+    var host = document.getElementById("map-scroll");
+    if (!host) return;
+    var s = [];
+    s.push('<svg viewBox="0 0 ' + L.W + ' ' + mapH + '" role="img" ' +
+           'aria-label="System architecture map" id="mapsvg">');
+
+    bands.forEach(function (b) {
+      s.push('<rect class="band-rect" x="' + L.PADX + '" y="' + b.y + '" width="' +
+             (L.W - L.PADX * 2) + '" height="' + b.h + '" rx="12"/>');
+      s.push('<text class="band-label" x="' + (L.PADX + 16) + '" y="' + (b.y + 26) + '">' +
+             esc(clip(b.layer.name, 20)) + '</text>');
+      if (b.layer.blurb) {
+        var words = String(b.layer.blurb).split(/\s+/);
+        var lines = [], cur = "";
+        words.forEach(function (w) {
+          if ((cur + " " + w).trim().length > 20) { lines.push(cur.trim()); cur = w; }
+          else { cur = (cur + " " + w).trim(); }
+        });
+        if (cur) lines.push(cur.trim());
+        lines.slice(0, 4).forEach(function (ln, i) {
+          s.push('<text class="band-blurb" x="' + (L.PADX + 16) + '" y="' +
+                 (b.y + 44 + i * 14) + '">' + esc(ln) + '</text>');
+        });
+      }
+    });
+
+    s.push('<g id="edgelayer">');
+    edges.forEach(function (e, i) {
+      var a = placed[e.from], b = placed[e.to];
+      if (!a || !b) return;
+      var k = EDGE_KINDS[e.kind] || "call";
+      var d = edgePath(a, b);
+      s.push('<path id="e' + i + '" class="edge k-' + k + '" d="' + d + '" ' +
+             'data-from="' + esc(e.from) + '" data-to="' + esc(e.to) + '"/>');
+      liveEdges.push({ i: i, from: e.from, to: e.to, kind: k, edge: e });
+    });
+    s.push("</g>");
+    s.push('<g id="dotlayer"></g>');
+    s.push('<g id="lbllayer"></g>');
+
+    nodes.forEach(function (n) {
+      var p = placed[n.id];
+      if (!p) return;
+      var k = kindOf(n);
+      var col = "var(" + KINDS[k].v + ")";
+      var sub = Array.isArray(n.tech) && n.tech.length
+        ? n.tech.join(" \u00b7 ")
+        : (n.loc ? num(n.loc) + " loc" : (n.files && n.files.length
+            ? n.files.length + " file" + (n.files.length === 1 ? "" : "s") : ""));
+      s.push('<g class="node-g" data-id="' + esc(n.id) + '" tabindex="0" role="button" ' +
+             'aria-label="' + esc(n.name) + '">');
+      s.push('<rect class="node-box" x="' + p.x + '" y="' + p.y + '" width="' + p.w +
+             '" height="' + p.h + '" rx="10"/>');
+      s.push('<rect class="node-accent" x="' + p.x + '" y="' + p.y + '" width="4" height="' +
+             p.h + '" rx="2" fill="' + col + '"/>');
+      s.push('<text class="node-title" x="' + (p.x + 14) + '" y="' + (p.y + 26) + '">' +
+             esc(clip(n.name, 21)) + '</text>');
+      if (sub) {
+        s.push('<text class="node-sub" x="' + (p.x + 14) + '" y="' + (p.y + 43) + '">' +
+               esc(clip(sub, 23)) + '</text>');
+      }
+      s.push('<text class="node-kind" x="' + (p.x + 14) + '" y="' + (p.y + 58) +
+             '" fill="' + col + '">' + esc(KINDS[k].label.toUpperCase()) + '</text>');
+      s.push("</g>");
+    });
+
+    s.push("</svg>");
+    host.innerHTML = s.join("");
+
+    var svg = document.getElementById("mapsvg");
+    if (!svg) return;
+    if (liveEdges.length > 16) svg.classList.add("many");
+
+    // edge labels need real geometry, so they go on after the paths exist
+    var lbl = document.getElementById("lbllayer");
+    liveEdges.forEach(function (le) {
+      if (!le.edge.label) return;
+      var path = document.getElementById("e" + le.i);
+      if (!path || !path.getPointAtLength) return;
+      var pt = path.getPointAtLength(path.getTotalLength() * 0.52);
+      var t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      t.setAttribute("class", "edge-label");
+      t.setAttribute("x", pt.x + 7);
+      t.setAttribute("y", pt.y - 5);
+      t.setAttribute("data-edge", String(le.i));
+      t.textContent = clip(le.edge.label, 26);
+      lbl.appendChild(t);
+    });
+
+    buildDots();
+    wireNodes(svg);
+  }
+
+  /* ---------------- travelling packets ---------------- */
+
+  var dots = [];
+  function buildDots() {
+    var layerEl = document.getElementById("dotlayer");
+    if (!layerEl) return;
+    var budget = 90;
+    var per = liveEdges.length > 24 ? 1 : 2;
+    liveEdges.forEach(function (le) {
+      var path = document.getElementById("e" + le.i);
+      if (!path || !path.getTotalLength) return;
+      var len = path.getTotalLength();
+      if (!len || !isFinite(len)) return;
+      for (var j = 0; j < per && budget > 0; j++) {
+        budget--;
+        var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        c.setAttribute("class", "dot k-" + le.kind);
+        c.setAttribute("r", "3.1");
+        c.setAttribute("data-edge", String(le.i));
+        layerEl.appendChild(c);
+        dots.push({
+          el: c, path: path, len: len,
+          off: (j / per) + (le.i * 0.137) % 1,
+          rate: 0.55 + ((le.i * 37) % 45) / 100
+        });
+      }
+    });
+    placeDots(0);
+  }
+
+  function placeDots(phase) {
+    for (var i = 0; i < dots.length; i++) {
+      var d = dots[i];
+      var u = (phase * d.rate + d.off) % 1;
+      if (u < 0) u += 1;
+      var p = d.path.getPointAtLength(u * d.len);
+      d.el.setAttribute("transform", "translate(" + p.x.toFixed(1) + "," + p.y.toFixed(1) + ")");
+    }
+  }
+
+  var motionOn = !reduced;
+  var mapVisible = true;
+  var phase = 0, last = 0;
+  function tick(now) {
+    if (!last) last = now;
+    var dt = Math.min(80, now - last);
+    last = now;
+    if (motionOn && mapVisible && dots.length) {
+      phase += dt * 0.00007 * SPEED;
+      placeDots(phase);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- focus + detail ---------------- */
+
+  var selected = null;
+
+  function clearFocus() {
+    var svg = document.getElementById("mapsvg");
+    if (!svg) return;
+    svg.classList.remove("dim");
+    Array.prototype.forEach.call(svg.querySelectorAll(".on"), function (el) {
+      el.classList.remove("on");
+    });
+    Array.prototype.forEach.call(svg.querySelectorAll(".step"), function (el) {
+      el.classList.remove("step");
+    });
+    selected = null;
+    renderDetail(null);
+  }
+
+  function focusNode(id, opts) {
+    var svg = document.getElementById("mapsvg");
+    if (!svg) return;
+    var node = nodes.filter(function (n) { return n.id === id; })[0];
+    if (!node) return;
+    Array.prototype.forEach.call(svg.querySelectorAll(".on"), function (el) {
+      el.classList.remove("on");
+    });
+    svg.classList.add("dim");
+    var self = svg.querySelector('.node-g[data-id="' + cssEsc(id) + '"]');
+    if (self) self.classList.add("on");
+    liveEdges.forEach(function (le) {
+      if (le.from !== id && le.to !== id) return;
+      var p = document.getElementById("e" + le.i);
+      if (p) p.classList.add("on");
+      var other = le.from === id ? le.to : le.from;
+      var og = svg.querySelector('.node-g[data-id="' + cssEsc(other) + '"]');
+      if (og) og.classList.add("on");
+      Array.prototype.forEach.call(
+        svg.querySelectorAll('[data-edge="' + le.i + '"]'),
+        function (el) { el.classList.add("on"); }
+      );
+    });
+    selected = id;
+    renderDetail(node);
+    if (!opts || !opts.quiet) scrollNodeIntoView(id);
+  }
+
+  function cssEsc(s) { return String(s).replace(/["\\]/g, "\\$&"); }
+
+  function scrollNodeIntoView(id) {
+    var p = placed[id];
+    var box = document.getElementById("map-scroll");
+    if (!p || !box || box.scrollWidth <= box.clientWidth) return;
+    var scale = box.scrollWidth / L.W;
+    var target = (p.x + p.w / 2) * scale - box.clientWidth / 2;
+    box.scrollTo({ left: Math.max(0, target), behavior: reduced ? "auto" : "smooth" });
+  }
+
+  function nodeById(id) {
+    return nodes.filter(function (n) { return n.id === id; })[0] || null;
+  }
+
+  function renderDetail(node) {
+    var host = document.getElementById("detail");
+    if (!host) return;
+    if (!node) {
+      var counts = layers.map(function (l) {
+        var c = nodes.filter(function (n) { return n.layer === l.id; }).length;
+        return '<div><dt>' + esc(clip(l.name, 16)) + '</dt><dd>' + c +
+               ' part' + (c === 1 ? "" : "s") + '</dd></div>';
+      }).join("");
+      host.innerHTML =
+        '<h3>Pick a box</h3>' +
+        '<p class="muted">Click any block in the map to see what it is, which files ' +
+        'it owns, and every other part it is wired to.</p>' +
+        '<dl class="dl">' + counts + '</dl>' +
+        '<p class="muted" style="margin-top:.8rem;font-size:.82rem">' +
+        esc(nodes.length) + ' parts, ' + esc(liveEdges.length) + ' dependencies.</p>';
+      return;
+    }
+    var k = kindOf(node);
+    var ins = liveEdges.filter(function (e) { return e.to === node.id; });
+    var outs = liveEdges.filter(function (e) { return e.from === node.id; });
+    var layer = layers.filter(function (l) { return l.id === node.layer; })[0];
+    var h = [];
+    h.push('<p class="kindtag" style="color:var(' + KINDS[k].v + ')">' +
+           esc(KINDS[k].label) + (layer ? " / " + esc(layer.name) : "") + '</p>');
+    h.push("<h3>" + esc(node.name) + "</h3>");
+    if (node.blurb) h.push("<p>" + esc(node.blurb) + "</p>");
+    if (node.detail) h.push('<p class="muted">' + esc(node.detail) + "</p>");
+    if (Array.isArray(node.tech) && node.tech.length) {
+      h.push('<div class="chiprow">' + node.tech.map(function (t) {
+        return '<span class="chip">' + esc(t) + "</span>";
+      }).join("") + "</div>");
+    }
+    var rows = [];
+    if (node.loc) rows.push(["lines", num(node.loc)]);
+    if (node.fileCount) rows.push(["files", num(node.fileCount)]);
+    rows.push(["depends on", outs.length ? outs.map(function (e) {
+      var t = nodeById(e.to); return t ? t.name : e.to;
+    }).join(", ") : "nothing here"]);
+    rows.push(["used by", ins.length ? ins.map(function (e) {
+      var t = nodeById(e.from); return t ? t.name : e.from;
+    }).join(", ") : "nothing here"]);
+    if (node.verified === false) rows.push(["confidence", "inferred, not verified"]);
+    h.push('<dl class="dl">' + rows.map(function (r) {
+      return "<div><dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>";
+    }).join("") + "</dl>");
+    if (Array.isArray(node.files) && node.files.length) {
+      h.push('<p class="kindtag muted" style="margin:.9rem 0 .1rem">files</p>');
+      h.push('<ul class="files">' + node.files.slice(0, 14).map(function (f) {
+        return "<li>" + esc(f) + "</li>";
+      }).join("") + "</ul>");
+    }
+    host.innerHTML = h.join("");
+  }
+
+  function wireNodes(svg) {
+    Array.prototype.forEach.call(svg.querySelectorAll(".node-g"), function (g) {
+      var id = g.getAttribute("data-id");
+      g.addEventListener("click", function () {
+        if (selected === id) { clearFocus(); } else { focusNode(id, { quiet: true }); }
+      });
+      g.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          if (selected === id) { clearFocus(); } else { focusNode(id, { quiet: true }); }
+        }
+      });
+    });
+  }
+
+  /* ---------------- flows ---------------- */
+
+  var flowTimer = null, flowIndex = -1, activeFlow = null;
+
+  function stopFlow() {
+    if (flowTimer) { clearTimeout(flowTimer); flowTimer = null; }
+  }
+
+  function selectFlow(flow, autoplay) {
+    stopFlow();
+    activeFlow = flow;
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#flow-tabs .btn"),
+      function (b) { b.classList.toggle("on", b.getAttribute("data-flow") === flow.id); }
+    );
+    var host = document.getElementById("flow-steps");
+    host.innerHTML = (flow.steps || []).map(function (st, i) {
+      var n = nodeById(st.node);
+      return '<li data-i="' + i + '"><b>' + esc(st.title || (n ? n.name : "Step " + (i + 1))) +
+        "</b>" + (st.text ? "<p>" + esc(st.text) + "</p>" : "") +
+        (st.file ? '<p class="fileref">' + esc(st.file) + "</p>" : "") +
+        (n ? '<p class="muted" style="font-size:.78rem">in ' + esc(n.name) + "</p>" : "") +
+        "</li>";
+    }).join("");
+    Array.prototype.forEach.call(host.querySelectorAll("li"), function (li) {
+      li.addEventListener("click", function () {
+        stopFlow();
+        showStep(parseInt(li.getAttribute("data-i"), 10));
+      });
+    });
+    var note = document.getElementById("flow-note");
+    note.innerHTML = "<h3>" + esc(flow.name) + "</h3>" +
+      (flow.blurb ? "<p>" + esc(flow.blurb) + "</p>" : "") +
+      '<div class="chiprow"><button class="btn" type="button" id="flow-play">replay</button>' +
+      '<button class="btn" type="button" id="flow-stop">stop</button></div>';
+    document.getElementById("flow-play").addEventListener("click", function () {
+      flowIndex = -1; stopFlow(); advance();
+    });
+    document.getElementById("flow-stop").addEventListener("click", function () {
+      stopFlow(); clearFocus();
+    });
+    flowIndex = -1;
+    // On first paint the map stays whole. Dimming it before anyone has asked a
+    // question hides the very thing the section exists to show.
+    if (autoplay && !reduced) { advance(); }
+    else { markStepList(0); }
+  }
+
+  function markStepList(i) {
+    flowIndex = i;
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#flow-steps li"),
+      function (li, j) { li.classList.toggle("on", j === i); }
+    );
+  }
+
+  function showStep(i) {
+    if (!activeFlow || !activeFlow.steps || !activeFlow.steps[i]) return;
+    markStepList(i);
+    var st = activeFlow.steps[i];
+    if (st.node && placed[st.node]) {
+      focusNode(st.node);
+      var svg = document.getElementById("mapsvg");
+      var g = svg && svg.querySelector('.node-g[data-id="' + cssEsc(st.node) + '"]');
+      Array.prototype.forEach.call(
+        svg ? svg.querySelectorAll(".step") : [],
+        function (el) { el.classList.remove("step"); }
+      );
+      if (g) g.classList.add("step");
+    }
+  }
+
+  function advance() {
+    if (!activeFlow) return;
+    var steps = activeFlow.steps || [];
+    flowIndex += 1;
+    if (flowIndex >= steps.length) { flowIndex = steps.length - 1; return; }
+    showStep(flowIndex);
+    if (flowIndex < steps.length - 1) {
+      flowTimer = setTimeout(advance, Math.round(1900 / Math.max(1, SPEED / 8 || 1)));
+    }
+  }
+
+  function renderFlows() {
+    var tabs = document.getElementById("flow-tabs");
+    var sec = document.getElementById("flows");
+    if (!flows.length) { if (sec) sec.style.display = "none"; return; }
+    tabs.innerHTML = flows.map(function (f) {
+      return '<button class="btn" type="button" data-flow="' + esc(f.id) + '">' +
+        esc(f.name) + "</button>";
+    }).join("");
+    Array.prototype.forEach.call(tabs.querySelectorAll(".btn"), function (b) {
+      b.addEventListener("click", function () {
+        var f = flows.filter(function (x) { return x.id === b.getAttribute("data-flow"); })[0];
+        if (f) selectFlow(f, true);
+      });
+    });
+    selectFlow(flows[0], false);
+  }
+
+  /* ---------------- content sections ---------------- */
+
+  function renderHero() {
+    setText("hero-eyebrow", meta.eyebrow || "architecture");
+    setText("hero-title", meta.title || "System architecture");
+    setText("hero-tagline", meta.tagline || "");
+    var facts = Array.isArray(spec.facts) ? spec.facts : [];
+    var host = document.getElementById("hero-facts");
+    if (host) {
+      host.innerHTML = facts.map(function (f) {
+        return '<li class="fact"><span>' + esc(f.label) + "</span><b>" + esc(f.value) +
+          "</b>" + (f.note ? "<em>" + esc(f.note) + "</em>" : "") + "</li>";
+      }).join("");
+    }
+    setText("foot-line", meta.footer || "");
+    var bits = [];
+    if (meta.root) bits.push(meta.root);
+    if (meta.generated) bits.push("generated " + meta.generated);
+    if (scan && scan.git && scan.git.head) {
+      bits.push("at " + scan.git.head + (scan.git.branch ? " on " + scan.git.branch : ""));
+    }
+    setText("foot-meta", bits.join("  \u00b7  "));
+    document.title = meta.title ? meta.title + " \u2014 architecture" : document.title;
+  }
+
+  function setText(id, txt) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = txt || "";
+  }
+
+  function renderLegend() {
+    var used = {};
+    nodes.forEach(function (n) { used[kindOf(n)] = true; });
+    var host = document.getElementById("map-legend");
+    if (!host) return;
+    host.innerHTML = Object.keys(KINDS).filter(function (k) { return used[k]; })
+      .map(function (k) {
+        return '<li><i style="background:var(' + KINDS[k].v + ')"></i>' +
+          esc(KINDS[k].label) + "</li>";
+      }).join("");
+  }
+
+  function renderModules() {
+    var host = document.getElementById("module-cards");
+    var sec = document.getElementById("modules");
+    if (!host) return;
+    if (!nodes.length) { if (sec) sec.style.display = "none"; return; }
+    host.innerHTML = layers.map(function (l) {
+      var mine = nodes.filter(function (n) { return n.layer === l.id; });
+      if (!mine.length) return "";
+      return mine.map(function (n) {
+        var k = kindOf(n);
+        var outs = liveEdges.filter(function (e) { return e.from === n.id; }).length;
+        var ins = liveEdges.filter(function (e) { return e.to === n.id; }).length;
+        return '<div class="card rv" data-node="' + esc(n.id) + '" ' +
+          'style="border-top:3px solid var(' + KINDS[k].v + ')">' +
+          '<p class="kindtag muted" style="font-size:.64rem;letter-spacing:.1em;' +
+          'text-transform:uppercase">' + esc(l.name) + " / " + esc(KINDS[k].label) + "</p>" +
+          "<h3>" + esc(n.name) + "</h3>" +
+          (n.blurb ? "<p>" + esc(n.blurb) + "</p>" : "") +
+          '<div class="chiprow">' +
+          (n.loc ? '<span class="chip">' + num(n.loc) + " loc</span>" : "") +
+          '<span class="chip">' + outs + " out</span>" +
+          '<span class="chip">' + ins + " in</span>" +
+          (n.verified === false ? '<span class="chip">inferred</span>' : "") +
+          "</div>" +
+          (Array.isArray(n.files) && n.files.length
+            ? '<ul class="files">' + n.files.slice(0, 5).map(function (f) {
+                return "<li>" + esc(f) + "</li>";
+              }).join("") + "</ul>"
+            : "") +
+          "</div>";
+      }).join("");
+    }).join("");
+    Array.prototype.forEach.call(host.querySelectorAll(".card"), function (c) {
+      c.addEventListener("click", function () {
+        var id = c.getAttribute("data-node");
+        document.getElementById("map").scrollIntoView({
+          behavior: reduced ? "auto" : "smooth", block: "start"
+        });
+        setTimeout(function () { focusNode(id); }, reduced ? 0 : 420);
+      });
+      c.style.cursor = "pointer";
+    });
+  }
+
+  function renderState() {
+    var host = document.getElementById("state-cards");
+    var sec = document.getElementById("state");
+    var items = Array.isArray(spec.state) ? spec.state : [];
+    if (!items.length) { if (sec) sec.style.display = "none"; return; }
+    host.innerHTML = items.map(function (s) {
+      return '<div class="card rv">' +
+        '<p class="kindtag muted" style="font-size:.64rem;letter-spacing:.1em;' +
+        'text-transform:uppercase">' + esc(s.kind || "store") + "</p>" +
+        "<h3>" + esc(s.name) + "</h3>" +
+        (s.blurb ? "<p>" + esc(s.blurb) + "</p>" : "") +
+        (s.where ? '<div class="chiprow"><span class="chip">' + esc(s.where) +
+          "</span></div>" : "") +
+        (Array.isArray(s.files) && s.files.length
+          ? '<ul class="files">' + s.files.slice(0, 6).map(function (f) {
+              return "<li>" + esc(f) + "</li>";
+            }).join("") + "</ul>"
+          : "") +
+        "</div>";
+    }).join("");
+  }
+
+  function renderSeams() {
+    var host = document.getElementById("seam-cards");
+    var sec = document.getElementById("seams");
+    var items = Array.isArray(spec.seams) ? spec.seams : [];
+    if (!items.length) { if (sec) sec.style.display = "none"; return; }
+    host.innerHTML = items.map(function (s) {
+      var risk = ["low", "medium", "high"].indexOf(s.risk) >= 0 ? s.risk : "low";
+      return '<div class="card rv">' +
+        '<p class="kindtag risk-' + risk + '" style="font-size:.64rem;letter-spacing:.1em;' +
+        'text-transform:uppercase">' + esc(risk) + " risk</p>" +
+        "<h3>" + esc(s.title) + "</h3>" +
+        (s.text ? "<p>" + esc(s.text) + "</p>" : "") +
+        (Array.isArray(s.files) && s.files.length
+          ? '<ul class="files">' + s.files.slice(0, 6).map(function (f) {
+              return "<li>" + esc(f) + "</li>";
+            }).join("") + "</ul>"
+          : "") +
+        "</div>";
+    }).join("");
+  }
+
+  function renderStackCards() {
+    var host = document.getElementById("stack-cards");
+    if (!host) return;
+    var cards = Array.isArray(spec.stackNotes) ? spec.stackNotes : [];
+    if (!cards.length) {
+      cards = layers.map(function (l) {
+        var mine = nodes.filter(function (n) { return n.layer === l.id; });
+        var lead = String(l.blurb || "").trim();
+        if (lead && !/[.!?]$/.test(lead)) lead += ".";
+        return {
+          title: l.name,
+          text: (lead ? lead + " " : "") + (mine.length
+            ? "Holds " + mine.length + " part" + (mine.length === 1 ? "" : "s") + ": " +
+              mine.map(function (n) { return n.name; }).join(", ") + "."
+            : "Nothing sits here yet.")
+        };
+      });
+    }
+    host.innerHTML = cards.map(function (c) {
+      return '<div class="card rv"><h3>' + esc(c.title) + "</h3><p>" +
+        esc(c.text) + "</p></div>";
+    }).join("");
+  }
+
+  function renderTrust() {
+    var host = document.getElementById("trust-cards");
+    var sec = document.getElementById("trust");
+    var g = spec.ground || {};
+    var groups = [
+      ["v", "Verified", g.verified, "Read or measured this session."],
+      ["i", "Inferred", g.inferred, "Reasoned from naming and structure, not confirmed."],
+      ["u", "Unknown", g.unknown, "Open questions this map cannot answer."]
+    ].filter(function (x) { return Array.isArray(x[2]) && x[2].length; });
+    if (!groups.length) { if (sec) sec.style.display = "none"; return; }
+    host.innerHTML = groups.map(function (x) {
+      return '<div class="card rv ' + x[0] + '"><h3>' + x[1] + "</h3>" +
+        '<p class="muted" style="font-size:.82rem">' + x[3] + "</p><ul>" +
+        x[2].map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") +
+        "</ul></div>";
+    }).join("");
+  }
+
+  function renderMeasured() {
+    var sec = document.getElementById("measured");
+    var host = document.getElementById("measured-body");
+    if (!scan || !scan.totals) { if (sec) sec.style.display = "none"; return; }
+    var t = scan.totals, g = scan.git || {};
+    var h = [];
+
+    var chips = [
+      ["files scanned", num(t.files)],
+      ["lines of code", num(t.loc)],
+      ["modules", num(t.modules)],
+      ["import edges", num(t.edges)]
+    ];
+    if (g.commits) chips.push(["commits", num(g.commits)]);
+    if (g.contributors) chips.push(["contributors", num(g.contributors)]);
+    if (typeof g.dirty === "number") chips.push(["uncommitted files", num(g.dirty)]);
+    h.push('<ul class="facts rv" style="margin:0 0 1.5rem">' + chips.map(function (c) {
+      return '<li class="fact"><span>' + esc(c[0]) + "</span><b>" + esc(c[1]) + "</b></li>";
+    }).join("") + "</ul>");
+
+    var langs = (scan.languages || []).slice(0, 9);
+    if (langs.length) {
+      var maxLoc = Math.max.apply(null, langs.map(function (l) { return l.loc || 0; })) || 1;
+      h.push('<h3 class="rv" style="margin:1.4rem 0 .6rem">Languages by volume</h3>');
+      h.push('<div class="tablewrap rv"><table><thead><tr><th>Language</th>' +
+        '<th class="num">Files</th><th class="num">Lines</th><th>Share</th></tr></thead><tbody>');
+      langs.forEach(function (l) {
+        h.push("<tr><td>" + esc(l.lang) + '</td><td class="num">' + num(l.files) +
+          '</td><td class="num">' + num(l.loc) + '</td><td><div class="bar" style="width:' +
+          Math.round((l.loc / maxLoc) * 100) + '%"></div></td></tr>');
+      });
+      h.push("</tbody></table></div>");
+    }
+
+    var mods = (scan.modules || []).slice(0, 12);
+    if (mods.length) {
+      h.push('<h3 class="rv" style="margin:1.6rem 0 .6rem">Biggest directories</h3>');
+      h.push('<div class="tablewrap rv"><table><thead><tr><th>Directory</th>' +
+        '<th class="num">Files</th><th class="num">Lines</th><th class="num">Imports out</th>' +
+        '<th class="num">Imported by</th></tr></thead><tbody>');
+      mods.forEach(function (m) {
+        h.push('<tr><td class="mono">' + esc(m.id) + '</td><td class="num">' + num(m.files) +
+          '</td><td class="num">' + num(m.loc) + '</td><td class="num">' + num(m.imports_out) +
+          '</td><td class="num">' + num(m.imports_in) + "</td></tr>");
+      });
+      h.push("</tbody></table></div>");
+    }
+
+    var eds = (scan.edges || []).slice(0, 12);
+    if (eds.length) {
+      h.push('<h3 class="rv" style="margin:1.6rem 0 .6rem">Strongest import edges</h3>');
+      h.push('<div class="tablewrap rv"><table><thead><tr><th>From</th><th>To</th>' +
+        '<th class="num">Imports</th></tr></thead><tbody>');
+      eds.forEach(function (e) {
+        h.push('<tr><td class="mono">' + esc(e.from) + '</td><td class="mono">' + esc(e.to) +
+          '</td><td class="num">' + num(e.count) + "</td></tr>");
+      });
+      h.push("</tbody></table></div>");
+    }
+
+    if ((scan.services || []).length) {
+      h.push('<h3 class="rv" style="margin:1.6rem 0 .6rem">Third party surface</h3>');
+      h.push('<div class="chiprow rv">' + scan.services.slice(0, 24).map(function (s) {
+        return '<span class="chip">' + esc(s.name) + " \u00b7 " + esc(s.category) + "</span>";
+      }).join("") + "</div>");
+    }
+    if ((scan.env_vars || []).length) {
+      h.push('<h3 class="rv" style="margin:1.4rem 0 .6rem">Environment surface</h3>');
+      h.push('<div class="chiprow rv">' + scan.env_vars.slice(0, 24).map(function (v) {
+        return '<span class="chip">' + esc(v.name) + "</span>";
+      }).join("") + "</div>");
+    }
+    if (scan.truncated) {
+      h.push('<p class="muted rv" style="margin-top:1.2rem;font-size:.84rem">' +
+        "The file list hit the scan limit, so these counts are a floor, not a total.</p>");
+    }
+    host.innerHTML = h.join("");
+  }
+
+  function renderNav() {
+    var list = document.getElementById("jumplist");
+    if (!list) return;
+    var secs = Array.prototype.filter.call(
+      document.querySelectorAll("main section"),
+      function (s) { return s.style.display !== "none"; }
+    );
+    list.innerHTML = secs.map(function (s) {
+      var h2 = s.querySelector("h2");
+      return '<li><a href="#' + s.id + '">' + esc(h2 ? h2.textContent : s.id) + "</a></li>";
+    }).join("");
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          Array.prototype.forEach.call(list.querySelectorAll("a"), function (a) {
+            a.setAttribute("aria-current",
+              a.getAttribute("href") === "#" + en.target.id ? "true" : "false");
+          });
+        });
+      }, { rootMargin: "-45% 0px -50% 0px" });
+      secs.forEach(function (s) { io.observe(s); });
+    }
+  }
+
+  function wireReveal() {
+    if (!("IntersectionObserver" in window)) {
+      Array.prototype.forEach.call(document.querySelectorAll(".rv"), function (el) {
+        el.classList.add("in");
+      });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+    Array.prototype.forEach.call(document.querySelectorAll(".rv"), function (el) {
+      io.observe(el);
+    });
+  }
+
+  function wireControls() {
+    var reset = document.getElementById("map-reset");
+    if (reset) reset.addEventListener("click", function () { stopFlow(); clearFocus(); });
+    var mot = document.getElementById("map-motion");
+    if (mot) {
+      mot.setAttribute("aria-pressed", motionOn ? "true" : "false");
+      mot.classList.toggle("on", motionOn);
+      mot.addEventListener("click", function () {
+        motionOn = !motionOn;
+        mot.setAttribute("aria-pressed", motionOn ? "true" : "false");
+        mot.classList.toggle("on", motionOn);
+        if (window.ARCH && window.ARCH.setMotion) window.ARCH.setMotion(motionOn);
+      });
+    }
+    var tog = document.getElementById("themetog");
+    if (tog) {
+      tog.addEventListener("click", function () {
+        var cur = document.documentElement.getAttribute("data-theme");
+        if (!cur) {
+          cur = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark" : "light";
+        }
+        var next = cur === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        try { localStorage.setItem("arch-theme", next); } catch (e) {}
+        if (window.ARCH && window.ARCH.onTheme) window.ARCH.onTheme(next);
+      });
+    }
+    if ("IntersectionObserver" in window) {
+      var frame = document.querySelector("#map .map-frame");
+      if (frame) {
+        new IntersectionObserver(function (en) {
+          mapVisible = en[0].isIntersecting;
+        }, { threshold: 0 }).observe(frame);
+      }
+    }
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape") { stopFlow(); clearFocus(); }
+    });
+  }
+
+  /* ---------------- boot ---------------- */
+
+  renderHero();
+  renderMap();
+  renderLegend();
+  renderDetail(null);
+  renderFlows();
+  renderStackCards();
+  renderModules();
+  renderState();
+  renderSeams();
+  renderMeasured();
+  renderTrust();
+  renderNav();
+  wireReveal();
+  wireControls();
+  requestAnimationFrame(tick);
+
+  window.ARCH = {
+    spec: spec, scan: scan, layers: layers, nodes: nodes, edges: edges,
+    placed: placed, bands: bands, L: L, KINDS: KINDS, mapH: mapH,
+    SPEED: SPEED, reduced: reduced,
+    kindOf: kindOf,
+    focus: function (id) { focusNode(id); },
+    scrollToMap: function () {
+      var m = document.getElementById("map");
+      if (m) m.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    }
+  };
+})();
+</script>
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+/* ------------------------------------------------------------------ *
+ * The same layout, extruded. Layer index becomes height, so depth in
+ * the stack is something you can see rather than something you infer.
+ * three.js is the only network dependency on this page; if it fails to
+ * load the rest of the document still works.
+ * ------------------------------------------------------------------ */
+(async function () {
+  var A = window.ARCH;
+  var frame = document.getElementById("scene-frame");
+  var canvas = document.getElementById("scene");
+  var tip = document.getElementById("scene-tip");
+  var section = document.getElementById("stack");
+  if (!A || !frame || !canvas) return;
+
+  function fail(msg) {
+    frame.classList.add("failed");
+    var el = document.getElementById("scene-fallback");
+    if (el) el.textContent = msg;
+  }
+  if (!A.nodes.length) { if (section) section.style.display = "none"; return; }
+
+  var THREE;
+  try {
+    THREE = await import("three");
+  } catch (err) {
+    fail("The 3D view loads three.js from the network and it did not arrive. " +
+         "Every other section on this page works offline.");
+    return;
+  }
+
+  var L = A.L, layers = A.layers, nodes = A.nodes, placed = A.placed;
+  var S = 1 / 64;
+  var rowVals = Object.keys(placed).map(function (k) { return placed[k].row; });
+  var maxRow = rowVals.length ? Math.max.apply(null, rowVals) : 0;
+  var LAYER_Y = 1.95, ROW_Z = 1.75;
+
+  function css(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+    v = (v || "").trim();
+    return v || fallback;
+  }
+  function kindColor(kind) {
+    var k = A.KINDS[kind] || A.KINDS.service;
+    return new THREE.Color(css(k.v, "#2563eb"));
+  }
+  function pos3(p) {
+    return new THREE.Vector3(
+      (p.x + p.w / 2 - L.W / 2) * S,
+      (layers.length - 1 - p.layer) * LAYER_Y,
+      (p.row - maxRow / 2) * ROW_Z
+    );
+  }
+
+  var renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas: canvas, antialias: true, alpha: true, powerPreference: "high-performance"
+    });
+  } catch (err) {
+    fail("This browser did not give the page a WebGL context, so the 3D view is off. " +
+         "The map in section one shows the same structure.");
+    return;
+  }
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(46, 16 / 9, 0.1, 400);
+  var midY = ((layers.length - 1) * LAYER_Y) / 2;
+  var target = new THREE.Vector3(0, midY, 0);
+
+  var orbit = { r: Math.max(13, layers.length * 3.6 + 7), theta: 0.62, phi: 1.02 };
+  function applyCamera() {
+    var sp = Math.sin(orbit.phi);
+    camera.position.set(
+      target.x + orbit.r * sp * Math.sin(orbit.theta),
+      target.y + orbit.r * Math.cos(orbit.phi),
+      target.z + orbit.r * sp * Math.cos(orbit.theta)
+    );
+    camera.lookAt(target);
+  }
+  applyCamera();
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x30384a, 0.95));
+  var key = new THREE.DirectionalLight(0xffffff, 1.05);
+  key.position.set(6, 12, 8);
+  scene.add(key);
+  var rim = new THREE.DirectionalLight(0x88aaff, 0.5);
+  rim.position.set(-8, 4, -6);
+  scene.add(rim);
+
+  /* layer slabs */
+  var slabMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(css("--ink", "#16181c")),
+    transparent: true, opacity: 0.055, depthWrite: false
+  });
+  var slabLineMat = new THREE.LineBasicMaterial({
+    color: new THREE.Color(css("--line-2", "#888")), transparent: true, opacity: 0.5
+  });
+  var labelSprites = [];
+
+  layers.forEach(function (layer, li) {
+    var mine = nodes.filter(function (n) { return n.layer === layer.id && placed[n.id]; });
+    if (!mine.length) return;
+    var xs = [], zs = [], rows = 0;
+    mine.forEach(function (n) {
+      var p = placed[n.id];
+      var v = pos3(p);
+      xs.push(v.x - (p.w * S) / 2, v.x + (p.w * S) / 2);
+      zs.push(v.z);
+      rows = Math.max(rows, p.row);
+    });
+    var minX = Math.min.apply(null, xs) - 0.55;
+    var maxX = Math.max.apply(null, xs) + 0.55;
+    var minZ = Math.min.apply(null, zs) - 0.85;
+    var maxZ = Math.max.apply(null, zs) + 0.85;
+    var w = maxX - minX, d = maxZ - minZ;
+    var y = (layers.length - 1 - li) * LAYER_Y - 0.3;
+    var geo = new THREE.BoxGeometry(w, 0.07, d);
+    var slab = new THREE.Mesh(geo, slabMat);
+    slab.position.set((minX + maxX) / 2, y, (minZ + maxZ) / 2);
+    scene.add(slab);
+    var lines = new THREE.LineSegments(new THREE.EdgesGeometry(geo), slabLineMat);
+    lines.position.copy(slab.position);
+    scene.add(lines);
+    var sp = makeLabel(layer.name.toUpperCase(), css("--muted", "#888"), 0.3);
+    sp.position.set(minX - 0.1, y + 0.5, maxZ + 0.2);
+    scene.add(sp);
+    labelSprites.push({ sprite: sp, text: layer.name.toUpperCase(), muted: true, scale: 0.3 });
+  });
+
+  /* node blocks */
+  var blocks = [];
+  var edgeLineMat = new THREE.LineBasicMaterial({
+    color: new THREE.Color(css("--line-2", "#888")), transparent: true, opacity: 0.55
+  });
+  nodes.forEach(function (n) {
+    var p = placed[n.id];
+    if (!p) return;
+    var v = pos3(p);
+    var geo = new THREE.BoxGeometry(p.w * S, 0.34, 1.05);
+    var mat = new THREE.MeshStandardMaterial({
+      color: kindColor(A.kindOf(n)), roughness: 0.48, metalness: 0.12
+    });
+    var mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(v);
+    mesh.userData.id = n.id;
+    mesh.userData.name = n.name;
+    mesh.userData.kind = A.kindOf(n);
+    mesh.userData.blurb = n.blurb || "";
+    scene.add(mesh);
+    var wire = new THREE.LineSegments(new THREE.EdgesGeometry(geo), edgeLineMat);
+    wire.position.copy(v);
+    scene.add(wire);
+    var sp = makeLabel(n.name, css("--ink", "#111"), 0.34);
+    sp.position.set(v.x, v.y + 0.52, v.z);
+    scene.add(sp);
+    labelSprites.push({ sprite: sp, text: n.name, muted: false, scale: 0.34 });
+    blocks.push(mesh);
+  });
+
+  /* dependency tubes plus travelling packets */
+  var curves = [], packets = [];
+  var EDGE_COLORS = { data: "--k-data", call: "--k-service", build: "--k-build", event: "--k-ui" };
+  A.edges.forEach(function (e) {
+    var a = placed[e.from], b = placed[e.to];
+    if (!a || !b) return;
+    var va = pos3(a), vb = pos3(b);
+    var mid = va.clone().lerp(vb, 0.5);
+    mid.z += 0.75;
+    if (Math.abs(va.y - vb.y) < 0.01) mid.y -= 0.5;
+    var curve = new THREE.QuadraticBezierCurve3(va, mid, vb);
+    var col = new THREE.Color(css(EDGE_COLORS[e.kind] || "--k-service", "#2563eb"));
+    var tube = new THREE.Mesh(
+      new THREE.TubeGeometry(curve, 26, 0.017, 6, false),
+      new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.6 })
+    );
+    scene.add(tube);
+    curves.push({
+      pts: curve.getSpacedPoints(60), color: col, tube: tube,
+      cssVar: EDGE_COLORS[e.kind] || "--k-service"
+    });
+  });
+
+  /* Frame whatever the spec turned out to be. A fixed camera distance suits one
+     shape of system and crops or strands every other one. */
+  (function fitCamera() {
+    if (!blocks.length) return;
+    var box = new THREE.Box3();
+    blocks.forEach(function (b) { box.expandByObject(b); });
+    var sphere = box.getBoundingSphere(new THREE.Sphere());
+    if (!isFinite(sphere.radius) || sphere.radius <= 0) return;
+    target.copy(sphere.center);
+    var vFov = (camera.fov * Math.PI) / 180;
+    orbit.r = Math.max(5, (sphere.radius / Math.sin(vFov / 2)) * 0.9);
+    orbit.phi = 0.98;
+    applyCamera();
+  })();
+
+  var dotTex = (function () {
+    var c = document.createElement("canvas");
+    c.width = c.height = 64;
+    var g = c.getContext("2d");
+    var rad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    rad.addColorStop(0, "rgba(255,255,255,1)");
+    rad.addColorStop(0.35, "rgba(255,255,255,0.85)");
+    rad.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = rad;
+    g.fillRect(0, 0, 64, 64);
+    var t = new THREE.CanvasTexture(c);
+    t.needsUpdate = true;
+    return t;
+  })();
+
+  var points = null;
+  if (curves.length) {
+    var per = curves.length > 26 ? 2 : 3;
+    var total = Math.min(150, curves.length * per);
+    var posArr = new Float32Array(total * 3);
+    var colArr = new Float32Array(total * 3);
+    for (var i = 0; i < total; i++) {
+      var ci = i % curves.length;
+      var c = curves[ci];
+      packets.push({ ci: ci, off: (Math.floor(i / curves.length) / per) + (ci * 0.11) % 1,
+                     rate: 0.5 + ((ci * 29) % 50) / 100 });
+      colArr[i * 3] = c.color.r; colArr[i * 3 + 1] = c.color.g; colArr[i * 3 + 2] = c.color.b;
+    }
+    var pgeo = new THREE.BufferGeometry();
+    pgeo.setAttribute("position", new THREE.BufferAttribute(posArr, 3));
+    pgeo.setAttribute("color", new THREE.BufferAttribute(colArr, 3));
+    points = new THREE.Points(pgeo, new THREE.PointsMaterial({
+      size: 0.26, map: dotTex, vertexColors: true, transparent: true,
+      depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true
+    }));
+    scene.add(points);
+  }
+
+  function makeLabel(text, color, scale) {
+    var c = document.createElement("canvas");
+    var g = c.getContext("2d");
+    var font = "600 30px -apple-system, BlinkMacSystemFont, Segoe UI, system-ui, sans-serif";
+    g.font = font;
+    var w = Math.ceil(g.measureText(text).width) + 26;
+    c.width = Math.max(48, w);
+    c.height = 48;
+    g = c.getContext("2d");
+    g.font = font;
+    g.textBaseline = "middle";
+    g.fillStyle = color;
+    g.fillText(text, 13, 25);
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    var sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: tex, transparent: true, depthTest: false, depthWrite: false
+    }));
+    sp.scale.set((c.width / c.height) * scale, scale, 1);
+    sp.renderOrder = 10;
+    return sp;
+  }
+
+  function rebuildLabels() {
+    labelSprites.forEach(function (rec) {
+      var color = rec.muted ? css("--muted", "#888") : css("--ink", "#111");
+      var fresh = makeLabel(rec.text, color, rec.scale);
+      rec.sprite.material.map.dispose();
+      rec.sprite.material.map = fresh.material.map;
+      rec.sprite.material.needsUpdate = true;
+    });
+    slabMat.color = new THREE.Color(css("--ink", "#16181c"));
+    slabLineMat.color = new THREE.Color(css("--line-2", "#888"));
+    edgeLineMat.color = new THREE.Color(css("--line-2", "#888"));
+    // Kind colours differ per theme, so the blocks and tubes have to move too.
+    blocks.forEach(function (b) {
+      b.material.color = kindColor(b.userData.kind);
+      b.material.needsUpdate = true;
+    });
+    curves.forEach(function (c, i) {
+      var col = new THREE.Color(css(c.cssVar, "#2563eb"));
+      c.color = col;
+      c.tube.material.color = col;
+      c.tube.material.needsUpdate = true;
+    });
+    if (points) {
+      var cols = points.geometry.attributes.color.array;
+      for (var i = 0; i < packets.length; i++) {
+        var col = curves[packets[i].ci].color;
+        cols[i * 3] = col.r; cols[i * 3 + 1] = col.g; cols[i * 3 + 2] = col.b;
+      }
+      points.geometry.attributes.color.needsUpdate = true;
+    }
+  }
+
+  /* interaction */
+  var dragging = false, lastX = 0, lastY = 0, lastTouch = 0;
+  canvas.style.touchAction = "none";
+  canvas.addEventListener("pointerdown", function (ev) {
+    dragging = true; lastX = ev.clientX; lastY = ev.clientY;
+    lastTouch = performance.now();
+    canvas.setPointerCapture(ev.pointerId);
+  });
+  canvas.addEventListener("pointermove", function (ev) {
+    if (dragging) {
+      orbit.theta -= (ev.clientX - lastX) * 0.006;
+      orbit.phi = Math.max(0.22, Math.min(1.48, orbit.phi - (ev.clientY - lastY) * 0.006));
+      lastX = ev.clientX; lastY = ev.clientY;
+      lastTouch = performance.now();
+      applyCamera();
+    } else {
+      hoverTest(ev);
+    }
+  });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(function (t) {
+    canvas.addEventListener(t, function () { dragging = false; });
+  });
+  canvas.addEventListener("wheel", function (ev) {
+    ev.preventDefault();
+    orbit.r = Math.max(6, Math.min(48, orbit.r * (1 + ev.deltaY * 0.0012)));
+    lastTouch = performance.now();
+    applyCamera();
+  }, { passive: false });
+
+  var ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), hovered = null;
+  function pick(ev) {
+    var r = canvas.getBoundingClientRect();
+    mouse.x = ((ev.clientX - r.left) / r.width) * 2 - 1;
+    mouse.y = -((ev.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(mouse, camera);
+    var hits = ray.intersectObjects(blocks, false);
+    return hits.length ? hits[0].object : null;
+  }
+  function hoverTest(ev) {
+    var hit = pick(ev);
+    if (hit === hovered) return;
+    if (hovered) hovered.scale.set(1, 1, 1);
+    hovered = hit;
+    if (hovered) {
+      hovered.scale.set(1.06, 1.5, 1.06);
+      tip.textContent = hovered.userData.name +
+        (hovered.userData.blurb ? " · " + hovered.userData.blurb : "");
+      tip.classList.add("on");
+      canvas.style.cursor = "pointer";
+    } else {
+      tip.classList.remove("on");
+      canvas.style.cursor = "grab";
+    }
+  }
+  canvas.addEventListener("click", function (ev) {
+    var hit = pick(ev);
+    if (hit && A.focus) A.focus(hit.userData.id);
+  });
+
+  /* loop */
+  var visible = true, motion = !A.reduced, phase = 0, prev = 0;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; },
+      { threshold: 0 }).observe(frame);
+  }
+  function resize() {
+    var w = frame.clientWidth || 800;
+    var h = canvas.clientHeight || 420;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  if ("ResizeObserver" in window) new ResizeObserver(resize).observe(frame);
+  else window.addEventListener("resize", resize);
+  resize();
+
+  var tmp = new THREE.Vector3();
+  function updatePackets() {
+    if (!points || !packets.length) return;
+    var arr = points.geometry.attributes.position.array;
+    for (var i = 0; i < packets.length; i++) {
+      var pk = packets[i];
+      var pts = curves[pk.ci].pts;
+      var u = (phase * pk.rate + pk.off) % 1;
+      if (u < 0) u += 1;
+      var f = u * (pts.length - 1);
+      var i0 = Math.floor(f), i1 = Math.min(pts.length - 1, i0 + 1);
+      tmp.copy(pts[i0]).lerp(pts[i1], f - i0);
+      arr[i * 3] = tmp.x; arr[i * 3 + 1] = tmp.y; arr[i * 3 + 2] = tmp.z;
+    }
+    points.geometry.attributes.position.needsUpdate = true;
+  }
+  /* Seed once up front. Positions only get written inside the loop, so with
+     motion off every packet would otherwise sit piled at the origin. */
+  updatePackets();
+
+  function frameLoop(now) {
+    requestAnimationFrame(frameLoop);
+    if (!prev) prev = now;
+    var dt = Math.min(80, now - prev);
+    prev = now;
+    if (!visible) return;
+    if (motion) {
+      phase += dt * 0.00009 * A.SPEED;
+      if (now - lastTouch > 2600) {
+        orbit.theta += dt * 0.00011 * Math.min(6, A.SPEED);
+        applyCamera();
+      }
+      updatePackets();
+    }
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(frameLoop);
+
+  A.setMotion = function (on) { motion = on && !A.reduced; };
+  A.onTheme = function () { rebuildLabels(); };
+})();
+</script>
+
+</body>
+</html>

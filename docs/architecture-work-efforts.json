@@ -1,0 +1,359 @@
+{
+  "meta": {
+    "title": "The work effort tracking system",
+    "eyebrow": "architecture / _pyrite",
+    "tagline": "A todo list becomes a folder of markdown files that link to each other in both directions, and a dashboard reads that folder as live state. Every number on this page came off the filesystem.",
+    "footer": "Counts from a scan of the working tree at 94ea3a9 on branch main. Import edges are resolved, not guessed. The four verification suites were run to produce the numbers quoted for them.",
+    "description": "How pyrite we and pyrite ticket turn a list of todos into a hub-and-spoke set of markdown work efforts, and how the Mission Control dashboard reads them."
+  },
+
+  "layers": [
+    { "id": "cli",     "name": "CLI",          "blurb": "What a human or agent types" },
+    { "id": "verbs",   "name": "Verbs",        "blurb": "One script per noun, argparse only" },
+    { "id": "core",    "name": "Shared core",  "blurb": "Every write goes through here" },
+    { "id": "store",   "name": "Store",        "blurb": "Markdown on disk is the database" },
+    { "id": "readers", "name": "Readers",      "blurb": "Things that consume the store" },
+    { "id": "checks",  "name": "Verification", "blurb": "Suites that can actually fail" }
+  ],
+
+  "nodes": [
+    {
+      "id": "pyrite",
+      "layer": "cli",
+      "kind": "entry",
+      "name": "pyrite",
+      "blurb": "Repo-root dispatcher. Forwards unknown args to one tool per subcommand.",
+      "detail": "Deliberately thin. It resolves the repo root and shells out, so each tool stays runnable on its own without importing the dispatcher.",
+      "files": ["pyrite"],
+      "tech": ["python", "argparse", "subprocess"],
+      "loc": 265,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "we",
+      "layer": "verbs",
+      "kind": "service",
+      "name": "we create/sync/close",
+      "blurb": "Turns a list of todos into a work effort. Also reconciles and closes one.",
+      "detail": "create allocates every ticket id up front so the hub can link to files that do not exist yet and so a dry run reports real ids. sync rebuilds only the Tickets block. close refuses while any ticket is open, and refuses a work effort with no tickets at all.",
+      "files": ["tools/work-effort/create.py", "tools/work-effort/README.md"],
+      "tech": ["python", "argparse"],
+      "loc": 471,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "ticket",
+      "layer": "verbs",
+      "kind": "service",
+      "name": "ticket verbs",
+      "blurb": "Adds a ticket to an existing work effort and changes its status.",
+      "detail": "status exists so a state change is a CLI verb rather than a hand edit. It validates the value, refuses an unknown or ambiguous id, is idempotent, and names the sync to run afterwards.",
+      "files": ["tools/ticket/create.py", "tools/ticket/README.md"],
+      "tech": ["python", "argparse"],
+      "loc": 230,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "helpers",
+      "layer": "core",
+      "kind": "lib",
+      "name": "plugins.helpers",
+      "blurb": "The only place that formats a file. Ids, quoting, escaping, sequences.",
+      "detail": "13 functions. Fixing a formatting bug here fixes it for the Todoist plugin and both CLI tools at once, which is why yaml_quote and escape_table_cell live here rather than at the call sites.",
+      "files": [
+        "plugins/helpers.py",
+        "plugins/__init__.py"
+      ],
+      "tech": ["python", "stdlib only"],
+      "loc": 560,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "naming",
+      "layer": "core",
+      "kind": "config",
+      "name": "naming-linter rules",
+      "blurb": "Canonical patterns for folder, index and ticket names.",
+      "detail": "Loaded by file path, because the directory is naming-linter with a hyphen and no import statement can name it. The previous import could never resolve and its ImportError was swallowed, so validation silently passed everything.",
+      "files": ["tools/naming-linter/rules/common.py", "tools/naming-linter/rules/work_efforts.py"],
+      "tech": ["python", "re"],
+      "loc": 693,
+      "fileCount": 4,
+      "verified": true
+    },
+    {
+      "id": "store",
+      "layer": "store",
+      "kind": "data",
+      "name": "_work_efforts",
+      "blurb": "37 folders, 314 markdown files. YAML frontmatter plus wiki-links.",
+      "detail": "One folder per work effort: an index that is the hub, and a tickets subfolder holding the spokes. There is no database and no index file to keep in sync, because the directory listing is the index.",
+      "files": [
+        "_work_efforts/WE-260730-tfxo_sightglass_follow_through/WE-260730-tfxo_index.md",
+        "_work_efforts/WE-260730-tfxo_sightglass_follow_through/tickets/"
+      ],
+      "tech": ["markdown", "yaml frontmatter"],
+      "loc": 314,
+      "fileCount": 314,
+      "verified": true
+    },
+    {
+      "id": "dashboard",
+      "layer": "readers",
+      "kind": "ui",
+      "name": "Mission Control",
+      "blurb": "Watches the folder and pushes a WebSocket frame per change.",
+      "detail": "Parses frontmatter with gray-matter, which is a real YAML parser and therefore throws on malformed input rather than degrading. That is what made the unescaped-quote bug a availability problem rather than a cosmetic one.",
+      "files": ["mcp-servers/dashboard/server.js", "mcp-servers/dashboard/lib/watcher.js", "mcp-servers/dashboard/lib/parser.js"],
+      "tech": ["node", "express", "ws", "chokidar", "gray-matter"],
+      "loc": 1674,
+      "fileCount": 6,
+      "verified": true
+    },
+    {
+      "id": "obsidian",
+      "layer": "readers",
+      "kind": "service",
+      "name": "obsidian-linter",
+      "blurb": "Validates frontmatter, wiki-link targets and ticket-to-parent reciprocity.",
+      "detail": "Resolves a wiki-link only against an exact filename stem, which is why the hub links to the full stem with an alias rather than to a bare id.",
+      "files": ["tools/obsidian-linter/check.py", "tools/obsidian-linter/lint.py"],
+      "tech": ["python", "stdlib only"],
+      "loc": 2905,
+      "fileCount": 7,
+      "verified": true
+    },
+    {
+      "id": "vhelpers",
+      "layer": "checks",
+      "kind": "build",
+      "name": "verify.py",
+      "blurb": "25 asserts on the core, using the exact keyword sets real callers pass.",
+      "files": ["tools/work-effort/verify.py"],
+      "tech": ["python", "assert"],
+      "loc": 166,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "vcli",
+      "layer": "checks",
+      "kind": "build",
+      "name": "verify_cli.py",
+      "blurb": "59 asserts driving the real scripts through subprocess with hostile input.",
+      "detail": "Found four data-corruption bugs the happy-path testing had missed. Every fix is mutation-tested: reverting it turns the suite red.",
+      "files": ["tools/work-effort/verify_cli.py"],
+      "tech": ["python", "subprocess", "pyyaml"],
+      "loc": 290,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "vreadonly",
+      "layer": "checks",
+      "kind": "build",
+      "name": "verify_readonly.py",
+      "blurb": "5 asserts that the linter writes nothing unless asked. It used to.",
+      "files": ["tools/obsidian-linter/verify_readonly.py"],
+      "tech": ["python", "hashlib"],
+      "loc": 116,
+      "fileCount": 1,
+      "verified": true
+    },
+    {
+      "id": "vtiles",
+      "layer": "checks",
+      "kind": "build",
+      "name": "tile-totals.mjs",
+      "blurb": "Drives a real browser, because a DOM dump cannot measure an animation.",
+      "files": ["mcp-servers/dashboard/tests/tile-totals.mjs"],
+      "tech": ["node", "playwright"],
+      "loc": 114,
+      "fileCount": 1,
+      "verified": true
+    }
+  ],
+
+  "edges": [
+    { "from": "pyrite", "to": "we",        "kind": "call", "label": "subcommand" },
+    { "from": "pyrite", "to": "ticket",    "kind": "call", "label": "subcommand" },
+    { "from": "we",     "to": "helpers",   "kind": "call", "label": "2 imports" },
+    { "from": "ticket", "to": "helpers",   "kind": "call", "label": "1 import" },
+    { "from": "helpers","to": "naming",    "kind": "call", "label": "by file path" },
+    { "from": "we",     "to": "store",     "kind": "data", "label": "writes" },
+    { "from": "ticket", "to": "store",     "kind": "data", "label": "writes" },
+    { "from": "helpers","to": "store",     "kind": "data", "label": "formats" },
+    { "from": "dashboard", "to": "store",  "kind": "event", "label": "watches" },
+    { "from": "obsidian",  "to": "store",  "kind": "data",  "label": "validates" },
+    { "from": "vhelpers",  "to": "helpers","kind": "build", "label": "25 asserts" },
+    { "from": "vcli",      "to": "we",     "kind": "build", "label": "subprocess" },
+    { "from": "vcli",      "to": "ticket", "kind": "build", "label": "subprocess" },
+    { "from": "vreadonly", "to": "obsidian","kind": "build","label": "5 asserts" },
+    { "from": "vtiles",    "to": "dashboard","kind": "build","label": "real browser" }
+  ],
+
+  "flows": [
+    {
+      "id": "create",
+      "name": "A todo list becomes a work effort",
+      "blurb": "The write path. Nine tickets in, one hub and nine spokes out, links resolving both ways.",
+      "steps": [
+        { "node": "pyrite", "title": "pyrite we create --todos-file todos.md",
+          "text": "The dispatcher resolves the repo root and forwards every unknown argument to the work-effort tool.",
+          "file": "pyrite" },
+        { "node": "we", "title": "Parse the todos",
+          "text": "Markdown checklists, bullets, numbered lists or bare lines all reduce to titles. Headings and blanks are dropped. A checked box still becomes a ticket, because the point is to capture the whole list.",
+          "file": "tools/work-effort/create.py" },
+        { "node": "we", "title": "Allocate every id up front",
+          "text": "Ticket ids are assigned before anything is written, so the hub can link to files that do not exist yet and a dry run can report the real ids it would use.",
+          "file": "tools/work-effort/create.py" },
+        { "node": "helpers", "title": "Format, quote and escape",
+          "text": "yaml_quote makes a title safe for a real YAML parser. escape_table_cell stops a pipe adding a column. ticket_file_stem computes the filename, and the hub links by that exact stem.",
+          "file": "plugins/helpers.py" },
+        { "node": "naming", "title": "Validate the folder name",
+          "text": "Loaded by file path rather than imported, because the directory has a hyphen in it. Rejects capitals, a short date, an uppercase id.",
+          "file": "tools/naming-linter/rules/common.py" },
+        { "node": "store", "title": "Write the hub and the spokes",
+          "text": "One index carrying a Tickets table, one file per ticket carrying a parent field and a back-link. Both directions resolve.",
+          "file": "_work_efforts/" },
+        { "node": "dashboard", "title": "The watcher fires",
+          "text": "chokidar sees the new files and the server pushes an update frame. No reload, no polling.",
+          "file": "mcp-servers/dashboard/lib/watcher.js" }
+      ]
+    },
+    {
+      "id": "close",
+      "name": "Work gets done and the record catches up",
+      "blurb": "The update path, and the two places it refuses to lie.",
+      "steps": [
+        { "node": "ticket", "title": "pyrite ticket status --status completed",
+          "text": "Validates the value against four allowed statuses, refuses an unknown or ambiguous id, and does nothing if the status already matches.",
+          "file": "tools/ticket/create.py" },
+        { "node": "store", "title": "One ticket file changes",
+          "text": "Only the status line in the frontmatter. The hub is now stale, and the tool says so rather than pretending otherwise.",
+          "file": "_work_efforts/" },
+        { "node": "we", "title": "pyrite we sync rebuilds the table",
+          "text": "Reads every ticket file, regenerates only the Tickets block, and refreshes last_updated. An objective, a description and hand-written notes all survive.",
+          "file": "tools/work-effort/create.py" },
+        { "node": "we", "title": "pyrite we close, which can refuse",
+          "text": "Refuses while any ticket is open. Also refuses a work effort with no tickets at all, because 'no ticket is incomplete' is trivially true when there are none.",
+          "file": "tools/work-effort/create.py" },
+        { "node": "dashboard", "title": "The board moves",
+          "text": "A frame per file change. Measured across three runs: three, two and five frames, one per edit.",
+          "file": "mcp-servers/dashboard/server.js" }
+      ]
+    },
+    {
+      "id": "verify",
+      "name": "Proving the thing can fail",
+      "blurb": "The path that stops a green result from being decoration.",
+      "steps": [
+        { "node": "vcli", "title": "Predict, then measure",
+          "text": "Five defects were predicted by reading the code. Three were confirmed, one was refuted, and a fourth was found only because a weak assertion got strengthened.",
+          "file": "tools/work-effort/verify_cli.py" },
+        { "node": "vcli", "title": "Feed it hostile input",
+          "text": "Seven title shapes: embedded quotes, a colon, a backslash, a leading dash, a hash, braces, and both quote kinds together. Each round-trips through a real YAML parser.",
+          "file": "tools/work-effort/verify_cli.py" },
+        { "node": "helpers", "title": "Fix at the root",
+          "text": "yaml_quote, escape_table_cell and next_ticket_sequence live in the shared core, so the Todoist plugin inherits the fixes without knowing they happened.",
+          "file": "plugins/helpers.py" },
+        { "node": "vcli", "title": "Mutate the fix and watch it go red",
+          "text": "Revert yaml_quote and 3 checks fail with real YAMLErrors. Revert the escaping and 2 fail on cell counts. Revert the sync regex, 3 fail. Revert the sequence fix, 1 fails.",
+          "file": "tools/work-effort/verify_cli.py" },
+        { "node": "vtiles", "title": "Check the instrument, not just the result",
+          "text": "A DOM dump cannot measure a requestAnimationFrame tween. Six such readings produced a bug report that had to be retracted. This suite drives a real browser instead.",
+          "file": "mcp-servers/dashboard/tests/tile-totals.mjs" }
+      ]
+    }
+  ],
+
+  "state": [
+    {
+      "name": "_work_efforts",
+      "kind": "markdown on disk",
+      "where": "in-repo, committed",
+      "blurb": "37 work efforts, 314 markdown files, 269 tickets. Frontmatter is the schema and the directory listing is the index. Git history is the audit log, which is most of the reason there is no database.",
+      "files": ["_work_efforts/"]
+    },
+    {
+      "name": "Ticket status",
+      "kind": "single field",
+      "where": "ticket frontmatter",
+      "blurb": "Held in exactly one place. The hub's Tickets table is a rendered copy that sync regenerates, never an independent record, so the two cannot disagree for long.",
+      "files": ["tools/work-effort/create.py"]
+    },
+    {
+      "name": "Dashboard memory",
+      "kind": "in-process",
+      "where": "node server",
+      "blurb": "Rebuilt from disk on boot and kept current by the watcher. Nothing is persisted, so deleting it costs a restart and nothing else.",
+      "files": ["mcp-servers/dashboard/lib/watcher.js"]
+    }
+  ],
+
+  "seams": [
+    {
+      "title": "Every write goes through one module",
+      "risk": "low",
+      "text": "Formatting lives only in plugins.helpers, so the four data-corruption bugs were four fixes in one file rather than four fixes in three call sites. Adding a writer that formats its own frontmatter would give that up.",
+      "files": ["plugins/helpers.py"]
+    },
+    {
+      "title": "A real YAML parser reads these files, so bad quoting is downtime",
+      "risk": "high",
+      "text": "gray-matter throws rather than degrading, so one ticket with an unescaped quote took its whole work effort out of the dashboard. All 314 files parse today, but only because no title had yet contained a double quote. That was luck until yaml_quote existed.",
+      "files": ["plugins/helpers.py", "mcp-servers/dashboard/lib/parser.js"]
+    },
+    {
+      "title": "Two linters disagreed about the same filename",
+      "risk": "medium",
+      "text": "naming-linter required TKT-YYMMDD-NNN while the generator and obsidian-linter used TKT-xxxx-NNN. 167 files follow the canonical form and 102 the legacy one. Reconciled, but nothing runs naming-linter automatically, so the drift is surfaced rather than enforced.",
+      "files": ["tools/naming-linter/rules/common.py", "tools/obsidian-linter/check.py"]
+    },
+    {
+      "title": "Ticket ids are only unique by construction",
+      "risk": "medium",
+      "text": "next_ticket_sequence reads the highest id on disk and adds one. Two concurrent creates in the same work effort would still collide. Single-operator use makes this theoretical today and a real bug the moment anything runs in parallel.",
+      "files": ["plugins/helpers.py"]
+    },
+    {
+      "title": "Work effort ids are four random characters",
+      "risk": "medium",
+      "text": "36^4 is about 1.7 million, so collisions are unlikely but not impossible, and create_work_effort_structure uses mkdir(exist_ok=True). An explicit colliding id is now refused. A randomly drawn collision would still merge two work efforts into one folder.",
+      "files": ["plugins/helpers.py"]
+    },
+    {
+      "title": "The hub table is a copy, and only sync reconciles it",
+      "risk": "low",
+      "text": "Change a status and the table is stale until someone runs sync. The tool prints the exact command every time, but nothing enforces it, so a hand-edited ticket can leave the hub disagreeing with reality indefinitely.",
+      "files": ["tools/work-effort/create.py"]
+    }
+  ],
+
+  "ground": {
+    "verified": [
+      "Line counts and file counts come from a scan of the working tree at 94ea3a9.",
+      "Import edges between plugins, tools/work-effort and tools/ticket are resolved by the scanner, not inferred.",
+      "Check counts were produced by running each suite: 25, 59, 5, and 6 under pytest.",
+      "314 markdown files under _work_efforts parse under gray-matter, the parser the dashboard uses. Zero failures.",
+      "37 work efforts and 269 tickets counted by pyrite we list and pyrite ticket list.",
+      "The four fixes are mutation-tested, and each mutation was confirmed to have applied before its result was believed.",
+      "Live update frames were counted on a socket with the initial state dump excluded."
+    ],
+    "inferred": [
+      "The layer assignment is editorial. Nothing in the repo declares these six layers.",
+      "Purpose descriptions come from reading the entrypoints and both ends of the heaviest edges, not every file.",
+      "The dashboard is described from its lib and server files plus observed behaviour, not a full read of its 13,377 line public directory."
+    ],
+    "unknown": [
+      "Whether two concurrent ticket creates actually collide in practice. The race is visible in the code and has never been exercised.",
+      "Whether the 102 legacy-form ticket ids matter to any consumer, or are simply old.",
+      "How the system behaves past a few thousand work efforts. Every read is a directory glob and none of it is indexed.",
+      "Whether the Todoist plugin still works end to end. It shares the core and was not run this session."
+    ]
+  }
+}
