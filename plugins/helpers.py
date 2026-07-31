@@ -41,6 +41,71 @@ def iso_z(dt: Optional[datetime] = None) -> str:
     return stamp.strftime('%Y-%m-%dT%H:%M:%S.') + f"{stamp.microsecond // 1000:03d}Z"
 
 
+def yaml_quote(value: str) -> str:
+    """
+    Render a string as a double-quoted YAML scalar that survives a real parser.
+
+    Titles were written straight into `title: "{title}"`. A title containing a
+    double quote produced `title: "handle "quoted" input"`, which the
+    dashboard's gray-matter parser does not merely mis-read, it THROWS on,
+    taking the whole work effort down with it. Measured, not assumed.
+
+    Args:
+        value: Raw string, possibly containing quotes, backslashes or newlines
+
+    Returns:
+        A quoted scalar safe to interpolate after `key: `
+
+    Example:
+        >>> yaml_quote('handle "quoted" input')
+        '"handle \\\\"quoted\\\\" input"'
+    """
+    text = str(value).replace('\\', '\\\\').replace('"', '\\"')
+    # A single-line scalar cannot hold a raw newline, and a title spanning
+    # lines would silently swallow every field after it.
+    text = text.replace('\r\n', ' ').replace('\n', ' ').replace('\r', ' ')
+    return f'"{text}"'
+
+
+def escape_table_cell(value: str) -> str:
+    """
+    Escape a string for a GitHub-flavoured markdown table cell.
+
+    An unescaped pipe in a ticket title silently adds columns to the Tickets
+    table, so one todo about "a|b routing" corrupts the row for every reader
+    and every parser downstream.
+
+    Example:
+        >>> escape_table_cell('fix a|b routing')
+        'fix a\\\\|b routing'
+    """
+    return str(value).replace('|', '\\|').replace('\n', ' ')
+
+
+def next_ticket_sequence(tickets_dir: Path) -> int:
+    """
+    Next free ticket sequence number for a work effort.
+
+    Deliberately NOT `len(existing) + 1`. Deleting ticket 002 of three makes
+    that formula return 3, which already exists, so two files end up carrying
+    the same ID and every lookup by ID becomes ambiguous. Reads the highest
+    sequence actually present and goes one past it.
+
+    Args:
+        tickets_dir: The work effort's tickets directory
+
+    Returns:
+        The next sequence number, starting at 1
+    """
+    highest = 0
+    if tickets_dir.exists():
+        for path in tickets_dir.glob('TKT-*.md'):
+            match = re.match(r'^TKT-[a-z0-9]{4}-(\d{3})', path.name)
+            if match:
+                highest = max(highest, int(match.group(1)))
+    return highest + 1
+
+
 def generate_we_id() -> str:
     """
     Generate a work effort ID in WE-YYMMDD-xxxx format
@@ -320,7 +385,7 @@ def create_ticket_file(
     created_iso = iso_z()
     frontmatter = f"""---
 id: {ticket_id}
-title: "{title}"
+title: {yaml_quote(title)}
 status: pending
 created: {created_iso}
 """
@@ -412,14 +477,14 @@ def format_index_file(
     # the daily-note bridge reads it first and only falls back to created.
     frontmatter = f"""---
 id: {we_id}
-title: "{title}"
+title: {yaml_quote(title)}
 status: {status}
 created: {created_iso}
 last_updated: {created_iso}
 """
 
     if objective:
-        frontmatter += f'objective: "{objective}"\n'
+        frontmatter += f'objective: {yaml_quote(objective)}\n'
     if priority:
         frontmatter += f"priority: {priority}\n"
     if category:
@@ -451,7 +516,7 @@ last_updated: {created_iso}
             ticket_status = ticket.get('status', 'pending')
             content += (
                 f"| [[{stem}|{ticket['id']}]] "
-                f"| {ticket['title']} "
+                f"| {escape_table_cell(ticket['title'])} "
                 f"| {ticket_status} |\n"
             )
         content += "\n"

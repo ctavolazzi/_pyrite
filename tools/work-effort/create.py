@@ -33,6 +33,7 @@ if str(_repo_root) not in sys.path:
 
 from plugins.helpers import (  # noqa: E402
     iso_z,
+    escape_table_cell,
     generate_we_id,
     sanitize_title,
     create_work_effort_structure,
@@ -215,14 +216,18 @@ def cmd_sync(work_efforts_dir: Path, we_id: str, dry_run: bool = False) -> int:
         stem = ticket_file_stem(ticket['id'], ticket['title'])
         table += (
             f"| [[{stem}|{ticket['id']}]] "
-            f"| {ticket['title']} "
+            f"| {escape_table_cell(ticket['title'])} "
             f"| {ticket.get('status', 'pending')} |\n"
         )
 
     text = index_path.read_text()
-    # Replace from the Tickets heading up to the next second-level heading.
+    # Replace from the Tickets heading up to the next second-level heading, OR
+    # to end of file. Without the \Z alternative, a work effort whose Tickets
+    # table is the final section could never be synced: the lookahead found no
+    # following heading, subn matched nothing, and the command failed with
+    # "no '## Tickets' section" against a file that plainly had one.
     new_text, count = re.subn(
-        r'## Tickets\n.*?(?=\n## )',
+        r'## Tickets\n.*?(?=\n## |\Z)',
         table,
         text,
         count=1,

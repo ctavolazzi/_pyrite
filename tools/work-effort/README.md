@@ -79,9 +79,27 @@ condition, not something this tool introduces.
 ## Verification
 
 ```bash
-python3 tools/work-effort/verify.py   # 25 assert-based checks, exits non-zero on failure
+python3 tools/work-effort/verify.py       # 25 checks on plugins/helpers.py
+python3 tools/work-effort/verify_cli.py   # 52 checks on the CLI surface
 pyrite lint --scope _work_efforts/WE-260730-tfxo_sightglass_follow_through
 ```
+
+`verify_cli.py` drives the real scripts through subprocess and feeds them
+hostile input, because that is where the bugs were. It found four:
+
+| Defect | Symptom |
+|--------|---------|
+| Unescaped `"` in a title | Emitted invalid YAML. `gray-matter`, which the dashboard uses, **throws**, so one ticket took down a whole work effort |
+| Unescaped `\|` in a title | Silently added a column to the Tickets table |
+| `sync` regex needed a trailing `## ` | Could never sync a work effort whose Tickets table was the last section |
+| Ticket sequence used `len() + 1` | Deleting a middle ticket made the next one reuse an existing ID |
+
+All four were latent rather than manifest: a scan of all 314 markdown files
+under `_work_efforts/` found zero unparseable, because no title had yet
+contained a double quote. That is luck, not design.
+
+Each fix is mutation-tested. Reverting any one of them turns the suite red,
+which is the only reason the green result means anything.
 
 `verify.py` asserts. It does not follow the pattern in the repo root's
 `test_plugins.py`, which returns `True`/`False` instead of asserting. pytest reports a

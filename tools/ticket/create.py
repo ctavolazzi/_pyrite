@@ -23,6 +23,7 @@ if str(_repo_root) not in sys.path:
 from plugins.helpers import (  # noqa: E402
     find_work_effort_by_id,
     generate_ticket_id,
+    next_ticket_sequence,
     create_ticket_file,
 )
 
@@ -40,9 +41,9 @@ def cmd_create(work_efforts_dir: Path, we_id: str, title: str, description: str 
     tickets_dir = we_path / "tickets"
     tickets_dir.mkdir(exist_ok=True)
 
-    existing = list(tickets_dir.glob("TKT-*.md"))
-    sequence = len(existing) + 1
-    ticket_id = generate_ticket_id(we_id, sequence)
+    # Highest existing sequence plus one, NOT len()+1. Deleting a middle
+    # ticket makes len()+1 return an id that already exists.
+    ticket_id = generate_ticket_id(we_id, next_ticket_sequence(tickets_dir))
 
     ticket_path = create_ticket_file(
         tickets_dir=tickets_dir,
