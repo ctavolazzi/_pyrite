@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-006
 title: "Add AsyncLocalStorage to the expect.mjs assertion sink before any parallelism"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.330Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']

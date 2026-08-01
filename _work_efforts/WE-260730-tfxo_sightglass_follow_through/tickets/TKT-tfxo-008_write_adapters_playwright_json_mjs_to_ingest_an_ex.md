@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-008
 title: "Write adapters/playwright-json.mjs to ingest an existing Playwright suite"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.331Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']

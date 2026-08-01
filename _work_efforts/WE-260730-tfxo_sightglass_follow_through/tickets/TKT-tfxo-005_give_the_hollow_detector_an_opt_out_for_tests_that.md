@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-005
 title: "Give the hollow detector an opt-out for tests that trigger an empty sweep on purpose"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.330Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']

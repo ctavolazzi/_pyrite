@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-007
 title: "Decide Playwright: real devDependency or documented peer dep, and drop the symlink"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.331Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']

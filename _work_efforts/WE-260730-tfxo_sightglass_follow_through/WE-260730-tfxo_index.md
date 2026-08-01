@@ -3,7 +3,7 @@ id: WE-260730-tfxo
 title: "Sightglass follow-through"
 status: active
 created: 2026-07-30T12:19:27.331Z
-last_updated: 2026-07-30T16:31:48.485Z
+last_updated: 2026-08-01T09:02:45.033Z
 objective: "Close the four gaps the README names, starting with the only objective anti-overfitting signal"
 labels: ['sightglass', 'testing']
 ---
@@ -25,11 +25,12 @@ Coverage-based pruning is wired through prune.mjs scoring but never fed: coverag
 | [[TKT-tfxo-001_wire_page_coverage_startjscoverage_into_interprete|TKT-tfxo-001]] | Wire page.coverage.startJSCoverage() into interpreter.mjs and feed coverageAdded | completed |
 | [[TKT-tfxo-002_diff_each_probe_s_covered_ranges_against_the_union|TKT-tfxo-002]] | Diff each probe's covered ranges against the union of all other probes | completed |
 | [[TKT-tfxo-003_confirm_no_new_ground_actually_fires_in_prune_mjs|TKT-tfxo-003]] | Confirm NO_NEW_GROUND actually fires in prune.mjs once coverageAdded is non-zero | completed |
-| [[TKT-tfxo-004_add_axe_core_playwright_to_the_explore_loop_for_fr|TKT-tfxo-004]] | Add @axe-core/playwright to the explore loop for free defects at no LLM cost | pending |
-| [[TKT-tfxo-005_give_the_hollow_detector_an_opt_out_for_tests_that|TKT-tfxo-005]] | Give the hollow detector an opt-out for tests that trigger an empty sweep on purpose | pending |
-| [[TKT-tfxo-006_add_asynclocalstorage_to_the_expect_mjs_assertion|TKT-tfxo-006]] | Add AsyncLocalStorage to the expect.mjs assertion sink before any parallelism | pending |
-| [[TKT-tfxo-007_decide_playwright_real_devdependency_or_documented|TKT-tfxo-007]] | Decide Playwright: real devDependency or documented peer dep, and drop the symlink | pending |
-| [[TKT-tfxo-008_write_adapters_playwright_json_mjs_to_ingest_an_ex|TKT-tfxo-008]] | Write adapters/playwright-json.mjs to ingest an existing Playwright suite | pending |
+| [[TKT-tfxo-004_add_axe_core_playwright_to_the_explore_loop_for_fr|TKT-tfxo-004]] | Add @axe-core/playwright to the explore loop for free defects at no LLM cost | completed |
+| [[TKT-tfxo-005_give_the_hollow_detector_an_opt_out_for_tests_that|TKT-tfxo-005]] | Give the hollow detector an opt-out for tests that trigger an empty sweep on purpose | completed |
+| [[TKT-tfxo-006_add_asynclocalstorage_to_the_expect_mjs_assertion|TKT-tfxo-006]] | Add AsyncLocalStorage to the expect.mjs assertion sink before any parallelism | completed |
+| [[TKT-tfxo-007_decide_playwright_real_devdependency_or_documented|TKT-tfxo-007]] | Decide Playwright: real devDependency or documented peer dep, and drop the symlink | completed |
+| [[TKT-tfxo-008_write_adapters_playwright_json_mjs_to_ingest_an_ex|TKT-tfxo-008]] | Write adapters/playwright-json.mjs to ingest an existing Playwright suite | completed |
+| [[TKT-tfxo-009_explore_silently_ignores_unknown_cli_flags_unlike|TKT-tfxo-009]] | explore silently ignores unknown CLI flags, unlike run | pending |
 
 ## Progress
 

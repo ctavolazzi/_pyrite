@@ -1,7 +1,7 @@
 ---
 id: TKT-tfxo-004
 title: "Add @axe-core/playwright to the explore loop for free defects at no LLM cost"
-status: pending
+status: completed
 created: 2026-07-30T12:19:27.330Z
 parent: WE-260730-tfxo
 labels: ['sightglass', 'testing']
