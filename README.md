@@ -1,5 +1,7 @@
 # Pyrite
 
+**Strategy (October 2026):** [docs/STRATEGY.md](docs/STRATEGY.md) sets out who this is for, the offer and pricing, the 90-day plan and the open decisions.
+
 > "Fool's gold" — shiny, promising, experimental.
 
 **AI-powered repository management toolkit** — configurable tools for managing, tracking, maintaining, and developing any codebase with AI assistance.
